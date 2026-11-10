@@ -1,23 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const photos = {
-  hero: "https://images.unsplash.com/photo-1675154134154-160ed169522e?auto=format&fit=crop&w=2400&q=90",
-  maldives: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=1400&q=85",
-  bali: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1400&q=85",
-  amalfi: "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1400&q=85",
-  feature: "https://images.unsplash.com/photo-1713502174761-415d3d9719d9?auto=format&fit=crop&w=2200&q=90",
-  island: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1400&q=85",
-  culture: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=1400&q=85",
-  wild: "https://images.unsplash.com/photo-1656691408381-abd98e368f80?auto=format&fit=crop&w=1400&q=85",
-  collage1: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=85",
-  collage2: "https://images.unsplash.com/photo-1613153262491-c1a4acb9795e?auto=format&fit=crop&w=900&q=85",
-  collage3: "https://images.unsplash.com/photo-1687170635819-61eb8b40840d?auto=format&fit=crop&w=900&q=85",
+  hero: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2400&q=90",
+  maldives: "https://images.unsplash.com/photo-1648312182804-346237fbc0ea?auto=format&fit=crop&w=1400&q=85",
+  bali: "https://images.unsplash.com/photo-1719400471588-575b23e27bd7?auto=format&fit=crop&w=1400&q=85",
+  amalfi: "https://images.unsplash.com/photo-1770368787729-6a42187b668c?auto=format&fit=crop&w=1400&q=85",
+  feature: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=2200&q=90",
+  island: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1400&q=85",
+  culture: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=85",
+  wild: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=85",
+  logoDesign: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&w=1400&q=85",
+  collage1: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85",
+  collage2: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",
+  collage3: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85",
   footer: "https://images.unsplash.com/photo-1643539515100-f55ad1e51ab8?auto=format&fit=crop&w=2200&q=90",
 };
+
+const technologies = [
+  ["HTML5", "html-5"], ["CSS3", "css"], ["JavaScript", "javascript"], ["TypeScript", "typescript-icon"],
+  ["React", "react"], ["Next.js", "nextjs-icon"], ["Tailwind CSS", "tailwindcss-icon"], ["Bootstrap", "bootstrap"],
+  ["Node.js", "nodejs-icon"], ["Express.js", "express"], ["NestJS", "nestjs"], ["WordPress", "wordpress-icon"],
+  ["Shopify", "shopify"], ["PostgreSQL", "postgresql"], ["MongoDB", "mongodb-icon"], ["MySQL", "mysql-icon"],
+  ["Redis", "redis"], ["SQLite", "sqlite"], ["Supabase", "supabase-icon"], ["Firebase", "firebase"],
+  ["Drizzle ORM", "drizzle-orm"], ["Prisma", "prisma"], ["pgvector", "postgresql"], ["OpenAI", "openai-icon"],
+  ["Google Gemini", "google-gemini"], ["n8n", "n8n-icon"], ["OpenClaw", "openclaw"], ["Ollama", "ollama"],
+  ["LangChain", "langchain-icon"], ["Docker", "docker-icon"], ["Kubernetes", "kubernetes"], ["AWS", "aws"],
+  ["Vercel", "vercel-icon"], ["Cloudflare", "cloudflare-icon"], ["GitHub Actions", "github-actions"], ["Figma", "figma"],
+  ["GitHub", "github-icon"],
+] as const;
+
+const technologyRows = [technologies.slice(0, 13), technologies.slice(13, 25), technologies.slice(25)];
 
 function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return <span aria-hidden="true" className="arrow">{diagonal ? "↗" : "→"}</span>;
@@ -26,6 +42,27 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 export default function Home() {
   const root = useRef<HTMLElement>(null);
   const [activeSection, setActiveSection] = useState("discover");
+  const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [contactError, setContactError] = useState("");
+
+  const handleContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (contactStatus === "loading") return;
+    const form = event.currentTarget;
+    const fields = new FormData(form);
+    setContactStatus("loading");
+    setContactError("");
+    try {
+      const response = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(fields)) });
+      const payload = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(payload.error || "Unable to send your message right now.");
+      form.reset();
+      setContactStatus("success");
+    } catch (error) {
+      setContactStatus("error");
+      setContactError(error instanceof Error ? error.message : "Unable to send your message right now.");
+    }
+  };
 
   useEffect(() => {
     const element = root.current;
@@ -87,8 +124,8 @@ export default function Home() {
         gsap.from(element.querySelector(".featured-location"), { x: -18, opacity: 0, duration: .65, ease: "power2.out", scrollTrigger: { trigger: element.querySelector(".featured"), start: "top 68%", once: true } });
         gsap.from(element.querySelector(".featured-content h2"), { y: 38, opacity: 0, duration: .9, delay: .1, ease: "power3.out", scrollTrigger: { trigger: element.querySelector(".featured"), start: "top 68%", once: true } });
         gsap.from(element.querySelector(".footer-photo"), { clipPath: "inset(0 0 100% 0)", duration: 1.1, ease: "power3.inOut", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 75%", once: true } });
-        gsap.from(element.querySelector(".footer-heading h2"), { y: 42, opacity: 0, duration: .85, ease: "power3.out", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 62%", once: true } });
-        gsap.from(element.querySelector(".footer-cta"), { y: 18, scale: .94, opacity: 0, duration: .65, delay: .18, ease: "power2.out", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 62%", once: true } });
+        gsap.from(element.querySelector(".footer-intro h2"), { y: 42, opacity: 0, duration: .85, ease: "power3.out", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 62%", once: true } });
+        gsap.from(element.querySelector(".contact-form"), { y: 18, scale: .94, opacity: 0, duration: .65, delay: .18, ease: "power2.out", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 62%", once: true } });
         for (const button of element.querySelectorAll<HTMLElement>(".magnetic")) {
           const onMove = (event: PointerEvent) => {
             const rect = button.getBoundingClientRect();
@@ -141,13 +178,19 @@ export default function Home() {
         <a className="text-link rise" href="#contact">Explore every possibility <Arrow /></a>
       </section>
 
+      <section className="technology-strip" aria-label="Technologies we use">
+        <p className="technology-intro">POWERED BY THE TECHNOLOGY WE TRUST</p>
+        <div className="technology-rows">{technologyRows.map((row, rowIndex) => <div className="technology-row" key={rowIndex}><div className="technology-track">{[0, 1].map((copy) => <div className="technology-sequence" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{row.map(([name, icon]) => <div className="technology-mark" key={`${copy}-${name}`} title={name}><img src={`https://cdn.jsdelivr.net/gh/gilbarbara/logos@master/logos/${icon}.svg`} alt={copy === 0 ? `${name} logo` : ""} width="72" height="34" /></div>)}</div>)}</div></div>)}</div>
+      </section>
+
       <section className="experiences section-pad" id="experiences">
         <div className="experience-top rise"><p className="eyebrow light-eyebrow"><span className="coral-dash" />OUR CORE CAPABILITIES</p><p className="experience-count">BUILT FOR WHAT'S NEXT<br />WAY YOU FEEL</p></div>
         <h2 className="experience-title rise">Ideas Are Easy<br /><em>Execution Changes Everything.</em></h2>
         <div className="experience-list">
-          <a className="experience-row" href="#contact"><span className="experience-num">01</span><div className="experience-image"><img src={photos.island} alt="Secluded island retreat set among palms" /></div><div className="experience-name"><h3>Creative Thinking<br /><em>Strategic Design</em></h3><span>Turning complex ideas into simple, beautiful digital experiences.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
-          <a className="experience-row" href="#contact"><span className="experience-num">02</span><div className="experience-image"><img src={photos.culture} alt="Traditional architecture nestled in a tropical landscape" /></div><div className="experience-name"><h3>Engineering<br /><em>Excellence</em></h3><span>Building fast, reliable, and scalable digital products.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
-          <a className="experience-row" href="#contact"><span className="experience-num">03</span><div className="experience-image"><img src={photos.wild} alt="Aerial view of a vibrant tropical coral reef beneath clear blue water" /></div><div className="experience-name"><h3>Intelligent<br /><em>Systems</em></h3><span>Smarter businesses through AI and intelligent automation.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
+          <a className="experience-row" href="#contact"><span className="experience-num">01</span><div className="experience-image"><img src={photos.island} alt="Creative designer working on a computer in a professional design workspace" /></div><div className="experience-name"><h3>Creative Thinking<br /><em>Strategic Design</em></h3><span>Turning complex ideas into simple, beautiful digital experiences.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
+          <a className="experience-row" href="#contact"><span className="experience-num">02</span><div className="experience-image"><img src={photos.culture} alt="Software developer working on a computer in a modern workspace" /></div><div className="experience-name"><h3>Engineering<br /><em>Excellence</em></h3><span>Building fast, reliable, and scalable digital products.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
+          <a className="experience-row" href="#contact"><span className="experience-num">03</span><div className="experience-image"><img src={photos.wild} alt="Professional analyzing data dashboards on a computer screen" /></div><div className="experience-name"><h3>Intelligent<br /><em>Systems</em></h3><span>Smarter businesses through AI and intelligent automation.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
+          <a className="experience-row" href="#contact"><span className="experience-num">04</span><div className="experience-image"><img src={photos.logoDesign} alt="Graphic designer creating a logo and brand identity on a computer" /></div><div className="experience-name"><h3>Professional Logo Design<br /><em>Brand Identity</em></h3><span>Creating distinctive visual identities that make brands memorable.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
         </div>
         <div className="experience-foot"><span>	THINK BEYOND LIMITS</span><span>✳</span><span>	BUILD WITH PURPOSE</span></div>
       </section>
@@ -162,13 +205,14 @@ export default function Home() {
       <section className="manifesto section-pad" id="manifesto">
         <div className="manifesto-top rise"><p className="eyebrow dark-eyebrow">BEHIND THE SPARK</p><span className="manifesto-star">✳</span><span className="manifesto-edition">SPARK LAB<br />OUR STORY · 01</span></div>
         <div className="manifesto-layout"><div className="manifesto-copy"><h2><span className="manifesto-words">More </span> <span className="manifesto-words serif-word">Than</span><br /><span className="manifesto-words">Just</span> <span className="manifesto-words coral-type">Technology.</span></h2><p className="manifesto-body rise">We believe great work comes from curiosity, collaboration, and a little courage to think differently.</p><a className="text-link rise" href="#contact">MEET THE STUDIO<Arrow /></a><span className="hand-note">Make Room For Creativity<b>↗</b></span></div>
-          <div className="manifesto-collage"><figure className="collage-shot collage-one"><img className="reveal-image" src={photos.collage1} alt="Cinque Terre village overlooking the Italian coastline" /><figcaption>Somewhere along the coast, Italy</figcaption></figure><figure className="collage-shot collage-two"><img className="reveal-image" src={photos.collage2} alt="Sunlit coral reef patterns beneath clear turquoise water" /><figcaption>Blue beneath the surface</figcaption></figure><figure className="collage-shot collage-three"><img className="reveal-image" src={photos.collage3} alt="Aerial tropical beach with white sand and turquoise surf" /><span>Take a breath.</span></figure><span className="collage-scribble">Always Question <br />The Ordinary</span></div></div>
+          <div className="manifesto-collage"><figure className="collage-shot collage-one"><img className="reveal-image" src={photos.collage1} alt="Creative professionals collaborating around a table in a modern studio" /><figcaption>Somewhere along the coast, Italy</figcaption></figure><figure className="collage-shot collage-two"><img className="reveal-image" src={photos.collage2} alt="Software developer working on a laptop in a modern workspace" /><figcaption>Blue beneath the surface</figcaption></figure><figure className="collage-shot collage-three"><img className="reveal-image" src={photos.collage3} alt="Professionals collaborating during a modern office meeting" /><span>Take a breath.</span></figure><span className="collage-scribble">Always Question <br />The Ordinary</span></div></div>
       </section>
 
       <footer className="footer" id="contact">
         <div className="footer-photo"><img src={photos.footer} alt="Aerial tropical shoreline with turquoise water breaking around a palm-lined beach" /></div><div className="footer-shade" />
-        <div className="footer-main"><div className="footer-heading"><p className="eyebrow light-eyebrow"><span className="live-dot" />THE NEXT MOVE IS YOURS</p><h2>Your Vision.<br /><em>Our Next Challenge.</em></h2><a className="footer-cta magnetic" href="#destinations">Let’s Explore <Arrow diagonal /></a></div>
-          <div className="footer-bottom"><div className="footer-brand"><a className="wordmark" href="#discover" aria-label="Khadi Trip home">SPARK LAB<span className="wordmark-dot">.</span></a><p>Good ideas deserve great execution<br />That's where we come in.</p></div><nav aria-label="Footer navigation" className="footer-links"><a href="#discover">Discover</a><a href="#destinations">Destinations</a><a href="#experiences">Experiences</a><a href="#manifesto">Journal</a></nav><div className="footer-social"><span>FOLLOW THE SPARK</span><div><a href="#contact" aria-label="Instagram">IG</a><a href="#contact" aria-label="Pinterest">PI</a><a href="#contact" aria-label="TikTok">TK</a></div></div><div className="footer-meta"><span>© SPARK LAB 2026</span><span>	CREATIVITY MEETS TECHNOLOGY</span><a href="#discover" className="back-top">Back to top ↑</a></div></div>
+        <div className="footer-main"><div className="footer-contact-grid"><div className="footer-intro"><p className="eyebrow light-eyebrow"><span className="live-dot" />LET'S CONNECT</p><h2>Let’s Talk.<br /><em>We’d Love to Hear From You.</em></h2><p>Have a project in mind, a challenge to solve, or simply want to say hello? We'd love to hear about it.</p><div className="contact-details"><span>BUSINESS EMAIL</span><a href="#contact-form">Send us a message below</a><span>LOCATION</span><strong>Dhaka, Bangladesh</strong></div><div className="footer-social"><span>FOLLOW THE SPARK</span><div><a href="#contact" aria-label="Instagram">IG</a><a href="#contact" aria-label="Pinterest">PI</a><a href="#contact" aria-label="TikTok">TK</a></div></div></div>
+          <form className="contact-form" id="contact-form" onSubmit={handleContactSubmit}><p className="eyebrow light-eyebrow">SEND US A MESSAGE</p><label>Full Name<input name="name" type="text" autoComplete="name" maxLength={100} required /></label><label>Email Address<input name="email" type="email" autoComplete="email" maxLength={254} required /></label><label>Subject<input name="subject" type="text" maxLength={160} required /></label><label>Message<textarea name="message" rows={5} maxLength={5000} required /></label><input className="honeypot" name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" /><button className="contact-submit" type="submit" disabled={contactStatus === "loading"}>{contactStatus === "loading" ? "SENDING…" : <>SEND MESSAGE <Arrow diagonal /></>}</button><p className="contact-response" aria-live="polite">{contactStatus === "success" ? "Thanks for reaching out! Your message has been sent successfully." : contactStatus === "error" ? contactError : "We usually respond within 1–2 business days."}</p></form></div>
+          <div className="footer-bottom"><div className="footer-brand"><a className="wordmark" href="#discover" aria-label="Spark Lab home">SPARK LAB<span className="wordmark-dot">.</span></a></div><nav aria-label="Footer navigation" className="footer-links"><a href="#discover">Discover</a><a href="#destinations">Destinations</a><a href="#experiences">Experiences</a><a href="#manifesto">Journal</a></nav><div className="footer-meta"><span>© SPARK LAB 2026</span><span>	CREATIVITY MEETS TECHNOLOGY</span><a href="#discover" className="back-top">Back to top ↑</a></div></div>
         </div>
       </footer>
     </main>

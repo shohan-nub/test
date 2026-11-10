@@ -2,13 +2,24 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Khadi Trip — Unforgettable Travel Moments",
-  description: "Thoughtful escapes to places that stay with you. Discover the world with Khadi Trip.",
+  title: {
+    default: "Spark Lab | Digital Experiences & AI Solutions",
+    template: "%s | Spark Lab",
+  },
+  description:
+    "Spark Lab designs and builds modern websites, web applications, e-commerce experiences, and intelligent AI automation solutions for ambitious businesses.",
   openGraph: {
-    title: "Khadi Trip — Unforgettable Travel Moments",
-    description: "Thoughtful escapes to places that stay with you. Discover the world with Khadi Trip.",
-    siteName: "Khadi Trip",
+    title: "Spark Lab | Digital Experiences & AI Solutions",
+    description:
+      "We create modern websites, powerful software, and intelligent automation that help businesses grow.",
+    siteName: "Spark Lab",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Spark Lab | Digital Experiences & AI Solutions",
+    description:
+      "Modern websites, powerful software, and intelligent AI automation by Spark Lab.",
   },
 };
 
