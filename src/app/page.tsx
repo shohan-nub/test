@@ -39,6 +39,30 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return <span aria-hidden="true" className="arrow">{diagonal ? "↗" : "→"}</span>;
 }
 
+function PlatformEmblem({ platform }: { platform: "clutch" | "behance" | "fiverr" | "dribbble" }) {
+  return <svg className={`platform-emblem platform-emblem-${platform}`} viewBox="0 0 100 72" aria-hidden="true">
+    <g className="laurel" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M24 60C13 46 12 28 20 13M76 60c11-14 12-32 4-47" />
+      <path d="M18 47l9 2M15 36l10 3M16 25l9 4M21 15l7 6M82 47l-9 2M85 36l-10 3M84 25l-9 4M79 15l-7 6" />
+    </g>
+    {platform === "clutch" && <><circle cx="50" cy="34" r="18" fill="currentColor" /><path d="M56 28a9 9 0 1 0 0 12" fill="none" stroke="white" strokeWidth="5" /><circle cx="59" cy="34" r="4" fill="white" /></>}
+    {platform === "behance" && <><path d="M35 20h20a10 10 0 0 1 3 19 11 11 0 0 1-4 21H35zm8 7v10h10a5 5 0 0 0 0-10zm0 17v9h11a4.5 4.5 0 0 0 0-9zM62 26h14v5H62zm-1 16c0-8 5-13 12-13s11 5 11 14H68c.5 4 2.5 6 6 6 2 0 4-1 5-3h5c-1 5-5 8-11 8-7 0-12-5-12-12zm7-3h10c-.5-3-2-5-5-5s-4 2-5 5z" fill="currentColor" /></>}
+    {platform === "fiverr" && <path d="M43 23c0-7 5-11 12-11h7v8h-6c-3 0-4 1-4 4v3h10v8H52v23h-9V35h-6v-8h6zm25 4h9v31h-9zm0-12h9v8h-9z" fill="currentColor" />}
+    {platform === "dribbble" && <><circle cx="50" cy="36" r="21" fill="none" stroke="currentColor" strokeWidth="5" /><path d="M34 22c10 8 18 20 23 34M29 35c14 2 29-1 40-9M36 52c8-10 20-15 34-14" fill="none" stroke="currentColor" strokeWidth="3" /></>}
+  </svg>;
+}
+
+function BrandSeal() {
+  return <svg className="brand-seal" viewBox="0 0 200 200" role="img" aria-label="Spark Lab, digital innovation and creative technology">
+    <defs><path id="brand-seal-type" d="M100,100 m-73,0 a73,73 0 1,1 146,0 a73,73 0 1,1 -146,0" /></defs>
+    <g className="seal-rotating"><circle className="seal-ring" cx="100" cy="100" r="91" /><text className="seal-type"><textPath href="#brand-seal-type">SPARK LAB • DIGITAL INNOVATION • CREATIVE TECHNOLOGY • </textPath></text></g>
+    <circle className="seal-inner-ring" cx="100" cy="100" r="57" />
+    <text className="seal-center" x="100" y="97" textAnchor="middle">SPARK</text>
+    <text className="seal-center seal-center-small" x="100" y="116" textAnchor="middle">EST. 2022 · DHAKA</text>
+    <path className="seal-star" d="M100 28v8M100 164v8M28 100h8M164 100h8" />
+  </svg>;
+}
+
 export default function Home() {
   const root = useRef<HTMLElement>(null);
   const [activeSection, setActiveSection] = useState("discover");
@@ -76,6 +100,23 @@ export default function Home() {
       if (active instanceof HTMLElement) setActiveSection(active.id);
     }, { rootMargin: "-24% 0px -56% 0px", threshold: [0, 0.08, 0.2, 0.4] });
     for (const section of sections) observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const section = root.current?.querySelector<HTMLElement>(".statistics-strip");
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      for (const counter of section.querySelectorAll<HTMLElement>("[data-counter]")) {
+        const target = Number(counter.dataset.counter);
+        const decimals = Number(counter.dataset.decimals);
+        const value = { current: 0 };
+        gsap.to(value, { current: target, duration: 1.8, ease: "power2.out", onUpdate: () => { counter.textContent = value.current.toFixed(decimals); }, onComplete: () => { counter.textContent = target.toFixed(decimals); } });
+      }
+    }, { threshold: 0.25 });
+    observer.observe(section);
     return () => observer.disconnect();
   }, []);
 
@@ -161,11 +202,23 @@ export default function Home() {
         <div className="hero-content">
           <p className="eyebrow hero-kicker"><span className="live-dot" />A NEW PERSPECTIVE ON DIGITAL<span className="eyebrow-line" /></p>
           <h1><span className="line-mask"><span className="hero-line">Unleashing</span></span><span className="line-mask"><span className="hero-line serif-word">Digital Boundaries</span></span><span className="line-mask"><span className="hero-line">by Spark Lab</span></span></h1>
-          <p className="hero-note">From websites to intelligent automation,<br />we build digital solutions designed for what's next.</p>
+          <div className="hero-note"><BrandSeal /></div>
         </div>
-        <a className="scroll-cue" href="#destinations"><span>SCROLL TO EXPLORE</span><i /></a>
         <div className="demo-badge"><span aria-hidden="true" />DIGITAL INNOVATION STUDIO</div>
-        <div className="hero-index">01 <span>/</span> 06</div>
+        <div className="text-marquee" aria-label="Digital innovation, creative technology, intelligent automation, built for what's next, ideas into reality, design meets technology">
+          <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
+        </div>
+      </section>
+
+      <section className="statistics-strip" aria-label="Client and platform statistics">
+        <div className="statistics-grid">
+          {[[49, "+", "Client Reviews on Clutch.co", "clutch"], [50, "+", "Feature Project on Behance", "behance"], [225, "+", "Client Reviews on Fiverr", "fiverr"], [3.5, "M+", "Monthly View on Dribbble", "dribbble"]].map(([value, suffix, label, platform]) => <div className="statistic" key={label as string}><PlatformEmblem platform={platform as "clutch" | "behance" | "fiverr" | "dribbble"} /><p className="statistic-value"><span data-counter={value} data-decimals={value === 3.5 ? 1 : 0}>0</span>{suffix}</p><p className="statistic-label">{label}</p></div>)}
+        </div>
+      </section>
+
+      <section className="technology-strip" aria-label="Technologies we use">
+        <p className="technology-intro">POWERED BY THE TECHNOLOGY WE TRUST</p>
+        <div className="technology-rows">{technologyRows.map((row, rowIndex) => <div className="technology-row" key={rowIndex}><div className="technology-track">{[0, 1].map((copy) => <div className="technology-sequence" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{row.map(([name, icon]) => <div className="technology-mark" key={`${copy}-${name}`} title={name}><img src={`https://cdn.jsdelivr.net/gh/gilbarbara/logos@master/logos/${icon}.svg`} alt={copy === 0 ? `${name} logo` : ""} width="72" height="34" /></div>)}</div>)}</div></div>)}</div>
       </section>
 
       <section className="destinations section-pad" id="destinations">
@@ -176,11 +229,6 @@ export default function Home() {
           <article className="destination-card destination-tertiary"><div className="photo-frame reveal-image"><img src={photos.amalfi} alt="Colorful villages along the Amalfi Coast" /></div><div className="destination-caption rise"><div><p className="eyebrow dark-eyebrow">03 — INTELLIGENT SYSTEMS</p><h3>AI & Automation</h3><p className="destination-copy">Making businesses smarter with intelligent systems and seamless automation.</p></div><a href="#contact" className="round-arrow" aria-label="Explore the Amalfi Coast"><Arrow diagonal /></a></div></article>
         </div>
         <a className="text-link rise" href="#contact">Explore every possibility <Arrow /></a>
-      </section>
-
-      <section className="technology-strip" aria-label="Technologies we use">
-        <p className="technology-intro">POWERED BY THE TECHNOLOGY WE TRUST</p>
-        <div className="technology-rows">{technologyRows.map((row, rowIndex) => <div className="technology-row" key={rowIndex}><div className="technology-track">{[0, 1].map((copy) => <div className="technology-sequence" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{row.map(([name, icon]) => <div className="technology-mark" key={`${copy}-${name}`} title={name}><img src={`https://cdn.jsdelivr.net/gh/gilbarbara/logos@master/logos/${icon}.svg`} alt={copy === 0 ? `${name} logo` : ""} width="72" height="34" /></div>)}</div>)}</div></div>)}</div>
       </section>
 
       <section className="experiences section-pad" id="experiences">
