@@ -65,6 +65,7 @@ function BrandSeal() {
 
 export default function Home() {
   const root = useRef<HTMLElement>(null);
+  const capabilitiesScrollText = useRef<HTMLDivElement>(null);
   const [activeSection, setActiveSection] = useState("discover");
   const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [contactError, setContactError] = useState("");
@@ -118,6 +119,96 @@ export default function Home() {
     }, { threshold: 0.25 });
     observer.observe(section);
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const text = capabilitiesScrollText.current;
+    const section = text?.closest<HTMLElement>(".experiences");
+    if (!text || !section) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let offset = reducedMotion
+      ? (window.innerWidth - text.scrollWidth) / 2
+      : window.innerWidth;
+    text.style.transform = `translate3d(${offset}px, 0, 0)`;
+    if (reducedMotion) {
+      const centerText = () => {
+        offset = (window.innerWidth - text.scrollWidth) / 2;
+        text.style.transform = `translate3d(${offset}px, 0, 0)`;
+      };
+      window.addEventListener("resize", centerText);
+      return () => window.removeEventListener("resize", centerText);
+    }
+
+    let previousY = window.scrollY;
+    let previousTime = performance.now();
+    let lastFrameTime = previousTime;
+    let previousViewportWidth = window.innerWidth;
+    let targetOffset = offset;
+    let frame = 0;
+    let visible = false;
+
+    const isVisible = () => {
+      const bounds = section.getBoundingClientRect();
+      return bounds.top < window.innerHeight && bounds.bottom > 0;
+    };
+
+    const render = () => {
+      text.style.transform = `translate3d(${offset.toFixed(2)}px, 0, 0)`;
+    };
+
+    const animate = (time: number) => {
+      const deltaTime = Math.min(time - lastFrameTime, 50);
+      lastFrameTime = time;
+      offset += (targetOffset - offset) * (1 - Math.exp(-deltaTime / 55));
+      render();
+
+      if (Math.abs(targetOffset - offset) > 0.5) {
+        frame = requestAnimationFrame(animate);
+      } else {
+        offset = targetOffset;
+        frame = 0;
+        render();
+      }
+    };
+
+    const onScroll = () => {
+      const now = performance.now();
+      const nextVisible = isVisible();
+      const currentY = window.scrollY;
+      const elapsed = Math.max(now - previousTime, 16);
+      const distance = currentY - previousY;
+      if (visible && distance !== 0) {
+        const scrollVelocity = distance / elapsed;
+        const horizontalVelocity = -scrollVelocity * 3800;
+        targetOffset += horizontalVelocity * elapsed / 1000;
+      }
+      visible = nextVisible;
+      previousY = currentY;
+      previousTime = now;
+
+      if (!frame && Math.abs(targetOffset - offset) > 0.5) {
+        lastFrameTime = now;
+        frame = requestAnimationFrame(animate);
+      }
+    };
+
+    const onResize = () => {
+      const widthChange = window.innerWidth - previousViewportWidth;
+      offset += widthChange;
+      targetOffset += widthChange;
+      previousViewportWidth = window.innerWidth;
+      render();
+    };
+
+    visible = isVisible();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
@@ -232,7 +323,12 @@ export default function Home() {
       </section>
 
       <section className="experiences section-pad" id="experiences">
-        <div className="experience-top rise"><p className="eyebrow light-eyebrow"><span className="coral-dash" />OUR CORE CAPABILITIES</p><p className="experience-count">BUILT FOR WHAT'S NEXT<br />WAY YOU FEEL</p></div>
+        <div className="experience-top rise">
+          <div className="capabilities-window" aria-label="Our Core Capabilities">
+            <div className="capabilities-track" ref={capabilitiesScrollText}>OUR CORE CAPABILITIES</div>
+          </div>
+          <p className="experience-count">BUILT FOR WHAT'S NEXT<br />WAY YOU FEEL</p>
+        </div>
         <h2 className="experience-title rise">Ideas Are Easy<br /><em>Execution Changes Everything.</em></h2>
         <div className="experience-list">
           <a className="experience-row" href="#contact"><span className="experience-num">01</span><div className="experience-image"><img src={photos.island} alt="Creative designer working on a computer in a professional design workspace" /></div><div className="experience-name"><h3>Creative Thinking<br /><em>Strategic Design</em></h3><span>Turning complex ideas into simple, beautiful digital experiences.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
