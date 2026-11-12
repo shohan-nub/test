@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -10,10 +11,6 @@ const photos = {
   bali: "https://images.unsplash.com/photo-1719400471588-575b23e27bd7?auto=format&fit=crop&w=1400&q=85",
   amalfi: "https://images.unsplash.com/photo-1770368787729-6a42187b668c?auto=format&fit=crop&w=1400&q=85",
   feature: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=2200&q=90",
-  island: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1400&q=85",
-  culture: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=85",
-  wild: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1400&q=85",
-  logoDesign: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&w=1400&q=85",
   collage1: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85",
   collage2: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",
   collage3: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85",
@@ -63,9 +60,22 @@ function BrandSeal() {
   </svg>;
 }
 
+function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  return (
+    <div className={`capability-media${imageFailed ? " is-fallback" : ""}`}>
+      <div className="capability-media-fallback" aria-hidden="true">
+        <span>PROJECT IMAGE</span>
+        <strong>{src}</strong>
+      </div>
+      {!imageFailed && <Image src={src} alt={alt} fill sizes="(max-width: 700px) 100vw, 54vw" onError={() => setImageFailed(true)} />}
+    </div>
+  );
+}
+
 export default function Home() {
   const root = useRef<HTMLElement>(null);
-  const capabilitiesScrollText = useRef<HTMLDivElement>(null);
   const [activeSection, setActiveSection] = useState("discover");
   const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [contactError, setContactError] = useState("");
@@ -122,96 +132,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const text = capabilitiesScrollText.current;
-    const section = text?.closest<HTMLElement>(".experiences");
-    if (!text || !section) return;
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let offset = reducedMotion
-      ? (window.innerWidth - text.scrollWidth) / 2
-      : window.innerWidth;
-    text.style.transform = `translate3d(${offset}px, 0, 0)`;
-    if (reducedMotion) {
-      const centerText = () => {
-        offset = (window.innerWidth - text.scrollWidth) / 2;
-        text.style.transform = `translate3d(${offset}px, 0, 0)`;
-      };
-      window.addEventListener("resize", centerText);
-      return () => window.removeEventListener("resize", centerText);
-    }
-
-    let previousY = window.scrollY;
-    let previousTime = performance.now();
-    let lastFrameTime = previousTime;
-    let previousViewportWidth = window.innerWidth;
-    let targetOffset = offset;
-    let frame = 0;
-    let visible = false;
-
-    const isVisible = () => {
-      const bounds = section.getBoundingClientRect();
-      return bounds.top < window.innerHeight && bounds.bottom > 0;
-    };
-
-    const render = () => {
-      text.style.transform = `translate3d(${offset.toFixed(2)}px, 0, 0)`;
-    };
-
-    const animate = (time: number) => {
-      const deltaTime = Math.min(time - lastFrameTime, 50);
-      lastFrameTime = time;
-      offset += (targetOffset - offset) * (1 - Math.exp(-deltaTime / 55));
-      render();
-
-      if (Math.abs(targetOffset - offset) > 0.5) {
-        frame = requestAnimationFrame(animate);
-      } else {
-        offset = targetOffset;
-        frame = 0;
-        render();
-      }
-    };
-
-    const onScroll = () => {
-      const now = performance.now();
-      const nextVisible = isVisible();
-      const currentY = window.scrollY;
-      const elapsed = Math.max(now - previousTime, 16);
-      const distance = currentY - previousY;
-      if (visible && distance !== 0) {
-        const scrollVelocity = distance / elapsed;
-        const horizontalVelocity = -scrollVelocity * 3800;
-        targetOffset += horizontalVelocity * elapsed / 1000;
-      }
-      visible = nextVisible;
-      previousY = currentY;
-      previousTime = now;
-
-      if (!frame && Math.abs(targetOffset - offset) > 0.5) {
-        lastFrameTime = now;
-        frame = requestAnimationFrame(animate);
-      }
-    };
-
-    const onResize = () => {
-      const widthChange = window.innerWidth - previousViewportWidth;
-      offset += widthChange;
-      targetOffset += widthChange;
-      previousViewportWidth = window.innerWidth;
-      render();
-    };
-
-    visible = isVisible();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const element = root.current;
     if (!element) return;
@@ -244,12 +164,6 @@ export default function Home() {
           gsap.to(photo, { yPercent: 8, ease: "none", scrollTrigger: { trigger: photo.parentElement, start: "top bottom", end: "bottom top", scrub: .7 } });
         }
         gsap.from(element.querySelectorAll(".manifesto-words"), { y: 42, opacity: 0, stagger: .1, duration: .8, scrollTrigger: { trigger: element.querySelector(".manifesto"), start: "top 70%", once: true } });
-        for (const row of element.querySelectorAll<HTMLElement>(".experience-row")) {
-          const image = row.querySelector(".experience-image");
-          const copy = row.querySelector(".experience-name");
-          gsap.from(image, { clipPath: "inset(0 100% 0 0 round 16px)", scale: .96, duration: .85, ease: "power3.inOut", scrollTrigger: { trigger: row, start: "top 82%", once: true } });
-          gsap.from(copy, { x: 28, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: row, start: "top 82%", once: true } });
-        }
         for (const shot of element.querySelectorAll<HTMLElement>(".collage-shot")) {
           gsap.from(shot, { y: 32, rotate: 0, scale: .96, opacity: 0, duration: .85, ease: "power3.out", scrollTrigger: { trigger: shot, start: "top 86%", once: true } });
         }
@@ -312,6 +226,27 @@ export default function Home() {
         <div className="technology-rows">{technologyRows.map((row, rowIndex) => <div className="technology-row" key={rowIndex}><div className="technology-track">{[0, 1].map((copy) => <div className="technology-sequence" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{row.map(([name, icon]) => <div className="technology-mark" key={`${copy}-${name}`} title={name}><img src={`https://cdn.jsdelivr.net/gh/gilbarbara/logos@master/logos/${icon}.svg`} alt={copy === 0 ? `${name} logo` : ""} width="72" height="34" /></div>)}</div>)}</div></div>)}</div>
       </section>
 
+      <section className="experiences section-pad" id="experiences" aria-label="Core services">
+        <div className="capability-stack">
+          <article className="capability-card capability-card-blue">
+            <div className="capability-copy"><p className="capability-label"><span>01</span> — CREATIVE THINKING</p><h3>Creative Thinking<br /><em>Strategic Design</em></h3><p className="capability-description">Turning complex ideas into simple, beautiful digital experiences.</p></div>
+            <CapabilityMedia src="/s1.png" alt="Creative Thinking project image" />
+          </article>
+          <article className="capability-card capability-card-lime">
+            <div className="capability-copy"><p className="capability-label"><span>02</span> — ENGINEERING EXCELLENCE</p><h3>Engineering<br /><em>Excellence</em></h3><p className="capability-description">Building fast, reliable, and scalable digital products.</p></div>
+            <CapabilityMedia src="/s2.png" alt="Engineering Excellence project image" />
+          </article>
+          <article className="capability-card capability-card-yellow">
+            <div className="capability-copy"><p className="capability-label"><span>03</span> — INTELLIGENT SYSTEMS</p><h3>Intelligent<br /><em>Systems</em></h3><p className="capability-description">Smarter businesses through AI and intelligent automation.</p></div>
+            <CapabilityMedia src="/s3.png" alt="Intelligent Systems project image" />
+          </article>
+          <article className="capability-card capability-card-coral">
+            <div className="capability-copy"><p className="capability-label"><span>04</span> — PROFESSIONAL LOGO DESIGN</p><h3>Professional Logo Design<br /><em>Brand Identity</em></h3><p className="capability-description">Creating distinctive visual identities that make brands memorable.</p></div>
+            <CapabilityMedia src="/s4.png" alt="Professional Logo Design project image" />
+          </article>
+        </div>
+      </section>
+
       <section className="destinations section-pad" id="destinations">
         <div className="section-heading rise"><div><p className="eyebrow dark-eyebrow">WHAT SETS US APART</p><h2>Ideas Into Reality.<br /><em>Built to Inspire.</em></h2></div><p className="heading-aside">We bring creativity, technology, and intelligent thinking together to build <br />digital experiences that move businesses forward.</p></div>
         <div className="destination-grid">
@@ -319,30 +254,12 @@ export default function Home() {
           <article className="destination-card destination-secondary"><div className="photo-frame reveal-image"><img src={photos.bali} alt="Lush Balinese temple and tropical greenery" /></div><div className="destination-caption rise"><div><p className="eyebrow dark-eyebrow">02 — ENGINEERING EXCELLENCE</p><h3>Modern Development</h3><p className="destination-copy">Building powerful, scalable, and high-performing digital solutions.</p></div><a href="#contact" className="round-arrow" aria-label="Explore Bali"><Arrow diagonal /></a></div></article>
           <article className="destination-card destination-tertiary"><div className="photo-frame reveal-image"><img src={photos.amalfi} alt="Colorful villages along the Amalfi Coast" /></div><div className="destination-caption rise"><div><p className="eyebrow dark-eyebrow">03 — INTELLIGENT SYSTEMS</p><h3>AI & Automation</h3><p className="destination-copy">Making businesses smarter with intelligent systems and seamless automation.</p></div><a href="#contact" className="round-arrow" aria-label="Explore the Amalfi Coast"><Arrow diagonal /></a></div></article>
         </div>
-        <a className="text-link rise" href="#contact">Explore every possibility <Arrow /></a>
-      </section>
-
-      <section className="experiences section-pad" id="experiences">
-        <div className="experience-top rise">
-          <div className="capabilities-window" aria-label="Our Core Capabilities">
-            <div className="capabilities-track" ref={capabilitiesScrollText}>OUR CORE CAPABILITIES</div>
-          </div>
-          <p className="experience-count">BUILT FOR WHAT'S NEXT<br />WAY YOU FEEL</p>
-        </div>
-        <h2 className="experience-title rise">Ideas Are Easy<br /><em>Execution Changes Everything.</em></h2>
-        <div className="experience-list">
-          <a className="experience-row" href="#contact"><span className="experience-num">01</span><div className="experience-image"><img src={photos.island} alt="Creative designer working on a computer in a professional design workspace" /></div><div className="experience-name"><h3>Creative Thinking<br /><em>Strategic Design</em></h3><span>Turning complex ideas into simple, beautiful digital experiences.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
-          <a className="experience-row" href="#contact"><span className="experience-num">02</span><div className="experience-image"><img src={photos.culture} alt="Software developer working on a computer in a modern workspace" /></div><div className="experience-name"><h3>Engineering<br /><em>Excellence</em></h3><span>Building fast, reliable, and scalable digital products.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
-          <a className="experience-row" href="#contact"><span className="experience-num">03</span><div className="experience-image"><img src={photos.wild} alt="Professional analyzing data dashboards on a computer screen" /></div><div className="experience-name"><h3>Intelligent<br /><em>Systems</em></h3><span>Smarter businesses through AI and intelligent automation.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
-          <a className="experience-row" href="#contact"><span className="experience-num">04</span><div className="experience-image"><img src={photos.logoDesign} alt="Graphic designer creating a logo and brand identity on a computer" /></div><div className="experience-name"><h3>Professional Logo Design<br /><em>Brand Identity</em></h3><span>Creating distinctive visual identities that make brands memorable.</span></div><span className="experience-arrow"><Arrow diagonal /></span></a>
-        </div>
-        <div className="experience-foot"><span>	THINK BEYOND LIMITS</span><span>✳</span><span>	BUILD WITH PURPOSE</span></div>
       </section>
 
       <section className="featured" aria-labelledby="featured-title">
         <div className="featured-photo"><img className="parallax-photo" src={photos.feature} alt="Aerial view of a turquoise Bali shoreline with pale sand and clear blue water" /></div><div className="featured-overlay" />
         <div className="featured-top"><span className="eyebrow light-eyebrow">GOOD THINGS START WITH A SPARK</span><span className="featured-number">EST. 2022</span></div>
-        <div className="featured-content rise"><p className="featured-location"><span>✳</span>DHAKA · BANGLADESH </p><h2 id="featured-title">Got a Big Idea?<br /><em>Let's Make It Happen.</em></h2><p className="featured-copy">Every great project starts with a conversation. Tell us what's on your mind.</p><a className="outline-button magnetic" href="#contact">TELL US YOUR IDEA<Arrow diagonal /></a></div>
+        <div className="featured-content rise"><p className="featured-location"><span>✳</span>DHAKA · BANGLADESH </p><h2 id="featured-title">Got a Big Idea?<br /><em>Let&apos;s Make It Happen.</em></h2><p className="featured-copy">Every great project starts with a conversation. Tell us what&apos;s on your mind.</p><a className="outline-button magnetic" href="#contact">TELL US YOUR IDEA<Arrow diagonal /></a></div>
         <span className="featured-side-note">SPARK LAB DIGITAL STUDIO<i>—</i> 05° 56′ N</span>
       </section>
 
@@ -354,7 +271,7 @@ export default function Home() {
 
       <footer className="footer" id="contact">
         <div className="footer-photo"><img src={photos.footer} alt="Aerial tropical shoreline with turquoise water breaking around a palm-lined beach" /></div><div className="footer-shade" />
-        <div className="footer-main"><div className="footer-contact-grid"><div className="footer-intro"><p className="eyebrow light-eyebrow"><span className="live-dot" />LET'S CONNECT</p><h2>Let’s Talk.<br /><em>We’d Love to Hear From You.</em></h2><p>Have a project in mind, a challenge to solve, or simply want to say hello? We'd love to hear about it.</p><div className="contact-details"><span>BUSINESS EMAIL</span><a href="#contact-form">Send us a message below</a><span>LOCATION</span><strong>Dhaka, Bangladesh</strong></div><div className="footer-social"><span>FOLLOW THE SPARK</span><div><a href="#contact" aria-label="Instagram">IG</a><a href="#contact" aria-label="Pinterest">PI</a><a href="#contact" aria-label="TikTok">TK</a></div></div></div>
+        <div className="footer-main"><div className="footer-contact-grid"><div className="footer-intro"><p className="eyebrow light-eyebrow"><span className="live-dot" />LET&apos;S CONNECT</p><h2>Let’s Talk.<br /><em>We’d Love to Hear From You.</em></h2><p>Have a project in mind, a challenge to solve, or simply want to say hello? We&apos;d love to hear about it.</p><div className="contact-details"><span>BUSINESS EMAIL</span><a href="#contact-form">Send us a message below</a><span>LOCATION</span><strong>Dhaka, Bangladesh</strong></div><div className="footer-social"><span>FOLLOW THE SPARK</span><div><a href="#contact" aria-label="Instagram">IG</a><a href="#contact" aria-label="Pinterest">PI</a><a href="#contact" aria-label="TikTok">TK</a></div></div></div>
           <form className="contact-form" id="contact-form" onSubmit={handleContactSubmit}><p className="eyebrow light-eyebrow">SEND US A MESSAGE</p><label>Full Name<input name="name" type="text" autoComplete="name" maxLength={100} required /></label><label>Email Address<input name="email" type="email" autoComplete="email" maxLength={254} required /></label><label>Subject<input name="subject" type="text" maxLength={160} required /></label><label>Message<textarea name="message" rows={5} maxLength={5000} required /></label><input className="honeypot" name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" /><button className="contact-submit" type="submit" disabled={contactStatus === "loading"}>{contactStatus === "loading" ? "SENDING…" : <>SEND MESSAGE <Arrow diagonal /></>}</button><p className="contact-response" aria-live="polite">{contactStatus === "success" ? "Thanks for reaching out! Your message has been sent successfully." : contactStatus === "error" ? contactError : "We usually respond within 1–2 business days."}</p></form></div>
           <div className="footer-bottom"><div className="footer-brand"><a className="wordmark" href="#discover" aria-label="Spark Lab home">SPARK LAB<span className="wordmark-dot">.</span></a></div><nav aria-label="Footer navigation" className="footer-links"><a href="#discover">Discover</a><a href="#destinations">Destinations</a><a href="#experiences">Experiences</a><a href="#manifesto">Journal</a></nav><div className="footer-meta"><span>© SPARK LAB 2026</span><span>	CREATIVITY MEETS TECHNOLOGY</span><a href="#discover" className="back-top">Back to top ↑</a></div></div>
         </div>
