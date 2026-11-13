@@ -1,12 +1,13 @@
 "use client";
 
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, type TransitionEvent, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import worldLand from "./world-land.json";
+import ServicesShowcase from "./ServicesShowcase";
 
 const photos = {
-  hero: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2400&q=90",
   maldives: "https://images.unsplash.com/photo-1648312182804-346237fbc0ea?auto=format&fit=crop&w=1400&q=85",
   bali: "https://images.unsplash.com/photo-1719400471588-575b23e27bd7?auto=format&fit=crop&w=1400&q=85",
   amalfi: "https://images.unsplash.com/photo-1770368787729-6a42187b668c?auto=format&fit=crop&w=1400&q=85",
@@ -49,15 +50,34 @@ function PlatformEmblem({ platform }: { platform: "clutch" | "behance" | "fiverr
   </svg>;
 }
 
-function BrandSeal() {
-  return <svg className="brand-seal" viewBox="0 0 200 200" role="img" aria-label="Spark Lab, digital innovation and creative technology">
-    <defs><path id="brand-seal-type" d="M100,100 m-73,0 a73,73 0 1,1 146,0 a73,73 0 1,1 -146,0" /></defs>
-    <g className="seal-rotating"><circle className="seal-ring" cx="100" cy="100" r="91" /><text className="seal-type"><textPath href="#brand-seal-type">SPARK LAB • DIGITAL INNOVATION • CREATIVE TECHNOLOGY • </textPath></text></g>
-    <circle className="seal-inner-ring" cx="100" cy="100" r="57" />
-    <text className="seal-center" x="100" y="97" textAnchor="middle">SPARK</text>
-    <text className="seal-center seal-center-small" x="100" y="116" textAnchor="middle">EST. 2022 · DHAKA</text>
-    <path className="seal-star" d="M100 28v8M100 164v8M28 100h8M164 100h8" />
-  </svg>;
+const mapRoutes = [
+  { name: "New York", x: 294, y: 153, path: "M 751 211 Q 520 14 294 153" },
+  { name: "London", x: 500, y: 115, path: "M 751 211 Q 626 42 500 115" },
+  { name: "Dubai", x: 654, y: 203, path: "M 751 211 Q 701 157 654 203" },
+  { name: "Singapore", x: 788, y: 289, path: "M 751 211 Q 801 237 788 289" },
+  { name: "Tokyo", x: 888, y: 171, path: "M 751 211 Q 825 107 888 171" },
+  { name: "Sydney", x: 920, y: 409, path: "M 751 211 Q 819 380 920 409" },
+] as const;
+
+function GlobalMap() {
+  return <div className="hero-map" role="img" aria-label="An illustrated world map showing connections from Dhaka to cities around the world">
+    <svg viewBox="0 0 1000 500" aria-hidden="true">
+      <defs>
+        <pattern id="map-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.25" fill="#6e6861" /></pattern>
+        <filter id="node-glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="5" /></filter>
+      </defs>
+      {/* Natural Earth 1:110m land polygons, public domain; equirectangular projection. */}
+      <path fill="url(#map-dots)" className="map-land" d={worldLand} fillRule="evenodd" />
+      <g className="map-routes">{mapRoutes.map((route, index) => <g key={route.name}>
+        <path d={route.path} className="map-route" pathLength="1" />
+        <circle className="map-particle" r="2.5"><animateMotion path={route.path} dur={`${4.5 + index * .55}s`} repeatCount="indefinite" /></circle>
+        <circle className="map-node-glow" cx={route.x} cy={route.y} r="6" filter="url(#node-glow)" />
+        <circle className="map-node" cx={route.x} cy={route.y} r="3.5" />
+      </g>)}</g>
+      <circle className="map-origin-halo" cx="751" cy="211" r="13" />
+      <circle className="map-origin" cx="751" cy="211" r="5" />
+    </svg>
+  </div>;
 }
 
 function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
@@ -72,6 +92,65 @@ function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
       {!imageFailed && <Image src={src} alt={alt} fill sizes="(max-width: 700px) 100vw, 54vw" onError={() => setImageFailed(true)} />}
     </div>
   );
+}
+
+function CapabilityAction() {
+  return <a className="capability-action" href="#contact"><span className="capability-action-icon" aria-hidden="true">✳</span><span>Explore Service</span><span className="capability-action-arrow" aria-hidden="true">→</span></a>;
+}
+
+function OverviewVideo() {
+  const video = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotion = () => {
+      const element = video.current;
+      if (!element) return;
+      if (media.matches) {
+        element.pause();
+        element.currentTime = 0;
+      } else {
+        void element.play().catch(() => {});
+      }
+    };
+    syncMotion();
+    media.addEventListener("change", syncMotion);
+    return () => media.removeEventListener("change", syncMotion);
+  }, []);
+
+  return <video ref={video} autoPlay muted loop playsInline preload="auto" aria-hidden="true"><source src="/creative-loop.mp4" type="video/mp4" /></video>;
+}
+
+const consultationPhrases = ["Automate Customer Replies", "Generate Reports Automatically", "Handle Follow-up Calls", "Capture & Qualify Leads", "Schedule Appointments", "Manage Customer Inquiries", "Send Order Notifications", "Sync Business Data"];
+
+function ConsultationPhrases() {
+  const [active, setActive] = useState(consultationPhrases.length);
+  const [animate, setAnimate] = useState(true);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const syncMotion = () => {
+      if (timer) clearInterval(timer);
+      if (!media.matches) timer = setInterval(() => setActive((value) => value + 1), 2700);
+    };
+    syncMotion();
+    media.addEventListener("change", syncMotion);
+    return () => { if (timer) clearInterval(timer); media.removeEventListener("change", syncMotion); };
+  }, []);
+
+  const handleTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget || event.propertyName !== "transform" || active < consultationPhrases.length * 2) return;
+    setAnimate(false);
+    setActive(consultationPhrases.length);
+    requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
+  };
+
+  return <div className="consultation-phrases" aria-label={consultationPhrases.join(", ")}>
+    <div className="consultation-phrases-track" aria-hidden="true" onTransitionEnd={handleTransitionEnd} style={{ transform: `translateY(${(2 - active) / (consultationPhrases.length * 3) * 100}%)`, transition: animate ? undefined : "none" }}>
+      {[0, 1, 2].flatMap((copy) => consultationPhrases.map((phrase, index) => <div key={`${copy}-${phrase}`} className={`consultation-phrase${copy * consultationPhrases.length + index === active ? " is-active" : ""}`}>{phrase}</div>))}
+    </div>
+  </div>;
 }
 
 export default function Home() {
@@ -140,17 +219,26 @@ export default function Home() {
     // Keep teardown owned by one GSAP context; self-reverting matchMedia cleanups caused the prior recursion.
     const ctx = gsap.context(() => {
       if (!reduceMotion) {
+        const stack = element.querySelector<HTMLElement>(".capability-stack");
+        const surfaces = gsap.utils.toArray<HTMLElement>(".capability-surface", element);
+        if (stack && surfaces.length) {
+          const expandedWidth = () => Math.max(0, window.innerWidth * .95);
+          const expandedHeight = () => Math.max(surfaces[0].parentElement?.offsetHeight || 0, window.innerHeight * .9 - 48);
+          gsap.timeline({ scrollTrigger: { trigger: stack, start: "top 90%", end: "bottom 35%", scrub: true, invalidateOnRefresh: true } })
+            .fromTo(surfaces, { width: "100%", height: "100%" }, { width: expandedWidth, height: expandedHeight, duration: 1, ease: "none" })
+            .to(surfaces, { width: expandedWidth, height: expandedHeight, duration: 5, ease: "none" })
+            .to(surfaces, { width: "100%", height: "100%", duration: 1, ease: "none" });
+        }
         const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-        intro.from(element.querySelector(".hero-photo"), { clipPath: "inset(0 0 100% 0)", duration: 1.2, ease: "power3.inOut" })
-          .from(element.querySelector(".nav-shell"), { y: -18, opacity: 0, duration: .7 }, "-=.62")
-          .from(element.querySelectorAll(".hero-line"), { yPercent: 105, opacity: 0, stagger: .12, duration: .82, ease: "power3.out" }, "-=.24")
-          .from(element.querySelector(".hero-note"), { y: 14, opacity: 0, duration: .55 }, "-=.28")
-          .from(element.querySelector(".demo-badge"), { y: 10, opacity: 0, duration: .45 }, "-=.38")
-          .from(element.querySelector(".nav-cta"), { scale: .96, opacity: 0, duration: .45 }, "-=.34")
-          .from(element.querySelector(".scroll-cue"), { y: 12, opacity: 0, duration: .5 }, "-=.18");
-
-        const heroImage = element.querySelector(".hero-photo img");
-        gsap.to(heroImage, { yPercent: 8, ease: "none", scrollTrigger: { trigger: element.querySelector(".hero"), start: "top top", end: "bottom top", scrub: .7 } });
+        intro.from(element.querySelector(".nav-shell"), { y: -18, opacity: 0, duration: .7 })
+          .from(element.querySelectorAll(".hero-line"), { yPercent: 105, opacity: 0, stagger: .12, duration: .82 }, "-=.4")
+          .from(element.querySelector(".hero-description"), { y: 14, opacity: 0, duration: .55 }, "-=.35")
+          .from(element.querySelector(".hero-map"), { opacity: 0, y: 18, duration: .9 }, "-=.55");
+        const overview = element.querySelector<HTMLElement>(".service-overview");
+        if (overview) {
+          gsap.from(overview.querySelector("h2"), { y: 20, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview, start: "top 82%", once: true } });
+          gsap.from(overview.querySelectorAll(".service-overview-card"), { y: 22, opacity: 0, stagger: .12, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview.querySelector(".service-overview-grid"), start: "top 86%", once: true } });
+        }
         for (const image of element.querySelectorAll<HTMLElement>(".reveal-image")) {
           gsap.fromTo(image, { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 1.05, ease: "power3.inOut", scrollTrigger: { trigger: image, start: "top 82%", once: true } });
           if (image.parentElement?.classList.contains("photo-frame")) {
@@ -195,25 +283,54 @@ export default function Home() {
 
   return (
     <main ref={root} data-active-section={activeSection}>
-      <section className="hero" id="discover" aria-label="Discover the world">
-        <div className="hero-photo"><img src={photos.hero} alt="Aerial view of a tropical island surrounded by turquoise lagoon and deep blue ocean" /></div>
-        <div className="hero-shade" />
+      <section className="hero" id="discover" aria-label="Spark Lab digital studio">
         <header className="nav-shell">
-          <a className="wordmark" href="#discover" aria-label="Khadi Trip home">Spark Lab<span className="wordmark-dot">.</span></a>
-          <nav className="main-nav" aria-label="Main navigation">{[["studio", "Studio"], ["services", "Services"], ["	about Us", "About Us"], ].map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "is-active" : undefined} aria-current={activeSection === id ? "location" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</nav>
+          <a className="wordmark" href="#discover" aria-label="Spark Lab home">Spark Lab<span className="wordmark-dot">.</span></a>
+          <nav className="main-nav" aria-label="Main navigation">{[["discover", "Studio"], ["experiences", "Services"], ["manifesto", "About Us"]].map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "is-active" : undefined} aria-current={activeSection === id ? "location" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</nav>
           <a className="nav-cta magnetic" href="https://shohan-portfolio-tau.vercel.app/" target="_blank" rel="noopener noreferrer">Contact Us<Arrow diagonal /></a>
-          <a className="mobile-menu" href="#destinations" aria-label="Explore destinations">Explore <span>↓</span></a>
+          <a className="mobile-menu" href="#experiences" aria-label="Explore services">Services <span>↓</span></a>
         </header>
         <div className="hero-content">
-          <p className="eyebrow hero-kicker"><span className="live-dot" />A NEW PERSPECTIVE ON DIGITAL<span className="eyebrow-line" /></p>
-          <h1><span className="line-mask"><span className="hero-line">Unleashing</span></span><span className="line-mask"><span className="hero-line serif-word">Digital Boundaries</span></span><span className="line-mask"><span className="hero-line">by Spark Lab</span></span></h1>
-          <div className="hero-note"><BrandSeal /></div>
+          <h1><span className="hero-line">Ideas Without <span className="hero-accent">Borders.</span></span></h1>
+          <p className="hero-description">Building digital experiences and intelligent solutions for businesses without boundaries.</p>
         </div>
-        <div className="demo-badge"><span aria-hidden="true" />DIGITAL INNOVATION STUDIO</div>
+        <GlobalMap />
+        <div className="hero-statistics" aria-label="Global reach">
+          <div><strong>7</strong><span>Continents</span></div>
+          <div><strong>195+</strong><span>Sovereign Countries</span></div>
+          <div><strong>1</strong><span>Global Team</span></div>
+        </div>
+      </section>
+      <section className="service-overview section-pad" aria-labelledby="service-overview-heading">
+        <h2 id="service-overview-heading">We build AI-powered automation, websites, web applications, mobile apps, and custom software that help businesses grow.</h2>
+        <div className="service-overview-grid">
+          <article className="service-overview-card service-overview-dark">
+            <span className="service-overview-number">01</span>
+            <div><h3>AI &amp; Intelligent Automation</h3><p>We build intelligent AI agents, automated workflows, conversational systems, and integrations that reduce manual work and improve business operations.</p></div>
+          </article>
+          <article className="service-overview-card service-overview-orange">
+            <span className="service-overview-number">02</span>
+            <div><h3>Web, Software &amp; Mobile Development</h3><p>We design and develop high-performance websites, custom web applications, mobile experiences, and scalable software tailored to your business.</p></div>
+          </article>
+          <div className="service-overview-card service-overview-visual" aria-label="Abstract visual">
+            <OverviewVideo />
+          </div>
+        </div>
+      </section>
+      <section className="consultation-section section-pad" aria-labelledby="consultation-heading">
+        <div className="consultation-panel">
+        <div className="consultation-copy">
+          <h2 id="consultation-heading">Ready to automate and scale your business?</h2>
+          <p>Our team is ready to architect, build, and deploy your idea. Book a free consultation to get started.</p>
+          <a className="consultation-cta" href="#contact">Book a free consultation <span aria-hidden="true">→</span></a>
+        </div>
+        <ConsultationPhrases />
+        </div>
+      </section>
+      <ServicesShowcase />
         <div className="text-marquee" aria-label="Digital innovation, creative technology, intelligent automation, built for what's next, ideas into reality, design meets technology">
           <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
         </div>
-      </section>
 
       <section className="statistics-strip" aria-label="Client and platform statistics">
         <div className="statistics-grid">
@@ -229,20 +346,28 @@ export default function Home() {
       <section className="experiences section-pad" id="experiences" aria-label="Core services">
         <div className="capability-stack">
           <article className="capability-card capability-card-blue">
-            <div className="capability-copy"><p className="capability-label"><span>01</span> — CREATIVE THINKING</p><h3>Creative Thinking<br /><em>Strategic Design</em></h3><p className="capability-description">Turning complex ideas into simple, beautiful digital experiences.</p></div>
+            <div className="capability-surface"><p className="capability-label">01 — Creative Thinking</p>
+            <div className="capability-copy"><h3>Creative Thinking<br /><em>Strategic Design</em></h3><p className="capability-description">Turning complex ideas into simple, beautiful digital experiences.</p><CapabilityAction /></div>
             <CapabilityMedia src="/s1.png" alt="Creative Thinking project image" />
+            </div>
           </article>
           <article className="capability-card capability-card-lime">
-            <div className="capability-copy"><p className="capability-label"><span>02</span> — ENGINEERING EXCELLENCE</p><h3>Engineering<br /><em>Excellence</em></h3><p className="capability-description">Building fast, reliable, and scalable digital products.</p></div>
+            <div className="capability-surface"><p className="capability-label">02 — Engineering</p>
+            <div className="capability-copy"><h3>Engineering<br /><em>Excellence</em></h3><p className="capability-description">Building fast, reliable, and scalable digital products.</p><CapabilityAction /></div>
             <CapabilityMedia src="/s2.png" alt="Engineering Excellence project image" />
+            </div>
           </article>
           <article className="capability-card capability-card-yellow">
-            <div className="capability-copy"><p className="capability-label"><span>03</span> — INTELLIGENT SYSTEMS</p><h3>Intelligent<br /><em>Systems</em></h3><p className="capability-description">Smarter businesses through AI and intelligent automation.</p></div>
+            <div className="capability-surface"><p className="capability-label">03 — Intelligent Systems</p>
+            <div className="capability-copy"><h3>Intelligent<br /><em>Systems</em></h3><p className="capability-description">Smarter businesses through AI and intelligent automation.</p><CapabilityAction /></div>
             <CapabilityMedia src="/s3.png" alt="Intelligent Systems project image" />
+            </div>
           </article>
           <article className="capability-card capability-card-coral">
-            <div className="capability-copy"><p className="capability-label"><span>04</span> — PROFESSIONAL LOGO DESIGN</p><h3>Professional Logo Design<br /><em>Brand Identity</em></h3><p className="capability-description">Creating distinctive visual identities that make brands memorable.</p></div>
+            <div className="capability-surface"><p className="capability-label">04 — Logo Design</p>
+            <div className="capability-copy"><h3>Professional Logo Design<br /><em>Brand Identity</em></h3><p className="capability-description">Creating distinctive visual identities that make brands memorable.</p><CapabilityAction /></div>
             <CapabilityMedia src="/s4.png" alt="Professional Logo Design project image" />
+            </div>
           </article>
         </div>
       </section>
