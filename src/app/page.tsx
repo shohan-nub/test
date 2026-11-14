@@ -257,15 +257,20 @@ export default function Home() {
           cardTimeline.to({}, { duration: .5 });
           cards.slice(1).forEach((card, index) => {
             const start = cardTimeline.duration();
-            // Begin below the clipped viewport, rather than exposing the next card early.
-            // Only the final card settles flush with the viewport top; earlier cards keep their depth.
+            // Bring each card in from below the viewport. The last card rests at
+            // the same compact size before its surface fills the viewport.
             const finalCard = index === cards.length - 2;
-            const duration = finalCard ? 1.2 : 1;
-            cardTimeline.fromTo(card, { y: () => showcase.clientHeight - stack.offsetTop }, { y: () => finalCard ? -stack.offsetTop : depth() * (index + 1), duration, ease: "sine.inOut", immediateRender: true }, start);
+            const duration = 1;
+            cardTimeline.fromTo(card, { y: () => showcase.clientHeight - stack.offsetTop }, { y: () => depth() * (index + 1), duration, ease: "sine.inOut", immediateRender: true }, start);
             if (finalCard) {
-              // Only the final shell changes dimensions. Typography never receives a scale transform.
-              cardTimeline.fromTo(card.querySelector(".capability-surface"), { width: () => stack.clientWidth, height: () => stack.clientHeight, left: 0 }, { width: () => showcase.clientWidth, height: () => showcase.clientHeight, left: () => -stack.offsetLeft, duration, ease: "sine.inOut", immediateRender: true }, start);
-              cardTimeline.to(showcase, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--showcase-charcoal").trim(), duration, ease: "none" }, start);
+              const surface = card.querySelector<HTMLElement>(".capability-surface");
+              const expandAt = start + duration + .3;
+              const expandDuration = 1.35;
+              cardTimeline.to(card, { y: () => -stack.offsetTop, duration: expandDuration, ease: "sine.inOut" }, expandAt);
+              if (surface) cardTimeline.fromTo(surface,
+                { width: () => stack.clientWidth, height: () => stack.clientHeight, left: 0, borderRadius: () => window.innerWidth <= 640 ? 22 : 26 },
+                { width: () => showcase.clientWidth, height: () => showcase.clientHeight, left: () => -stack.offsetLeft, borderRadius: 0, duration: expandDuration, ease: "sine.inOut", immediateRender: true }, expandAt);
+              cardTimeline.to(showcase, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--showcase-charcoal").trim(), duration: expandDuration, ease: "sine.inOut" }, expandAt);
             }
             cardTimeline.to({}, { duration: .45 });
           });
@@ -403,14 +408,16 @@ export default function Home() {
         <div className="capability-stack">
           {projects.map((project, index) => <article className={`capability-card capability-card-${project.tone}`} key={project.image}>
             <div className="capability-surface">
-              <div className="capability-copy">
-                <p className="capability-label">{project.category}<span>{String(index + 1).padStart(2, "0")} / 05</span></p>
-                <h3>{project.title}</h3>
-                <p className="project-summary">{project.description}</p>
-                <dl className="project-details"><div><dt>Scope</dt><dd>{project.scope}</dd></div><div><dt>Duration</dt><dd>To be confirmed</dd></div></dl>
-                <a className="capability-action" href="#contact">View Project <span aria-hidden="true">→</span></a>
-              </div>
-              <CapabilityMedia src={project.image} alt={`${project.title} project preview`} />
+              {index < 4 && <>
+                <div className="capability-copy">
+                  <p className="capability-label">{project.category}<span>{String(index + 1).padStart(2, "0")} / 05</span></p>
+                  <h3>{project.title}</h3>
+                  <p className="project-summary">{project.description}</p>
+                  <dl className="project-details"><div><dt>Scope</dt><dd>{project.scope}</dd></div><div><dt>Duration</dt><dd>To be confirmed</dd></div></dl>
+                  <a className="capability-action" href="#contact">View Project <span aria-hidden="true">→</span></a>
+                </div>
+                <CapabilityMedia src={project.image} alt={`${project.title} project preview`} />
+              </>}
             </div>
           </article>)}
         </div>
