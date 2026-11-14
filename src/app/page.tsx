@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
 import ServicesShowcase from "./ServicesShowcase";
+import OpeningLoader from "./components/OpeningLoader";
+import Image from "next/image";
 
 const photos = {
   maldives: "https://images.unsplash.com/photo-1648312182804-346237fbc0ea?auto=format&fit=crop&w=1400&q=85",
@@ -329,9 +331,10 @@ export default function Home() {
 
   return (
     <main ref={root} data-active-section={activeSection}>
+      <OpeningLoader />
       <section className="hero" id="discover" aria-label="Spark Lab digital studio">
         <header className="nav-shell">
-          <a className="wordmark" href="#discover" aria-label="Spark Lab home">Spark Lab<span className="wordmark-dot">.</span></a>
+          <a className="wordmark" href="#discover" aria-label="Spark Lab home"><Image className="navbar-brand-logo" src="/sparklab-full-logo-clear.svg" alt="SparkLab" width={894} height={191} unoptimized priority /></a>
           <nav className="main-nav" aria-label="Main navigation">{[["discover", "Studio"], ["experiences", "Services"], ["manifesto", "About Us"]].map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "is-active" : undefined} aria-current={activeSection === id ? "location" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</nav>
           <a className="nav-cta magnetic" href="https://shohan-portfolio-tau.vercel.app/" target="_blank" rel="noopener noreferrer">Contact Us<Arrow diagonal /></a>
           <a className="mobile-menu" href="#experiences" aria-label="Explore services">Services <span>↓</span></a>

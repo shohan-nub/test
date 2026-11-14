@@ -408,7 +408,7 @@ body{background:var(--theme-bg);color:var(--theme-ink)}
 main{position:relative;isolation:isolate}
 main::before,main::after{content:"";position:fixed;z-index:-1;pointer-events:none}
 main::before{inset:0;background-image:radial-gradient(circle,rgba(119,107,96,.14) .8px,transparent 1.2px),radial-gradient(circle,rgba(217,107,50,.12) .65px,transparent 1px);background-size:15px 15px,31px 31px;background-position:0 0,7px 10px;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.35) 35%,rgba(0,0,0,.35) 65%,#000)}
-main::after{inset:-3%;background:radial-gradient(ellipse 46% 58% at 7% 22%,rgba(239,169,127,.18),transparent 76%),radial-gradient(ellipse 42% 50% at 92% 75%,rgba(240,178,192,.14),transparent 76%),radial-gradient(ellipse 36% 44% at 65% 15%,rgba(255,227,190,.18),transparent 78%);opacity:.65;animation:ambient-warmth 72s ease-in-out infinite alternate}
+main::after{inset:-3%;background:radial-gradient(ellipse 46% 58% at 7% 22%,rgba(239,169,127,.2),transparent 76%),radial-gradient(ellipse 42% 50% at 92% 75%,rgba(232,145,86,.13),transparent 76%),radial-gradient(ellipse 36% 44% at 65% 15%,rgba(255,227,190,.2),transparent 78%);opacity:.7;animation:ambient-warmth 72s ease-in-out infinite alternate}
 main > :is(.hero,.service-overview,.consultation-section,.statistics-strip,.creative-statement,.technology-strip,.experiences,.destinations){background:transparent}
 main > .manifesto{background:rgba(240,237,232,.48)}
 @keyframes ambient-warmth{0%{transform:translate(-1%,0);opacity:.5}50%{transform:translate(1%,1%);opacity:.8}100%{transform:translate(0,-1%);opacity:.6}}
@@ -508,3 +508,10 @@ main > .manifesto{background:rgba(240,237,232,.48)}
 @media(max-width:640px){.creative-statement{min-height:0;padding:60px 6%}.creative-statement h2{font-size:clamp(20px,6vw,31px);line-height:1.17;letter-spacing:-.07em}.creative-preview{left:calc(50% - 60px);top:calc(50% - 45px);width:120px;height:90px;padding:4px;border-radius:12px}.creative-preview img{border-radius:8px}}
 @media(prefers-reduced-motion:reduce){.creative-statement{height:auto;min-height:0;display:flex;flex-direction:column;gap:35px;padding:90px 6%}.creative-statement::before{display:none}.creative-previews{position:relative;inset:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;width:min(900px,100%);order:2}.creative-preview{position:relative;left:auto;top:auto;width:100%;height:auto;aspect-ratio:4/3;transform:none!important}.creative-statement h2{order:1}.creative-preview .capability-media img{transition:none}}
 @media(max-width:640px) and (prefers-reduced-motion:reduce){.creative-previews{grid-template-columns:repeat(3,minmax(0,1fr))}.creative-statement{padding:70px 7%}}
+
+/* The shared Hero atmosphere remains visible through every light section. */
+main > :is(.hero,.service-overview,.consultation-section,.statistics-strip,.creative-statement,.technology-strip,.experiences,.destinations){background:transparent}
+
+.hero .nav-shell .wordmark{display:flex;align-items:center;flex:none}
+.hero .navbar-brand-logo{display:block;width:132px;height:auto;object-fit:contain}
+@media(max-width:640px){.hero .navbar-brand-logo{width:108px}}

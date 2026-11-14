@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  icons: {
+    icon: "/sparklab-icon-clear.svg",
+    shortcut: "/sparklab-icon-clear.svg",
+    apple: "/sparklab-icon-clear.png",
+  },
   title: {
     default: "Spark Lab | Digital Experiences & AI Solutions",
     template: "%s | Spark Lab",
@@ -25,7 +30,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

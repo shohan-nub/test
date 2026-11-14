@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 import "./services-showcase.css";
+
+const headingWords = ["Creativity", "Productivity", "Innovation", "Strategy", "Ideas"];
+const marqueePhrases = ["DESIGN", "DEVELOPMENT", "INNOVATION", "DIGITAL EXPERIENCE", "BRAND STRATEGY", "CREATIVE THINKING"];
 
 const images = [
   { name: "gallery-01", alt: "Sculptural cosmetic packaging in jewel colors", width: 1120, height: 1400 },
@@ -31,6 +35,8 @@ const rows = [
 
 export default function ServicesShowcase() {
   const section = useRef<HTMLElement>(null);
+  const word = useRef<HTMLElement>(null);
+  const verb = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -41,9 +47,55 @@ export default function ServicesShowcase() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const wordNode = word.current;
+    const verbNode = verb.current;
+    if (!visible || !wordNode || !verbNode) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let index = Math.max(0, headingWords.indexOf(wordNode.textContent ?? ""));
+    let timer: gsap.core.Tween | undefined;
+    let transition: gsap.core.Timeline | undefined;
+
+    const cycle = () => {
+      transition = gsap.timeline({ onComplete: () => { timer = gsap.delayedCall(2.25, cycle); } })
+        .to(wordNode, { opacity: 0, y: -8, duration: .22, ease: "power2.in" })
+        .call(() => {
+          index = (index + 1) % headingWords.length;
+          wordNode.textContent = headingWords[index];
+          verbNode.textContent = index === headingWords.length - 1 ? "Meet" : "Meets";
+        })
+        .fromTo(wordNode, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .32, ease: "power2.out" });
+    };
+    const syncMotion = () => {
+      timer?.kill();
+      transition?.kill();
+      gsap.set(wordNode, { clearProps: "opacity,transform" });
+      if (motion.matches) {
+        index = 0;
+        wordNode.textContent = headingWords[0];
+        verbNode.textContent = "Meets";
+      } else {
+        timer = gsap.delayedCall(2.7, cycle);
+      }
+    };
+    syncMotion();
+    motion.addEventListener("change", syncMotion);
+    return () => {
+      motion.removeEventListener("change", syncMotion);
+      timer?.kill();
+      transition?.kill();
+      gsap.set(wordNode, { clearProps: "opacity,transform" });
+    };
+  }, [visible]);
+
   return <section ref={section} className="services-showcase" data-visible={visible} aria-labelledby="gallery-heading">
     {rows.map((row, rowIndex) => <div className="gallery-row-group" key={rowIndex}>
-      {rowIndex === 1 && <h2 className="gallery-heading" id="gallery-heading">Where <em>Creativity</em><br />Meets Technology</h2>}
+      {rowIndex === 1 && <div className="gallery-heading-composition">
+        <h2 className="gallery-heading" id="gallery-heading">Where <span className="gallery-word-slot"><em className="gallery-word-measure" aria-hidden="true">Productivity</em><em className="gallery-word" ref={word}>Creativity</em></span><br /><span ref={verb}>Meets</span> Technology</h2>
+        <div className="gallery-caption-marquee" aria-label={marqueePhrases.join(" · ")}>
+          <div className="gallery-caption-track" aria-hidden="true">{[0, 1].map((copy) => <div className="gallery-caption-sequence" key={copy}>{marqueePhrases.map((phrase) => <span className="gallery-caption-phrase" key={`${copy}-${phrase}`}>{phrase}<i>·</i></span>)}</div>)}</div>
+        </div>
+      </div>}
       <div className={`gallery-row${rowIndex === 1 ? " gallery-row-reverse" : ""}`} tabIndex={0} role="group" aria-label={`Creative gallery row ${rowIndex + 1}. Hover or focus to pause movement.`}>
         <div className="gallery-track">
           {[0, 1].map((copy) => <div className="gallery-sequence" key={copy} aria-hidden={copy === 1 ? true : undefined}>
