@@ -1,11 +1,11 @@
 "use client";
 
-import { type FormEvent, type TransitionEvent, useEffect, useRef, useState } from "react";
+import { type TransitionEvent, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
 import ServicesShowcase from "./ServicesShowcase";
-import OpeningLoader from "./components/OpeningLoader";
+import Footer from "./components/Footer";
 import Image from "next/image";
 
 const photos = {
@@ -171,28 +171,6 @@ function ConsultationPhrases() {
 export default function Home() {
   const root = useRef<HTMLElement>(null);
   const [activeSection, setActiveSection] = useState("discover");
-  const [contactStatus, setContactStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [contactError, setContactError] = useState("");
-
-  const handleContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (contactStatus === "loading") return;
-    const form = event.currentTarget;
-    const fields = new FormData(form);
-    setContactStatus("loading");
-    setContactError("");
-    try {
-      const response = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(fields)) });
-      const payload = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(payload.error || "Unable to send your message right now.");
-      form.reset();
-      setContactStatus("success");
-    } catch (error) {
-      setContactStatus("error");
-      setContactError(error instanceof Error ? error.message : "Unable to send your message right now.");
-    }
-  };
-
   useEffect(() => {
     const element = root.current;
     if (!element) return;
@@ -305,9 +283,6 @@ export default function Home() {
         }
         gsap.from(element.querySelector(".featured-location"), { x: -18, opacity: 0, duration: .65, ease: "power2.out", scrollTrigger: { trigger: element.querySelector(".featured"), start: "top 68%", once: true } });
         gsap.from(element.querySelector(".featured-content h2"), { y: 38, opacity: 0, duration: .9, delay: .1, ease: "power3.out", scrollTrigger: { trigger: element.querySelector(".featured"), start: "top 68%", once: true } });
-        gsap.from(element.querySelector(".footer-photo"), { clipPath: "inset(0 0 100% 0)", duration: 1.1, ease: "power3.inOut", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 75%", once: true } });
-        gsap.from(element.querySelector(".footer-intro h2"), { y: 42, opacity: 0, duration: .85, ease: "power3.out", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 62%", once: true } });
-        gsap.from(element.querySelector(".contact-form"), { y: 18, scale: .94, opacity: 0, duration: .65, delay: .18, ease: "power2.out", scrollTrigger: { trigger: element.querySelector(".footer"), start: "top 62%", once: true } });
         for (const button of element.querySelectorAll<HTMLElement>(".magnetic")) {
           const onMove = (event: PointerEvent) => {
             const rect = button.getBoundingClientRect();
@@ -331,7 +306,6 @@ export default function Home() {
 
   return (
     <main ref={root} data-active-section={activeSection}>
-      <OpeningLoader />
       <section className="hero" id="discover" aria-label="Spark Lab digital studio">
         <header className="nav-shell">
           <a className="wordmark" href="#discover" aria-label="Spark Lab home"><Image className="navbar-brand-logo" src="/sparklab-full-logo-clear.svg" alt="SparkLab" width={894} height={191} unoptimized priority /></a>
@@ -450,13 +424,7 @@ export default function Home() {
           <div className="manifesto-collage"><figure className="collage-shot collage-one"><img className="reveal-image" src={photos.collage1} alt="Creative professionals collaborating around a table in a modern studio" /><figcaption>Somewhere along the coast, Italy</figcaption></figure><figure className="collage-shot collage-two"><img className="reveal-image" src={photos.collage2} alt="Software developer working on a laptop in a modern workspace" /><figcaption>Blue beneath the surface</figcaption></figure><figure className="collage-shot collage-three"><img className="reveal-image" src={photos.collage3} alt="Professionals collaborating during a modern office meeting" /><span>Take a breath.</span></figure><span className="collage-scribble">Always Question <br />The Ordinary</span></div></div>
       </section>
 
-      <footer className="footer" id="contact">
-        <div className="footer-photo"><img src={photos.footer} alt="Aerial tropical shoreline with turquoise water breaking around a palm-lined beach" /></div><div className="footer-shade" />
-        <div className="footer-main"><div className="footer-contact-grid"><div className="footer-intro"><p className="eyebrow light-eyebrow"><span className="live-dot" />LET&apos;S CONNECT</p><h2>Let’s Talk.<br /><em>We’d Love to Hear From You.</em></h2><p>Have a project in mind, a challenge to solve, or simply want to say hello? We&apos;d love to hear about it.</p><div className="contact-details"><span>BUSINESS EMAIL</span><a href="#contact-form">Send us a message below</a><span>LOCATION</span><strong>Dhaka, Bangladesh</strong></div><div className="footer-social"><span>FOLLOW THE SPARK</span><div><a href="#contact" aria-label="Instagram">IG</a><a href="#contact" aria-label="Pinterest">PI</a><a href="#contact" aria-label="TikTok">TK</a></div></div></div>
-          <form className="contact-form" id="contact-form" onSubmit={handleContactSubmit}><p className="eyebrow light-eyebrow">SEND US A MESSAGE</p><label>Full Name<input name="name" type="text" autoComplete="name" maxLength={100} required /></label><label>Email Address<input name="email" type="email" autoComplete="email" maxLength={254} required /></label><label>Subject<input name="subject" type="text" maxLength={160} required /></label><label>Message<textarea name="message" rows={5} maxLength={5000} required /></label><input className="honeypot" name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" /><button className="contact-submit" type="submit" disabled={contactStatus === "loading"}>{contactStatus === "loading" ? "SENDING…" : <>SEND MESSAGE <Arrow diagonal /></>}</button><p className="contact-response" aria-live="polite">{contactStatus === "success" ? "Thanks for reaching out! Your message has been sent successfully." : contactStatus === "error" ? contactError : "We usually respond within 1–2 business days."}</p></form></div>
-          <div className="footer-bottom"><div className="footer-brand"><a className="wordmark" href="#discover" aria-label="Spark Lab home">SPARK LAB<span className="wordmark-dot">.</span></a></div><nav aria-label="Footer navigation" className="footer-links"><a href="#discover">Discover</a><a href="#destinations">Destinations</a><a href="#experiences">Experiences</a><a href="#manifesto">Journal</a></nav><div className="footer-meta"><span>© SPARK LAB 2026</span><span>	CREATIVITY MEETS TECHNOLOGY</span><a href="#discover" className="back-top">Back to top ↑</a></div></div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

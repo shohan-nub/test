@@ -4,30 +4,27 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import styles from "./OpeningLoader.module.css";
 
-const storageKey = "sparklab-opening-loader-seen";
-// Before paint: skip repeat visits and claim this session immediately.
-const sessionCheck = `(()=>{let seen=false;try{seen=sessionStorage.getItem("${storageKey}")==="1";sessionStorage.setItem("${storageKey}","1")}catch{}document.documentElement.dataset.sparklabOpening=seen||matchMedia("(prefers-reduced-motion: reduce)").matches?"done":"active"})()`;
-
 export default function OpeningLoader() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const active = document.documentElement.dataset.sparklabOpening === "active";
-    const timer = window.setTimeout(() => {
-      document.documentElement.dataset.sparklabOpening = "done";
-      setVisible(false);
-    }, active ? 2000 : 0);
+    // Root layouts persist during client navigation. A new document mounts a
+    // fresh overlay; CSS also ends it after two seconds if hydration is slow.
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(() => setVisible(false), reduced ? 0 : 2000);
     return () => window.clearTimeout(timer);
   }, []);
 
-  return <>
-    <script dangerouslySetInnerHTML={{ __html: sessionCheck }} />
-    {visible && <div className={styles.loader} data-opening-loader role="status" aria-label="Welcome to SparkLab">
+  if (!visible) return null;
+
+  return <div className={styles.loader} data-opening-loader role="status" aria-label="Welcome to SparkLab"
+    onAnimationEnd={event => { if (event.target === event.currentTarget) setVisible(false); }}>
       <div className={styles.light} aria-hidden="true" />
-      <div className={styles.panel}>
-        <Image className={styles.logo} src="/sparklab-full-logo-clear.svg" alt="SparkLab" width={894} height={191} unoptimized priority />
+      <div className={styles.brand}>
+        <div className={styles.reveal}>
+          <Image className={styles.logo} src="/sparklab-full-logo-clear.svg" alt="SparkLab" width={894} height={191} unoptimized priority />
+        </div>
         <div className={styles.progress} aria-hidden="true"><span /></div>
       </div>
-    </div>}
-  </>;
+    </div>;
 }
