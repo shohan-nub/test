@@ -104,11 +104,11 @@ function CreativePreview({ index }: { index: number }) {
 }
 
 const projects = [
-  { title: "Website 1", category: "Design", image: "/p1.webp", tone: "peach" },
-  { title: "Website 2", category: "Development", image: "/p2.webp", tone: "sage" },
-  { title: "Website 3", category: "AI & Automation", image: "/p3.webp", tone: "lavender" },
-  { title: "Website 4", category: "Branding", image: "/p4.webp", tone: "terracotta" },
-  { title: "Website 5", category: "UI/UX", image: "/p5.webp", tone: "charcoal" },
+  { title: "Website 1", category: "Design", image: "/p1.webp", tone: "apricot", description: "A clear, considered website experience with thoughtful details and a distinctive visual language.", scope: "Website design · UX" },
+  { title: "Website 2", category: "Development", image: "/p2.webp", tone: "butter", description: "A responsive digital experience that brings intuitive navigation and everyday functionality together.", scope: "Web development" },
+  { title: "Website 3", category: "AI & Automation", image: "/p3.webp", tone: "coral", description: "An approachable interface for connected workflows, useful insights, and simpler daily tasks.", scope: "Product design · Automation" },
+  { title: "Website 4", category: "Branding", image: "/p4.webp", tone: "sage", description: "An expressive brand experience, connecting a confident identity with a cohesive digital presence.", scope: "Brand identity · Website" },
+  { title: "Website 5", category: "UI/UX", image: "/p5.webp", tone: "charcoal", description: "A focused digital experience where considered design and practical technology work together.", scope: "UI/UX · Development" },
 ] as const;
 
 function OverviewVideo() {
@@ -236,50 +236,37 @@ export default function Home() {
         if (creative) {
           const previews = gsap.utils.toArray<HTMLElement>(".creative-preview", creative);
           const directions = [[-.34, -.25], [.3, -.22], [-.3, .24], [.34, .24], [-.2, -.32], [.21, -.31], [-.12, .38], [.14, .37], [-.4, .02], [.4, -.02]];
-          const creativeTimeline = gsap.timeline({ scrollTrigger: { trigger: creative, start: "top top", end: () => `+=${Math.max(1100, window.innerHeight * 1.9)}`, pin: true, scrub: .9, invalidateOnRefresh: true, anticipatePin: 1 } });
+          gsap.from(creative.querySelector("h2"), { y: 16, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: creative, start: "top 75%", once: true } });
+          const creativeTimeline = gsap.timeline({ scrollTrigger: { trigger: creative, start: "top top", end: () => `+=${Math.max(650, creative.clientHeight * 1.15)}`, pin: true, scrub: .45, invalidateOnRefresh: true, anticipatePin: 1 } });
           previews.forEach((preview, index) => {
             const [x, y] = directions[index];
             // One continuous journey avoids a velocity jump between emergence and exit.
-            const start = .12 + index * .11;
-            const duration = 2.8 + (index % 3) * .14;
+            const start = .08 + index * .08;
+            const duration = 2.4 + (index % 3) * .12;
             creativeTimeline.fromTo(preview, { x: 0, y: 0, opacity: .25 }, { x: () => x * window.innerWidth * 2.7, y: () => y * window.innerHeight * 2.7, opacity: 1, ease: "sine.inOut", duration }, start);
             creativeTimeline.to(preview, { opacity: 0, ease: "sine.inOut", duration: .65 }, start + duration - .65);
           });
-          creativeTimeline.fromTo(creative.querySelectorAll(".creative-line-inner"), { y: 18, opacity: .72 }, { y: 0, opacity: 1, stagger: .16, ease: "power2.out", duration: .6 }, 0);
         }
         const showcase = element.querySelector<HTMLElement>(".experiences");
         const stack = showcase?.querySelector<HTMLElement>(".capability-stack");
         const cards = stack ? gsap.utils.toArray<HTMLElement>(".capability-card", stack) : [];
         if (showcase && stack && cards.length) {
           const depth = () => parseFloat(getComputedStyle(stack).getPropertyValue("--stack-step")) || 10;
-          const gutter = () => parseFloat(getComputedStyle(showcase).getPropertyValue("--showcase-gutter"));
-          const frameSize = (card: HTMLElement, index: number) => ({
-            width: card.clientWidth + (index === cards.length - 1 ? gutter() * 2 : 0),
-            height: card.clientHeight + (index === cards.length - 1 ? 16 : 0),
-            left: index === cards.length - 1 ? -gutter() : 0,
-          });
-          const compactFrame = (card: HTMLElement, index: number) => ({
-            width: () => frameSize(card, index).width * .94,
-            height: () => frameSize(card, index).height * .94,
-            left: () => frameSize(card, index).left + frameSize(card, index).width * .03,
-            top: () => frameSize(card, index).height * .03,
-          });
-          const fullFrame = (card: HTMLElement, index: number) => ({
-            width: () => frameSize(card, index).width,
-            height: () => frameSize(card, index).height,
-            left: () => frameSize(card, index).left,
-            top: 0,
-          });
-          // Resize the shell; its inner grid uses the stable stack dimensions in CSS.
-          gsap.fromTo(cards[0].querySelector(".capability-surface"), compactFrame(cards[0], 0), { ...fullFrame(cards[0], 0), ease: "sine.inOut", scrollTrigger: { trigger: showcase, start: "top 85%", end: "top top", scrub: .6, invalidateOnRefresh: true } });
           // Scroll distance includes a resting interval for every card, including the first and last.
-          const cardTimeline = gsap.timeline({ scrollTrigger: { trigger: showcase, start: "top top", end: () => `+=${Math.max(3200, showcase.clientHeight * 6.4)}`, pin: true, scrub: .5, invalidateOnRefresh: true, anticipatePin: 1 } });
+          const cardTimeline = gsap.timeline({ scrollTrigger: { trigger: showcase, start: "top top", end: () => `+=${showcase.clientHeight * (window.innerWidth <= 900 ? 3.6 : 4.8)}`, pin: true, scrub: .4, invalidateOnRefresh: true, anticipatePin: 1 } });
           cardTimeline.to({}, { duration: .5 });
           cards.slice(1).forEach((card, index) => {
             const start = cardTimeline.duration();
-            cardTimeline.fromTo(card, { y: () => stack.clientHeight + depth() * (index + 1) }, { y: () => depth() * (index + 1), duration: 1, ease: "power1.inOut", immediateRender: true }, start);
-            cardTimeline.fromTo(card.querySelector(".capability-surface"), compactFrame(card, index + 1), { ...fullFrame(card, index + 1), duration: 1, ease: "sine.inOut", immediateRender: true }, start);
-            if (index === cards.length - 2) cardTimeline.to(showcase, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--showcase-charcoal").trim(), duration: 1, ease: "none" }, start);
+            // Begin below the clipped viewport, rather than exposing the next card early.
+            // Only the final card settles flush with the viewport top; earlier cards keep their depth.
+            const finalCard = index === cards.length - 2;
+            const duration = finalCard ? 1.2 : 1;
+            cardTimeline.fromTo(card, { y: () => showcase.clientHeight - stack.offsetTop }, { y: () => finalCard ? -stack.offsetTop : depth() * (index + 1), duration, ease: "sine.inOut", immediateRender: true }, start);
+            if (finalCard) {
+              // Only the final shell changes dimensions. Typography never receives a scale transform.
+              cardTimeline.fromTo(card.querySelector(".capability-surface"), { width: () => stack.clientWidth, height: () => stack.clientHeight, left: 0 }, { width: () => showcase.clientWidth, height: () => showcase.clientHeight, left: () => -stack.offsetLeft, duration, ease: "sine.inOut", immediateRender: true }, start);
+              cardTimeline.to(showcase, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--showcase-charcoal").trim(), duration, ease: "none" }, start);
+            }
             cardTimeline.to({}, { duration: .45 });
           });
         }
@@ -408,14 +395,22 @@ export default function Home() {
         <div className="technology-rows">{technologyRows.map((row, rowIndex) => <div className="technology-row" key={rowIndex}><div className="technology-track">{[0, 1].map((copy) => <div className="technology-sequence" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{row.map(([name, icon]) => <div className="technology-mark" key={`${copy}-${name}`} title={name}><img src={`https://cdn.jsdelivr.net/gh/gilbarbara/logos@master/logos/${icon}.svg`} alt={copy === 0 ? `${name} logo` : ""} width="72" height="34" /></div>)}</div>)}</div></div>)}</div>
       </section>
 
+      <div className="text-marquee text-marquee-reverse" aria-label="Creative technology, built for what's next, ideas into reality, design meets technology, digital experiences">
+        <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["CREATIVE TECHNOLOGY", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY", "DIGITAL EXPERIENCES"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
+      </div>
+
       <section className="experiences section-pad" id="experiences" aria-label="Selected projects">
         <div className="capability-stack">
           {projects.map((project, index) => <article className={`capability-card capability-card-${project.tone}`} key={project.image}>
             <div className="capability-surface">
-              <div className="capability-content">
-              <div className="capability-copy"><p className="capability-label">{String(index + 1).padStart(2, "0")} / 05 <span>{project.category}</span></p><h3>{project.title}</h3><a className="capability-action" href="#contact">View Project <span aria-hidden="true">→</span></a></div>
-              <CapabilityMedia src={project.image} alt={`${project.title} project preview`} />
+              <div className="capability-copy">
+                <p className="capability-label">{project.category}<span>{String(index + 1).padStart(2, "0")} / 05</span></p>
+                <h3>{project.title}</h3>
+                <p className="project-summary">{project.description}</p>
+                <dl className="project-details"><div><dt>Scope</dt><dd>{project.scope}</dd></div><div><dt>Duration</dt><dd>To be confirmed</dd></div></dl>
+                <a className="capability-action" href="#contact">View Project <span aria-hidden="true">→</span></a>
               </div>
+              <CapabilityMedia src={project.image} alt={`${project.title} project preview`} />
             </div>
           </article>)}
         </div>

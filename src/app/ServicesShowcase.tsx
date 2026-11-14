@@ -3,61 +3,56 @@
 import { useEffect, useRef, useState } from "react";
 import "./services-showcase.css";
 
-// Add images at these public paths; each placeholder will display its image on reload.
-const services = [
-  { title: "WEB & APP DEVELOPMENT", description: "We design and develop high-performance websites, web applications, e-commerce platforms, and scalable mobile experiences.", images: ["/services/web-development/web-01.webp", "/services/web-development/web-02.webp", "/services/web-development/web-03.webp", "/services/web-development/web-04.webp"] },
-  { title: "AI & AUTOMATION", description: "We build intelligent AI agents, automated workflows, conversational systems, and business automation solutions.", images: ["/services/ai-automation/ai-01.webp", "/services/ai-automation/ai-02.webp", "/services/ai-automation/ai-03.webp", "/services/ai-automation/ai-04.webp"] },
-  { title: "BRANDING & IDENTITY", description: "We create memorable brand identities, visual systems, logo designs, and digital experiences that make businesses stand out.", images: ["/services/branding/brand-01.webp", "/services/branding/brand-02.webp", "/services/branding/brand-03.webp", "/services/branding/brand-04.webp"] },
-  { title: "UI/UX & DIGITAL EXPERIENCE", description: "We craft intuitive interfaces and engaging digital experiences through thoughtful research, interaction design, and modern UI systems.", images: ["/services/ui-ux-design/design-01.webp", "/services/ui-ux-design/design-02.webp", "/services/ui-ux-design/design-03.webp", "/services/ui-ux-design/design-04.webp"] },
+const images = [
+  { name: "gallery-01", alt: "Sculptural cosmetic packaging in jewel colors", width: 1120, height: 1400 },
+  { name: "gallery-02", alt: "Orange and yellow sculptural digital artwork", width: 1200, height: 675 },
+  { name: "gallery-03", alt: "Makeup collection art directed against violet", width: 1200, height: 1200 },
+  { name: "gallery-04", alt: "Oversized black and red poster typography", width: 935, height: 1400 },
+  { name: "gallery-05", alt: "Iridescent glass forms against turquoise", width: 1200, height: 960 },
+  { name: "gallery-06", alt: "Blue sneaker styled on a bright yellow background", width: 1029, height: 1400 },
+  { name: "gallery-07", alt: "Skincare packaging in an orange studio composition", width: 1050, height: 1400 },
+  { name: "gallery-08", alt: "Vintage illustrated posters with bold lettering", width: 1200, height: 960 },
+  { name: "gallery-09", alt: "Perfume bottle and yellow flowers against deep blue", width: 1200, height: 960 },
+  { name: "gallery-10", alt: "Reflective geometric digital sculpture", width: 1200, height: 1200 },
+  { name: "gallery-11", alt: "Playful yellow letter tiles on blue", width: 1200, height: 800 },
+  { name: "gallery-12", alt: "Orange skincare packaging and pink flowers", width: 1050, height: 1400 },
+  { name: "gallery-13", alt: "Blue ice cream styled against vivid yellow", width: 1200, height: 900 },
+  { name: "gallery-14", alt: "Floating purple and pink three-dimensional shapes", width: 1200, height: 675 },
+  { name: "gallery-15", alt: "Minimal cosmetic bottle in a red studio setting", width: 787, height: 1400 },
+  { name: "gallery-16", alt: "Mobile app presentation with vibrant blue and violet lighting", width: 875, height: 1400 },
+  { name: "gallery-17", alt: "Desktop dashboard displayed on a laptop beside a mobile interface", width: 640, height: 480 },
+  { name: "gallery-18", alt: "Smartphone displaying a real ordering and rewards app interface", width: 1400, height: 933 },
 ];
 
-function ShowcaseImage({ src }: { src: string }) {
-  const [failed, setFailed] = useState(false);
-  return <div className="showcase-image">{!failed && <img src={src} alt="" onError={() => setFailed(true)} />}</div>;
-}
+const rows = [
+  [0, 16, 1, 3, 5, 6, 8, 10, 13].map((index) => images[index]),
+  [2, 4, 7, 9, 11, 12, 14, 15, 17].map((index) => images[index]),
+];
 
 export default function ServicesShowcase() {
   const section = useRef<HTMLElement>(null);
-  const [active, setActive] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(true);
 
   useEffect(() => {
     const node = section.current;
     if (!node) return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.2 });
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
     observer.observe(node);
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updateMotion = () => setReducedMotion(motion.matches);
-    updateMotion();
-    motion.addEventListener("change", updateMotion);
-    return () => { observer.disconnect(); motion.removeEventListener("change", updateMotion); };
+    return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!visible || paused || reducedMotion) return;
-    const timer = window.setInterval(() => setActive((value) => (value + 1) % services.length), 5500);
-    return () => window.clearInterval(timer);
-  }, [visible, paused, reducedMotion]);
-
-  return <section ref={section} className="services-showcase" aria-label="Services showcase" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }}>
-    <div className="showcase-inner">
-      <div className="showcase-slides">
-        {services.map((service, index) => <article key={service.title} className={`showcase-slide${index === active ? " is-active" : ""}`} aria-hidden={index !== active}>
-          <div className="showcase-copy">
-            <span className="showcase-number">{String(index + 1).padStart(2, "0")} <span>/ 04</span></span>
-            <h2>{service.title}</h2>
-            <p>{service.description}</p>
-            <a href="#contact" tabIndex={index === active ? 0 : -1} className="showcase-cta">Explore Service <span aria-hidden="true">↗</span></a>
-          </div>
-          <div className="showcase-collage" aria-hidden="true">{service.images.map((src) => <ShowcaseImage key={src} src={src} />)}</div>
-        </article>)}
+  return <section ref={section} className="services-showcase" data-visible={visible} aria-labelledby="gallery-heading">
+    {rows.map((row, rowIndex) => <div className="gallery-row-group" key={rowIndex}>
+      {rowIndex === 1 && <h2 className="gallery-heading" id="gallery-heading">Where <em>Creativity</em><br />Meets Technology</h2>}
+      <div className={`gallery-row${rowIndex === 1 ? " gallery-row-reverse" : ""}`} tabIndex={0} role="group" aria-label={`Creative gallery row ${rowIndex + 1}. Hover or focus to pause movement.`}>
+        <div className="gallery-track">
+          {[0, 1].map((copy) => <div className="gallery-sequence" key={copy} aria-hidden={copy === 1 ? true : undefined}>
+            {row.map((image) => <div className="gallery-image" key={image.name} style={{ width: `calc(var(--gallery-height) * ${image.width / image.height})` }}>
+              <img src={`/web-app-gallery/${image.name}.webp`} alt={copy === 0 ? image.alt : ""} width={image.width} height={image.height} decoding="async" draggable={false} />
+            </div>)}
+          </div>)}
+        </div>
       </div>
-      <div className="showcase-navigation">
-        <div className="showcase-indicators" aria-label="Choose a service">{services.map((service, index) => <button key={service.title} type="button" aria-label={`Show ${service.title}`} aria-current={index === active ? "true" : undefined} onClick={() => setActive(index)} />)}</div>
-        <div className="showcase-arrows"><button type="button" aria-label="Previous service" onClick={() => setActive((active + services.length - 1) % services.length)}>←</button><button type="button" aria-label="Next service" onClick={() => setActive((active + 1) % services.length)}>→</button></div>
-      </div>
-    </div>
+    </div>)}
   </section>;
 }

@@ -1,0 +1,164 @@
+[
+  {
+    "filename": "gallery-01.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/close-up-of-colorful-boxes-18754191/",
+    "download": "https://images.pexels.com/photos/18754191/pexels-photo-18754191.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Geometric cosmetic packaging",
+    "width": 1120,
+    "height": 1400
+  },
+  {
+    "filename": "gallery-02.webp",
+    "provider": "unsplash",
+    "source": "https://unsplash.com/photos/s_yJmYW71Q8",
+    "download": "https://images.unsplash.com/photo-1742273330004-ef9c9d228530?auto=format&fit=max&w=1200&q=85",
+    "alt": "Orange sculptural digital artwork",
+    "width": 1200,
+    "height": 675
+  },
+  {
+    "filename": "gallery-03.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/product-photography-of-make-up-products-6527702/",
+    "download": "https://images.pexels.com/photos/6527702/pexels-photo-6527702.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Makeup art direction on purple",
+    "width": 1200,
+    "height": 1200
+  },
+  {
+    "filename": "gallery-04.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/colorful-poster-with-numbers-and-letters-on-white-surface-3964452/",
+    "download": "https://images.pexels.com/photos/3964452/pexels-photo-3964452.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Graphic typography poster",
+    "width": 935,
+    "height": 1400
+  },
+  {
+    "filename": "gallery-05.webp",
+    "provider": "unsplash",
+    "source": "https://unsplash.com/photos/nzkGVjsIkG8",
+    "download": "https://images.unsplash.com/photo-1770173047431-1af521ed5481?auto=format&fit=max&w=1200&q=85",
+    "alt": "Iridescent glass digital artwork",
+    "width": 1200,
+    "height": 960
+  },
+  {
+    "filename": "gallery-06.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/a-nike-air-jordan-on-a-flat-surface-9645566/",
+    "download": "https://images.pexels.com/photos/9645566/pexels-photo-9645566.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Blue sneaker on yellow",
+    "width": 1029,
+    "height": 1400
+  },
+  {
+    "filename": "gallery-07.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/skincare-product-display-with-vibrant-orange-theme-28482034/",
+    "download": "https://images.pexels.com/photos/28482034/pexels-photo-28482034.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Orange skincare packaging",
+    "width": 1050,
+    "height": 1400
+  },
+  {
+    "filename": "gallery-08.webp",
+    "provider": "unsplash",
+    "source": "https://unsplash.com/photos/crw8I3Bzp4Q",
+    "download": "https://images.unsplash.com/photo-1717601716921-c3c2d4574a60?auto=format&fit=max&w=1200&q=85",
+    "alt": "Colorful vintage poster collection",
+    "width": 1200,
+    "height": 960
+  },
+  {
+    "filename": "gallery-09.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/close-up-shot-of-a-perfume-bottle-8166570/",
+    "download": "https://images.pexels.com/photos/8166570/pexels-photo-8166570.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Perfume art direction with yellow flowers",
+    "width": 1200,
+    "height": 960
+  },
+  {
+    "filename": "gallery-10.webp",
+    "provider": "unsplash",
+    "source": "https://unsplash.com/photos/SXdgHhCUWzk",
+    "download": "https://images.unsplash.com/photo-1776053473082-9520f829fbbb?auto=format&fit=max&w=1200&q=85",
+    "alt": "Colorful geometric digital composition",
+    "width": 1200,
+    "height": 1200
+  },
+  {
+    "filename": "gallery-11.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/yellow-letter-tiles-1888028/",
+    "download": "https://images.pexels.com/photos/1888028/pexels-photo-1888028.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Yellow typography on blue",
+    "width": 1200,
+    "height": 800
+  },
+  {
+    "filename": "gallery-12.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/bright-floral-display-of-skincare-products-28482030/",
+    "download": "https://images.pexels.com/photos/28482030/pexels-photo-28482030.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Orange skincare packaging with pink floral art direction",
+    "width": 1050,
+    "height": 1400
+  },
+  {
+    "filename": "gallery-13.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/person-holding-ice-cream-cone-8093183/",
+    "download": "https://images.pexels.com/photos/8093183/pexels-photo-8093183.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Blue ice cream editorial still life",
+    "width": 1200,
+    "height": 900
+  },
+  {
+    "filename": "gallery-14.webp",
+    "provider": "unsplash",
+    "source": "https://unsplash.com/photos/RV-JqA9o8XU",
+    "download": "https://images.unsplash.com/photo-1774997282921-f5f9709b1333?auto=format&fit=max&w=1200&q=85",
+    "alt": "Pink and purple 3D forms",
+    "width": 1200,
+    "height": 675
+  },
+  {
+    "filename": "gallery-15.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/bottle-with-a-cosmetic-product-on-red-background-15569139/",
+    "download": "https://images.pexels.com/photos/15569139/pexels-photo-15569139.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "alt": "Red cosmetic product composition",
+    "width": 787,
+    "height": 1400
+  },
+  {
+    "filename": "gallery-16.webp",
+    "provider": "unsplash",
+    "source": "https://unsplash.com/photos/YnAAIgbpwlA",
+    "download": "https://images.unsplash.com/photo-1761305135230-a626d3c8d0a5?auto=format&fit=max&w=1200&q=85",
+    "alt": "Vibrant mobile app presentation",
+    "width": 875,
+    "height": 1400
+  },
+  {
+    "filename": "gallery-17.webp",
+    "provider": "unsplash",
+    "source": "https://unsplash.com/photos/_rAKDw1Fd54",
+    "reusedFrom": "/creative-showcase/project-9.webp",
+    "alt": "Desktop dashboard and mobile interface",
+    "width": 640,
+    "height": 480
+  },
+  {
+    "filename": "gallery-18.webp",
+    "provider": "pexels",
+    "source": "https://www.pexels.com/photo/photo-of-a-hand-holding-a-phone-with-a-delivery-app-on-screen-16052344/",
+    "download": "https://images.pexels.com/photos/16052344/pexels-photo-16052344.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    "alt": "Smartphone displaying a delivery app interface",
+    "width": 1400,
+    "height": 933
+  }
+]
