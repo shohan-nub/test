@@ -1,4 +1,4 @@
-.services-showcase{background:#242321;color:#fffcf8;padding:clamp(90px,10vw,150px) 6%;overflow:hidden}
+.services-showcase{background:var(--showcase-charcoal);color:#fffcf8;padding:clamp(90px,10vw,150px) 6%;overflow:hidden}
 .showcase-inner{max-width:1440px;margin:auto}
 .showcase-slides{display:grid}
 .showcase-slide{grid-area:1/1;display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:clamp(48px,7vw,110px);align-items:center;opacity:0;visibility:hidden;transform:translateX(24px);transition:opacity .8s ease,transform .8s cubic-bezier(.22,1,.36,1),visibility 0s linear .8s;pointer-events:none}

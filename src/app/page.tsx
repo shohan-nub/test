@@ -1,7 +1,6 @@
 "use client";
 
 import { type FormEvent, type TransitionEvent, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
@@ -38,16 +37,7 @@ function Arrow({ diagonal = false }: { diagonal?: boolean }) {
 }
 
 function PlatformEmblem({ platform }: { platform: "clutch" | "behance" | "fiverr" | "dribbble" }) {
-  return <svg className={`platform-emblem platform-emblem-${platform}`} viewBox="0 0 100 72" aria-hidden="true">
-    <g className="laurel" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M24 60C13 46 12 28 20 13M76 60c11-14 12-32 4-47" />
-      <path d="M18 47l9 2M15 36l10 3M16 25l9 4M21 15l7 6M82 47l-9 2M85 36l-10 3M84 25l-9 4M79 15l-7 6" />
-    </g>
-    {platform === "clutch" && <><circle cx="50" cy="34" r="18" fill="currentColor" /><path d="M56 28a9 9 0 1 0 0 12" fill="none" stroke="white" strokeWidth="5" /><circle cx="59" cy="34" r="4" fill="white" /></>}
-    {platform === "behance" && <><path d="M35 20h20a10 10 0 0 1 3 19 11 11 0 0 1-4 21H35zm8 7v10h10a5 5 0 0 0 0-10zm0 17v9h11a4.5 4.5 0 0 0 0-9zM62 26h14v5H62zm-1 16c0-8 5-13 12-13s11 5 11 14H68c.5 4 2.5 6 6 6 2 0 4-1 5-3h5c-1 5-5 8-11 8-7 0-12-5-12-12zm7-3h10c-.5-3-2-5-5-5s-4 2-5 5z" fill="currentColor" /></>}
-    {platform === "fiverr" && <path d="M43 23c0-7 5-11 12-11h7v8h-6c-3 0-4 1-4 4v3h10v8H52v23h-9V35h-6v-8h6zm25 4h9v31h-9zm0-12h9v8h-9z" fill="currentColor" />}
-    {platform === "dribbble" && <><circle cx="50" cy="36" r="21" fill="none" stroke="currentColor" strokeWidth="5" /><path d="M34 22c10 8 18 20 23 34M29 35c14 2 29-1 40-9M36 52c8-10 20-15 34-14" fill="none" stroke="currentColor" strokeWidth="3" /></>}
-  </svg>;
+  return <span className={"platform-logo platform-logo-" + platform} aria-hidden="true"><img src={"/brands/" + platform + (platform === "clutch" ? ".webp" : ".svg")} alt="" width="96" height="52" /></span>;
 }
 
 const mapRoutes = [
@@ -84,19 +74,42 @@ function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
-    <div className={`capability-media${imageFailed ? " is-fallback" : ""}`}>
-      <div className="capability-media-fallback" aria-hidden="true">
-        <span>PROJECT IMAGE</span>
-        <strong>{src}</strong>
-      </div>
-      {!imageFailed && <Image src={src} alt={alt} fill sizes="(max-width: 700px) 100vw, 54vw" onError={() => setImageFailed(true)} />}
+    <div className="capability-media">
+      {!imageFailed && <img src={src} alt={alt} onError={() => setImageFailed(true)} />}
     </div>
   );
 }
 
-function CapabilityAction() {
-  return <a className="capability-action" href="#contact"><span className="capability-action-icon" aria-hidden="true">✳</span><span>Explore Service</span><span className="capability-action-arrow" aria-hidden="true">→</span></a>;
+function CreativePreview({ index }: { index: number }) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    let disposed = false;
+    const reveal = async () => {
+      if (!image.complete || !image.naturalWidth) return;
+      try { await image.decode(); } catch { return; }
+      if (!disposed) setReady(true);
+    };
+    image.addEventListener("load", reveal);
+    void reveal(); // Cached images can finish loading before hydration.
+    return () => { disposed = true; image.removeEventListener("load", reveal); };
+  }, []);
+
+  return <div className={`creative-preview${ready ? " is-ready" : ""}`}>
+    <img ref={imageRef} src={`/creative-showcase/project-${index + 1}.webp`} alt="" width="640" height="480" loading="eager" decoding="async" />
+  </div>;
 }
+
+const projects = [
+  { title: "Website 1", category: "Design", image: "/p1.webp", tone: "peach" },
+  { title: "Website 2", category: "Development", image: "/p2.webp", tone: "sage" },
+  { title: "Website 3", category: "AI & Automation", image: "/p3.webp", tone: "lavender" },
+  { title: "Website 4", category: "Branding", image: "/p4.webp", tone: "terracotta" },
+  { title: "Website 5", category: "UI/UX", image: "/p5.webp", tone: "charcoal" },
+] as const;
 
 function OverviewVideo() {
   const video = useRef<HTMLVideoElement>(null);
@@ -219,15 +232,56 @@ export default function Home() {
     // Keep teardown owned by one GSAP context; self-reverting matchMedia cleanups caused the prior recursion.
     const ctx = gsap.context(() => {
       if (!reduceMotion) {
-        const stack = element.querySelector<HTMLElement>(".capability-stack");
-        const surfaces = gsap.utils.toArray<HTMLElement>(".capability-surface", element);
-        if (stack && surfaces.length) {
-          const expandedWidth = () => Math.max(0, window.innerWidth * .95);
-          const expandedHeight = () => Math.max(surfaces[0].parentElement?.offsetHeight || 0, window.innerHeight * .9 - 48);
-          gsap.timeline({ scrollTrigger: { trigger: stack, start: "top 90%", end: "bottom 35%", scrub: true, invalidateOnRefresh: true } })
-            .fromTo(surfaces, { width: "100%", height: "100%" }, { width: expandedWidth, height: expandedHeight, duration: 1, ease: "none" })
-            .to(surfaces, { width: expandedWidth, height: expandedHeight, duration: 5, ease: "none" })
-            .to(surfaces, { width: "100%", height: "100%", duration: 1, ease: "none" });
+        const creative = element.querySelector<HTMLElement>(".creative-statement");
+        if (creative) {
+          const previews = gsap.utils.toArray<HTMLElement>(".creative-preview", creative);
+          const directions = [[-.34, -.25], [.3, -.22], [-.3, .24], [.34, .24], [-.2, -.32], [.21, -.31], [-.12, .38], [.14, .37], [-.4, .02], [.4, -.02]];
+          const creativeTimeline = gsap.timeline({ scrollTrigger: { trigger: creative, start: "top top", end: () => `+=${Math.max(1100, window.innerHeight * 1.9)}`, pin: true, scrub: .9, invalidateOnRefresh: true, anticipatePin: 1 } });
+          previews.forEach((preview, index) => {
+            const [x, y] = directions[index];
+            // One continuous journey avoids a velocity jump between emergence and exit.
+            const start = .12 + index * .11;
+            const duration = 2.8 + (index % 3) * .14;
+            creativeTimeline.fromTo(preview, { x: 0, y: 0, opacity: .25 }, { x: () => x * window.innerWidth * 2.7, y: () => y * window.innerHeight * 2.7, opacity: 1, ease: "sine.inOut", duration }, start);
+            creativeTimeline.to(preview, { opacity: 0, ease: "sine.inOut", duration: .65 }, start + duration - .65);
+          });
+          creativeTimeline.fromTo(creative.querySelectorAll(".creative-line-inner"), { y: 18, opacity: .72 }, { y: 0, opacity: 1, stagger: .16, ease: "power2.out", duration: .6 }, 0);
+        }
+        const showcase = element.querySelector<HTMLElement>(".experiences");
+        const stack = showcase?.querySelector<HTMLElement>(".capability-stack");
+        const cards = stack ? gsap.utils.toArray<HTMLElement>(".capability-card", stack) : [];
+        if (showcase && stack && cards.length) {
+          const depth = () => parseFloat(getComputedStyle(stack).getPropertyValue("--stack-step")) || 10;
+          const gutter = () => parseFloat(getComputedStyle(showcase).getPropertyValue("--showcase-gutter"));
+          const frameSize = (card: HTMLElement, index: number) => ({
+            width: card.clientWidth + (index === cards.length - 1 ? gutter() * 2 : 0),
+            height: card.clientHeight + (index === cards.length - 1 ? 16 : 0),
+            left: index === cards.length - 1 ? -gutter() : 0,
+          });
+          const compactFrame = (card: HTMLElement, index: number) => ({
+            width: () => frameSize(card, index).width * .94,
+            height: () => frameSize(card, index).height * .94,
+            left: () => frameSize(card, index).left + frameSize(card, index).width * .03,
+            top: () => frameSize(card, index).height * .03,
+          });
+          const fullFrame = (card: HTMLElement, index: number) => ({
+            width: () => frameSize(card, index).width,
+            height: () => frameSize(card, index).height,
+            left: () => frameSize(card, index).left,
+            top: 0,
+          });
+          // Resize the shell; its inner grid uses the stable stack dimensions in CSS.
+          gsap.fromTo(cards[0].querySelector(".capability-surface"), compactFrame(cards[0], 0), { ...fullFrame(cards[0], 0), ease: "sine.inOut", scrollTrigger: { trigger: showcase, start: "top 85%", end: "top top", scrub: .6, invalidateOnRefresh: true } });
+          // Scroll distance includes a resting interval for every card, including the first and last.
+          const cardTimeline = gsap.timeline({ scrollTrigger: { trigger: showcase, start: "top top", end: () => `+=${Math.max(3200, showcase.clientHeight * 6.4)}`, pin: true, scrub: .5, invalidateOnRefresh: true, anticipatePin: 1 } });
+          cardTimeline.to({}, { duration: .5 });
+          cards.slice(1).forEach((card, index) => {
+            const start = cardTimeline.duration();
+            cardTimeline.fromTo(card, { y: () => stack.clientHeight + depth() * (index + 1) }, { y: () => depth() * (index + 1), duration: 1, ease: "power1.inOut", immediateRender: true }, start);
+            cardTimeline.fromTo(card.querySelector(".capability-surface"), compactFrame(card, index + 1), { ...fullFrame(card, index + 1), duration: 1, ease: "sine.inOut", immediateRender: true }, start);
+            if (index === cards.length - 2) cardTimeline.to(showcase, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--showcase-charcoal").trim(), duration: 1, ease: "none" }, start);
+            cardTimeline.to({}, { duration: .45 });
+          });
         }
         const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
         intro.from(element.querySelector(".nav-shell"), { y: -18, opacity: 0, duration: .7 })
@@ -327,15 +381,26 @@ export default function Home() {
         <ConsultationPhrases />
         </div>
       </section>
-      <ServicesShowcase />
-        <div className="text-marquee" aria-label="Digital innovation, creative technology, intelligent automation, built for what's next, ideas into reality, design meets technology">
-          <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
-        </div>
-
       <section className="statistics-strip" aria-label="Client and platform statistics">
         <div className="statistics-grid">
           {[[49, "+", "Client Reviews on Clutch.co", "clutch"], [50, "+", "Feature Project on Behance", "behance"], [225, "+", "Client Reviews on Fiverr", "fiverr"], [3.5, "M+", "Monthly View on Dribbble", "dribbble"]].map(([value, suffix, label, platform]) => <div className="statistic" key={label as string}><PlatformEmblem platform={platform as "clutch" | "behance" | "fiverr" | "dribbble"} /><p className="statistic-value"><span data-counter={value} data-decimals={value === 3.5 ? 1 : 0}>0</span>{suffix}</p><p className="statistic-label">{label}</p></div>)}
         </div>
+      </section>
+
+      <div className="text-marquee" aria-label="Digital innovation, creative technology, intelligent automation, built for what's next, ideas into reality, design meets technology">
+        <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
+      </div>
+
+      <section className="creative-statement" aria-labelledby="creative-statement-title">
+        <div className="creative-previews" aria-hidden="true">
+          {Array.from({ length: 10 }, (_, index) => <CreativePreview key={index} index={index} />)}
+        </div>
+        <h2 id="creative-statement-title">
+          <span className="creative-line"><span className="creative-line-inner">From stunning <em>websites</em></span></span>
+          <span className="creative-line"><span className="creative-line-inner">to powerful web applications,</span></span>
+          <span className="creative-line"><span className="creative-line-inner">we&apos;re ready to bring your ideas</span></span>
+          <span className="creative-line"><span className="creative-line-inner">to life with exceptional <em>design.</em></span></span>
+        </h2>
       </section>
 
       <section className="technology-strip" aria-label="Technologies we use">
@@ -343,34 +408,20 @@ export default function Home() {
         <div className="technology-rows">{technologyRows.map((row, rowIndex) => <div className="technology-row" key={rowIndex}><div className="technology-track">{[0, 1].map((copy) => <div className="technology-sequence" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{row.map(([name, icon]) => <div className="technology-mark" key={`${copy}-${name}`} title={name}><img src={`https://cdn.jsdelivr.net/gh/gilbarbara/logos@master/logos/${icon}.svg`} alt={copy === 0 ? `${name} logo` : ""} width="72" height="34" /></div>)}</div>)}</div></div>)}</div>
       </section>
 
-      <section className="experiences section-pad" id="experiences" aria-label="Core services">
+      <section className="experiences section-pad" id="experiences" aria-label="Selected projects">
         <div className="capability-stack">
-          <article className="capability-card capability-card-blue">
-            <div className="capability-surface"><p className="capability-label">01 — Creative Thinking</p>
-            <div className="capability-copy"><h3>Creative Thinking<br /><em>Strategic Design</em></h3><p className="capability-description">Turning complex ideas into simple, beautiful digital experiences.</p><CapabilityAction /></div>
-            <CapabilityMedia src="/s1.png" alt="Creative Thinking project image" />
+          {projects.map((project, index) => <article className={`capability-card capability-card-${project.tone}`} key={project.image}>
+            <div className="capability-surface">
+              <div className="capability-content">
+              <div className="capability-copy"><p className="capability-label">{String(index + 1).padStart(2, "0")} / 05 <span>{project.category}</span></p><h3>{project.title}</h3><a className="capability-action" href="#contact">View Project <span aria-hidden="true">→</span></a></div>
+              <CapabilityMedia src={project.image} alt={`${project.title} project preview`} />
+              </div>
             </div>
-          </article>
-          <article className="capability-card capability-card-lime">
-            <div className="capability-surface"><p className="capability-label">02 — Engineering</p>
-            <div className="capability-copy"><h3>Engineering<br /><em>Excellence</em></h3><p className="capability-description">Building fast, reliable, and scalable digital products.</p><CapabilityAction /></div>
-            <CapabilityMedia src="/s2.png" alt="Engineering Excellence project image" />
-            </div>
-          </article>
-          <article className="capability-card capability-card-yellow">
-            <div className="capability-surface"><p className="capability-label">03 — Intelligent Systems</p>
-            <div className="capability-copy"><h3>Intelligent<br /><em>Systems</em></h3><p className="capability-description">Smarter businesses through AI and intelligent automation.</p><CapabilityAction /></div>
-            <CapabilityMedia src="/s3.png" alt="Intelligent Systems project image" />
-            </div>
-          </article>
-          <article className="capability-card capability-card-coral">
-            <div className="capability-surface"><p className="capability-label">04 — Logo Design</p>
-            <div className="capability-copy"><h3>Professional Logo Design<br /><em>Brand Identity</em></h3><p className="capability-description">Creating distinctive visual identities that make brands memorable.</p><CapabilityAction /></div>
-            <CapabilityMedia src="/s4.png" alt="Professional Logo Design project image" />
-            </div>
-          </article>
+          </article>)}
         </div>
       </section>
+
+      <ServicesShowcase />
 
       <section className="destinations section-pad" id="destinations">
         <div className="section-heading rise"><div><p className="eyebrow dark-eyebrow">WHAT SETS US APART</p><h2>Ideas Into Reality.<br /><em>Built to Inspire.</em></h2></div><p className="heading-aside">We bring creativity, technology, and intelligent thinking together to build <br />digital experiences that move businesses forward.</p></div>
