@@ -5,15 +5,12 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
 import ServicesShowcase from "./ServicesShowcase";
+import SeoGeoShowcase from "./components/SeoGeoShowcase";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import { brandLogo } from "./components/brand";
 
 const photos = {
-  maldives: "https://images.unsplash.com/photo-1648312182804-346237fbc0ea?auto=format&fit=crop&w=1400&q=85",
-  bali: "https://images.unsplash.com/photo-1719400471588-575b23e27bd7?auto=format&fit=crop&w=1400&q=85",
-  amalfi: "https://images.unsplash.com/photo-1770368787729-6a42187b668c?auto=format&fit=crop&w=1400&q=85",
-  feature: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=2200&q=90",
   collage1: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85",
   collage2: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",
   collage3: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85",
@@ -281,6 +278,17 @@ export default function Home() {
             }
             cardTimeline.to({}, { duration: .45 });
           });
+          const statement = showcase.querySelector<HTMLElement>(".project-statement-track");
+          const phrase = statement?.querySelector<HTMLElement>(".project-statement-phrase");
+          if (statement && phrase) {
+            // Use the stack's existing duration and ScrollTrigger, without
+            // extending its pin, changing card timing, or adding another trigger.
+            cardTimeline.fromTo(statement, { x: 0 }, {
+              x: () => -phrase.getBoundingClientRect().width,
+              duration: cardTimeline.duration(),
+              ease: "none",
+            }, 0);
+          }
         }
         const overview = element.querySelector<HTMLElement>(".service-overview");
         if (overview) {
@@ -289,22 +297,14 @@ export default function Home() {
         }
         for (const image of element.querySelectorAll<HTMLElement>(".reveal-image")) {
           gsap.fromTo(image, { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 1.05, ease: "power3.inOut", scrollTrigger: { trigger: image, start: "top 82%", once: true } });
-          if (image.parentElement?.classList.contains("photo-frame")) {
-            gsap.to(image.parentElement, { y: 12, ease: "none", scrollTrigger: { trigger: image.parentElement, start: "top bottom", end: "bottom top", scrub: .6 } });
-          }
         }
         for (const item of element.querySelectorAll<HTMLElement>(".rise")) {
           gsap.from(item, { y: 30, opacity: 0, duration: .75, ease: "power2.out", scrollTrigger: { trigger: item, start: "top 88%", once: true } });
-        }
-        for (const photo of element.querySelectorAll<HTMLElement>(".parallax-photo")) {
-          gsap.to(photo, { yPercent: 8, ease: "none", scrollTrigger: { trigger: photo.parentElement, start: "top bottom", end: "bottom top", scrub: .7 } });
         }
         gsap.from(element.querySelectorAll(".manifesto-words"), { y: 42, opacity: 0, stagger: .1, duration: .8, scrollTrigger: { trigger: element.querySelector(".manifesto"), start: "top 70%", once: true } });
         for (const shot of element.querySelectorAll<HTMLElement>(".collage-shot")) {
           gsap.from(shot, { y: 32, rotate: 0, scale: .96, opacity: 0, duration: .85, ease: "power3.out", scrollTrigger: { trigger: shot, start: "top 86%", once: true } });
         }
-        gsap.from(element.querySelector(".featured-location"), { x: -18, opacity: 0, duration: .65, ease: "power2.out", scrollTrigger: { trigger: element.querySelector(".featured"), start: "top 68%", once: true } });
-        gsap.from(element.querySelector(".featured-content h2"), { y: 38, opacity: 0, duration: .9, delay: .1, ease: "power3.out", scrollTrigger: { trigger: element.querySelector(".featured"), start: "top 68%", once: true } });
         for (const button of element.querySelectorAll<HTMLElement>(".magnetic")) {
           const onMove = (event: PointerEvent) => {
             const rect = button.getBoundingClientRect();
@@ -404,6 +404,12 @@ export default function Home() {
       </div>
 
       <section className="experiences section-pad" id="experiences" aria-label="Selected projects">
+        <h2 className="project-statement">
+          <span className="project-statement-track">
+            <span className="project-statement-phrase">BE VISIBLE. BE DISCOVERED. <em>BE UNSTOPPABLE.</em></span>
+            <span className="project-statement-phrase" aria-hidden="true">BE VISIBLE. BE DISCOVERED. <em>BE UNSTOPPABLE.</em></span>
+          </span>
+        </h2>
         <div className="capability-stack">
           {projects.map((project, index) => <article className={`capability-card capability-card-${project.tone}`} key={project.image}>
             <div className="capability-surface">
@@ -425,21 +431,7 @@ export default function Home() {
 
       <ServicesShowcase />
 
-      <section className="destinations section-pad" id="destinations">
-        <div className="section-heading rise"><div><p className="eyebrow dark-eyebrow">WHAT SETS US APART</p><h2>Ideas Into Reality.<br /><em>Built to Inspire.</em></h2></div><p className="heading-aside">We bring creativity, technology, and intelligent thinking together to build <br />digital experiences that move businesses forward.</p></div>
-        <div className="destination-grid">
-          <article className="destination-card destination-main"><div className="photo-frame reveal-image"><img src={photos.maldives} alt="Overwater villas surrounded by the Maldives lagoon" /></div><div className="destination-caption rise"><div><p className="eyebrow dark-eyebrow">01 — CREATIVE THINKING</p><h3>Strategic Design<span className="caption-country"> </span></h3><p className="destination-copy">Thoughtful design that transforms ideas into meaningful digital experiences.</p></div><a href="#contact" className="round-arrow" aria-label="Explore Maldives"><Arrow diagonal /></a></div><span className="image-stamp">3° 12′ N<br />73° 13′ E</span></article>
-          <article className="destination-card destination-secondary"><div className="photo-frame reveal-image"><img src={photos.bali} alt="Lush Balinese temple and tropical greenery" /></div><div className="destination-caption rise"><div><p className="eyebrow dark-eyebrow">02 — ENGINEERING EXCELLENCE</p><h3>Modern Development</h3><p className="destination-copy">Building powerful, scalable, and high-performing digital solutions.</p></div><a href="#contact" className="round-arrow" aria-label="Explore Bali"><Arrow diagonal /></a></div></article>
-          <article className="destination-card destination-tertiary"><div className="photo-frame reveal-image"><img src={photos.amalfi} alt="Colorful villages along the Amalfi Coast" /></div><div className="destination-caption rise"><div><p className="eyebrow dark-eyebrow">03 — INTELLIGENT SYSTEMS</p><h3>AI & Automation</h3><p className="destination-copy">Making businesses smarter with intelligent systems and seamless automation.</p></div><a href="#contact" className="round-arrow" aria-label="Explore the Amalfi Coast"><Arrow diagonal /></a></div></article>
-        </div>
-      </section>
-
-      <section className="featured" aria-labelledby="featured-title">
-        <div className="featured-photo"><img className="parallax-photo" src={photos.feature} alt="Aerial view of a turquoise Bali shoreline with pale sand and clear blue water" /></div><div className="featured-overlay" />
-        <div className="featured-top"><span className="eyebrow light-eyebrow">GOOD THINGS START WITH A SPARK</span><span className="featured-number">EST. 2022</span></div>
-        <div className="featured-content rise"><p className="featured-location"><span>✳</span>DHAKA · BANGLADESH </p><h2 id="featured-title">Got a Big Idea?<br /><em>Let&apos;s Make It Happen.</em></h2><p className="featured-copy">Every great project starts with a conversation. Tell us what&apos;s on your mind.</p><a className="outline-button magnetic" href="#contact">TELL US YOUR IDEA<Arrow diagonal /></a></div>
-        <span className="featured-side-note">SPARK LAB DIGITAL STUDIO<i>—</i> 05° 56′ N</span>
-      </section>
+      <SeoGeoShowcase />
 
       <section className="manifesto section-pad" id="manifesto">
         <div className="manifesto-top rise"><p className="eyebrow dark-eyebrow">BEHIND THE SPARK</p><span className="manifesto-star">✳</span><span className="manifesto-edition">SPARK LAB<br />OUR STORY · 01</span></div>
