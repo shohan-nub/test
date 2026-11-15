@@ -82,6 +82,32 @@ function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
   );
 }
 
+function ProjectShowreel() {
+  const video = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const media = video.current;
+    if (!media) return;
+    const reveal = () => { media.dataset.ready = "true"; };
+    const hide = () => { delete media.dataset.ready; };
+    const play = () => { void media.play().catch(() => { /* Autoplay can be restricted by the browser. */ }); };
+    media.muted = true;
+    media.addEventListener("loadeddata", reveal);
+    media.addEventListener("canplay", play);
+    media.addEventListener("error", hide);
+    if (media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) reveal();
+    play();
+    return () => {
+      media.removeEventListener("loadeddata", reveal);
+      media.removeEventListener("canplay", play);
+      media.removeEventListener("error", hide);
+      media.pause();
+    };
+  }, []);
+
+  return <video ref={video} className="project-showreel" src="/card5.mp4" autoPlay muted loop playsInline preload="auto" aria-label="SparkLab creative showreel" />;
+}
+
 function CreativePreview({ index }: { index: number }) {
   const imageRef = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
@@ -395,6 +421,7 @@ export default function Home() {
                 </div>
                 <CapabilityMedia src={project.image} alt={`${project.title} project preview`} />
               </>}
+              {index === 4 && <ProjectShowreel />}
             </div>
           </article>)}
         </div>
