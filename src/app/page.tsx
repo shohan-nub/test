@@ -7,6 +7,7 @@ import worldLand from "./world-land.json";
 import ServicesShowcase from "./ServicesShowcase";
 import Footer from "./components/Footer";
 import Image from "next/image";
+import { brandLogo } from "./components/brand";
 
 const photos = {
   maldives: "https://images.unsplash.com/photo-1648312182804-346237fbc0ea?auto=format&fit=crop&w=1400&q=85",
@@ -281,11 +282,6 @@ export default function Home() {
             cardTimeline.to({}, { duration: .45 });
           });
         }
-        const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-        intro.from(element.querySelector(".nav-shell"), { y: -18, opacity: 0, duration: .7 })
-          .from(element.querySelectorAll(".hero-line"), { yPercent: 105, opacity: 0, stagger: .12, duration: .82 }, "-=.4")
-          .from(element.querySelector(".hero-description"), { y: 14, opacity: 0, duration: .55 }, "-=.35")
-          .from(element.querySelector(".hero-map"), { opacity: 0, y: 18, duration: .9 }, "-=.55");
         const overview = element.querySelector<HTMLElement>(".service-overview");
         if (overview) {
           gsap.from(overview.querySelector("h2"), { y: 20, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview, start: "top 82%", once: true } });
@@ -334,7 +330,7 @@ export default function Home() {
     <main ref={root} data-active-section={activeSection}>
       <section className="hero" id="discover" aria-label="Spark Lab digital studio">
         <header className="nav-shell">
-          <a className="wordmark" href="#discover" aria-label="Spark Lab home"><Image className="navbar-brand-logo" src="/sparklab-full-logo-clear.svg" alt="SparkLab" width={894} height={191} unoptimized priority /></a>
+          <a className="wordmark" href="#discover" aria-label="Spark Lab home"><Image className="navbar-brand-logo" {...brandLogo} alt="SparkLab" priority sizes="(max-width: 640px) 108px, 132px" /></a>
           <nav className="main-nav" aria-label="Main navigation">{[["discover", "Studio"], ["experiences", "Services"], ["manifesto", "About Us"]].map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "is-active" : undefined} aria-current={activeSection === id ? "location" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</nav>
           <a className="nav-cta magnetic" href="https://shohan-portfolio-tau.vercel.app/" target="_blank" rel="noopener noreferrer">Contact Us<Arrow diagonal /></a>
           <a className="mobile-menu" href="#experiences" aria-label="Explore services">Services <span>↓</span></a>

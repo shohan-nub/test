@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { type FormEvent, useEffect, useState } from "react";
 import styles from "./Footer.module.css";
+import { brandLogo } from "./brand";
 
 const linkGroups = [
   { title: "Explore", links: [["Studio", "#discover"], ["Services", "#experiences"], ["Our approach", "#destinations"]] },
@@ -47,7 +48,7 @@ export default function Footer() {
       </div>
       <div className={styles.main}>
         <div className={styles.brandArea}>
-          <a className={styles.logoPanel} href="#discover" aria-label="SparkLab home"><Image src="/sparklab-full-logo-clear.svg" alt="SparkLab" width={894} height={191} unoptimized /></a>
+          <a className={styles.logoPanel} href="#discover" aria-label="SparkLab home"><Image {...brandLogo} alt="SparkLab" sizes="190px" /></a>
           <p className={styles.description}>We bring design, development, and intelligent automation together to build digital experiences with purpose.</p>
           <p className={styles.location}><span aria-hidden="true">↗</span> Dhaka, Bangladesh <span className={styles.locationNote}>Working without boundaries.</span></p>
           <nav className={styles.navigation} aria-label="Footer navigation">{linkGroups.map(group => <div key={group.title}><h3>{group.title}</h3>{group.links.map(([label, href]) => <a key={label} href={href} {...(href.startsWith("https:") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{label}</a>)}</div>)}</nav>

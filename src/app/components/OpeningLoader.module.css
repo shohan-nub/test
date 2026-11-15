@@ -1,16 +1,11 @@
-.loader{position:fixed;z-index:9999;inset:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 22% 16%,#fffefa 0%,transparent 65%),linear-gradient(135deg,#fcfaf6,#f7f3ec);animation:opening 2s ease-in-out both}
+.loader{position:fixed;z-index:9999;inset:0;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 22% 16%,#fffefa 0%,transparent 65%),linear-gradient(135deg,#fcfaf6,#f7f3ec);animation:fallback 2.5s both}
 .loader::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(131,105,81,.15) .6px,transparent 1px);background-size:24px 24px;opacity:.28;mask-image:radial-gradient(ellipse,#000,transparent 80%)}
-.light{position:absolute;inset:-15%;pointer-events:none;background:radial-gradient(ellipse 34% 32% at 52% 47%,rgba(241,177,128,.16),transparent 80%),radial-gradient(ellipse 40% 44% at 20% 75%,rgba(249,221,190,.14),transparent 76%);animation:light 2s ease-in-out both}
+.light{position:absolute;inset:-15%;pointer-events:none;background:radial-gradient(ellipse 34% 32% at 52% 47%,rgba(241,177,128,.13),transparent 80%),radial-gradient(ellipse 40% 44% at 20% 75%,rgba(249,221,190,.12),transparent 76%)}
 .brand{position:relative;width:min(420px,72vw);text-align:center}
-.reveal{position:relative;overflow:hidden;animation:reveal .75s .12s cubic-bezier(.22,1,.36,1) both}
-.reveal::after{content:"";position:absolute;inset:-40% -80%;pointer-events:none;background:linear-gradient(110deg,transparent 45%,rgba(255,253,247,.48) 50%,transparent 55%);transform:translateX(-45%);animation:sweep .9s .65s ease-in-out both}
+.reveal{position:relative;overflow:hidden;opacity:0}
+.sweep{position:absolute;inset:-40% -10%;pointer-events:none;transform:translateX(-110%);background:linear-gradient(110deg,transparent 40%,rgba(255,253,247,.55) 50%,transparent 60%)}
 .logo{display:block;width:100%;height:auto;object-fit:contain}
-.progress{width:36%;height:2px;margin:clamp(28px,4vw,40px) auto 0;overflow:hidden;border-radius:2px;background:rgba(185,86,45,.09);animation:appear .3s .3s both}
-.progress span{display:block;width:100%;height:100%;transform-origin:left;background:linear-gradient(90deg,#d96b32,#f17727);animation:progress 1.2s .35s cubic-bezier(.25,.65,.25,1) both}
-@keyframes reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes appear{from{opacity:0}to{opacity:1}}
-@keyframes light{0%{opacity:0;transform:translate(-1%,1%)}35%{opacity:1}100%{opacity:.7;transform:translate(1%,-1%)}}
-@keyframes sweep{to{transform:translateX(45%)}}
-@keyframes progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@keyframes opening{0%{opacity:.97;visibility:visible}8%,80%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden}}
-@media(prefers-reduced-motion:reduce){.loader{display:none;animation:none}.light,.reveal,.reveal::after,.progress,.progress span{animation:none}}
+.progress{width:36%;height:2px;margin:clamp(28px,4vw,40px) auto 0;overflow:hidden;border-radius:2px;background:rgba(185,86,45,.09)}
+.progress span{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,#d96b32,#f17727)}
+@keyframes fallback{0%,85%{visibility:visible;opacity:1}100%{visibility:hidden;opacity:0}}
+@media(prefers-reduced-motion:reduce){.loader{display:none;animation:none}}
