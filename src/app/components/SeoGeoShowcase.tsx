@@ -4,16 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import styles from "./SeoGeoShowcase.module.css";
+import services from "./seo-geo-services.json";
 
-const services = [
-  { title: "SEO Strategy", image: "seo-strategy.svg", category: "Search intelligence", description: "Turn search intent into a clear direction for sustainable organic growth." },
-  { title: "Generative Engine Optimization", image: "geo.svg", category: "AI visibility", description: "Help your expertise become a trusted source in AI-generated answers." },
-  { title: "Technical SEO", image: "technical-seo.svg", category: "A stronger foundation", description: "Make your website faster, easier to crawl, and easier to understand." },
-  { title: "AI Search Optimization", image: "ai-search.svg", category: "Intelligent discovery", description: "Connect your brand with the questions people ask answer engines." },
-  { title: "Content Strategy", image: "content-strategy.svg", category: "Ideas with direction", description: "Build a connected content ecosystem around the topics that matter." },
-  { title: "AI Automation", image: "automation.svg", category: "Connected systems", description: "Connect tools, data, and intelligence to move everyday work forward." },
-  { title: "Analytics & Growth", image: "analytics.svg", category: "Measure what matters", description: "Translate performance signals into your next opportunity for growth." },
-];
 const count = services.length;
 const slot = (index: number, active: number) => ((index - active + count + 3) % count) - 3;
 
@@ -22,6 +14,7 @@ export default function SeoGeoShowcase() {
   const [visible, setVisible] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [playing, setPlaying] = useState(true);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
   const root = useRef<HTMLElement>(null);
   const cards = useRef<Array<HTMLDivElement | null>>([]);
   const previous = useRef(0);
@@ -44,7 +37,7 @@ export default function SeoGeoShowcase() {
     const schedule = () => {
       timer?.kill();
       if (visible && playing && !dragging && !media.matches && !document.hidden) {
-        timer = gsap.delayedCall(1.65, () => setActive(index => (index + 1) % count));
+        timer = gsap.delayedCall(1.7, () => setActive(index => (index + 1) % count));
       }
     };
     schedule();
@@ -68,7 +61,7 @@ export default function SeoGeoShowcase() {
         gsap.set(card, { zIndex: distance === 0 ? 3 : Math.abs(distance) === 1 ? 2 : 1 });
         // Offstage cards wrap while invisible; only adjacent cards cross the stage.
         if (instant || reduced.matches || Math.abs(distance) > 1 && Math.abs(oldDistance) > 1) gsap.set(card, position);
-        else gsap.to(card, { ...position, duration: .65, ease: "power3.inOut", overwrite: true });
+        else gsap.to(card, { ...position, duration: .75, ease: "power3.inOut", overwrite: true });
       });
       previous.current = active;
     };
@@ -86,7 +79,7 @@ export default function SeoGeoShowcase() {
     drag.current = null;
     setDragging(false);
     if (!cancelled && Math.abs(gesture.dx) > 45) navigate(gesture.dx < 0 ? 1 : -1);
-    else gsap.to(cards.current.filter(Boolean), { x: 0, duration: .45, ease: "power3.out", overwrite: "auto" });
+    else gsap.to(cards.current.filter(Boolean), { x: 0, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : .45, ease: "power3.out", overwrite: "auto" });
   };
 
   return <section ref={root} className={styles.section} id="destinations" aria-labelledby="visibility-title">
@@ -104,13 +97,20 @@ export default function SeoGeoShowcase() {
         onPointerUp={event => { release(); if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}
         onPointerCancel={() => release(true)} onLostPointerCapture={() => release(true)}>
         {services.map((service, index) => <div key={service.image} className={styles.card} ref={node => { cards.current[index] = node; }}
+          data-artwork={failedImages.includes(service.image) ? "error" : "available"}
           role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${count}: ${service.title}`} aria-hidden={index !== active}
           style={{ transform: `translateX(${slot(index, 0) * 84}%) scale(${index === 0 ? 1 : .82})`, opacity: Math.abs(slot(index, 0)) <= 1 ? 1 : 0, zIndex: index === 0 ? 3 : 1 }}>
-          <div className={styles.browserBar}><span><i /><i /><i /></span><span>sparklab.studio / {service.category.toLowerCase()}</span><span>↗</span></div>
-          <div className={styles.preview}>
-            <Image src={`/seo-geo-showcase/${service.image}`} alt={`${service.title} interface concept`} width={1280} height={800} draggable={false} loading="eager" unoptimized />
+          {!failedImages.includes(service.image) ? <Image
+            src={`/seo-geo-showcase/${service.image}?v=${service.imageVersion}`} alt={service.alt}
+            fill sizes="(max-width: 640px) 82vw, (max-width: 900px) 64vw, (max-width: 1200px) 52vw, 640px"
+            draggable={false} loading={Math.abs(slot(index, active)) <= 1 ? "eager" : "lazy"}
+            onError={() => setFailedImages(images => images.includes(service.image) ? images : [...images, service.image])}
+          /> : <span className={styles.imageError}>Image unavailable</span>}
+          <div className={styles.caption}>
+            <span className={styles.number}>{String(index + 1).padStart(2, "0")} / 07</span>
+            <h3>{service.title}</h3>
+            <p>{service.description}</p>
           </div>
-          <div className={styles.cardLabel}><span>{String(index + 1).padStart(2, "0")}</span><strong>{service.title}</strong><span>{service.category}</span></div>
         </div>)}
       </div>
       <div className={styles.controls}>
@@ -120,9 +120,7 @@ export default function SeoGeoShowcase() {
       </div>
     </div>
     <div className={styles.footer}>
-      <p aria-live="polite" aria-atomic="true">{services[active].description}</p>
       <a href="#experiences">Explore Our Capabilities <span aria-hidden="true">↗</span></a>
-      <span className={styles.note}>Interface concepts · Illustrative data</span>
     </div>
   </section>;
 }

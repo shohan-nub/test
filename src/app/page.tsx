@@ -9,6 +9,7 @@ import SeoGeoShowcase from "./components/SeoGeoShowcase";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import { brandLogo } from "./components/brand";
+import soundStyles from "./components/ShowreelSound.module.css";
 
 const photos = {
   collage1: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85",
@@ -82,6 +83,37 @@ function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
 
 function ProjectShowreel() {
   const video = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+  const [feedback, setFeedback] = useState("");
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const soundRequest = useRef(0);
+
+  const announce = (message: string) => {
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    setFeedback(message);
+    feedbackTimer.current = setTimeout(() => setFeedback(""), 2800);
+  };
+
+  const toggleSound = async () => {
+    const media = video.current;
+    if (!media) return;
+    const request = ++soundRequest.current;
+    const enable = media.muted || media.volume === 0;
+    try {
+      if (enable) media.volume = .65;
+      media.muted = !enable;
+      setMuted(media.muted || media.volume === 0);
+      announce(enable ? "Sound On" : "Sound Off");
+      // play() preserves currentTime and also recovers a policy-paused video.
+      if (enable || media.paused) await media.play();
+    } catch {
+      if (request !== soundRequest.current) return;
+      media.muted = true;
+      setMuted(true);
+      announce("Sound unavailable. Try again.");
+      void media.play().catch(() => { /* Leave the control available for another user gesture. */ });
+    }
+  };
 
   useEffect(() => {
     const media = video.current;
@@ -89,21 +121,47 @@ function ProjectShowreel() {
     const reveal = () => { media.dataset.ready = "true"; };
     const hide = () => { delete media.dataset.ready; };
     const play = () => { void media.play().catch(() => { /* Autoplay can be restricted by the browser. */ }); };
+    const syncSound = () => {
+      const silent = media.muted || media.volume === 0;
+      setMuted(silent);
+      if (silent) setFeedback(message => message === "Sound On" ? "" : message);
+    };
     media.muted = true;
+    media.defaultMuted = true;
     media.addEventListener("loadeddata", reveal);
     media.addEventListener("canplay", play);
     media.addEventListener("error", hide);
+    media.addEventListener("volumechange", syncSound);
     if (media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) reveal();
     play();
     return () => {
       media.removeEventListener("loadeddata", reveal);
       media.removeEventListener("canplay", play);
       media.removeEventListener("error", hide);
+      media.removeEventListener("volumechange", syncSound);
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+      soundRequest.current += 1;
       media.pause();
     };
   }, []);
 
-  return <video ref={video} className="project-showreel" src="/card5.mp4" autoPlay muted loop playsInline preload="auto" aria-label="SparkLab creative showreel" />;
+  return <div className={soundStyles.root} onDoubleClick={event => {
+    if ((event.target as HTMLElement).closest("button")) return;
+    event.preventDefault();
+    void toggleSound();
+  }}>
+    <video ref={video} className="project-showreel" src="/card5.mp4" autoPlay muted={muted} loop playsInline preload="auto" aria-label="SparkLab creative showreel" />
+    <button className={soundStyles.control} type="button" aria-label={muted ? "Enable showreel sound" : "Mute showreel sound"} aria-pressed={!muted} onClick={event => {
+      event.stopPropagation();
+      const touch = window.matchMedia("(pointer: coarse)").matches || ("pointerType" in event.nativeEvent && event.nativeEvent.pointerType === "touch");
+      // Every touch tap is intentional; a desktop button double-click toggles once.
+      if (touch || event.detail < 2) void toggleSound();
+    }}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4V4Z" />{muted ? <path d="m16 9 6 6m0-6-6 6" /> : <><path d="M15 8a6 6 0 0 1 0 8" /><path d="M18 5a10 10 0 0 1 0 14" /></>}</svg>
+      <span className={soundStyles.label} data-visible={muted || !!feedback} aria-hidden="true">{feedback || (muted ? <><span className={soundStyles.desktopHint}>Double-click for sound</span><span className={soundStyles.touchHint}>Tap for sound</span></> : "Sound On")}</span>
+    </button>
+    <span className={soundStyles.status} role="status">{feedback}</span>
+  </div>;
 }
 
 function CreativePreview({ index }: { index: number }) {

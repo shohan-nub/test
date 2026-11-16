@@ -1,0 +1,51 @@
+[
+  {
+    "title": "SEO Strategy",
+    "image": "seo-strategy.webp",
+    "description": "Build stronger search visibility and attract the right customers through data-driven SEO.",
+    "alt": "A laptop showing SparkLab keyword rankings and organic search analytics on a warm minimal desk.",
+    "imageVersion": "1302a184ff4f"
+  },
+  {
+    "title": "GEO Optimization",
+    "image": "geo-optimization.webp",
+    "description": "Help your brand appear across AI-powered answers and next-generation discovery platforms.",
+    "alt": "A smartphone on a wooden desk displaying SparkLab AI answers and cited discovery sources.",
+    "imageVersion": "0f4e2dc25785"
+  },
+  {
+    "title": "Technical SEO",
+    "image": "technical-seo.webp",
+    "description": "Build faster, healthier, search-friendly websites with a stronger technical foundation.",
+    "alt": "A desktop workstation display showing a SparkLab website health audit and Core Web Vitals.",
+    "imageVersion": "24b0607924d6"
+  },
+  {
+    "title": "AI Search Optimization",
+    "image": "ai-search.webp",
+    "description": "Make your business discoverable through intelligent search and semantic visibility.",
+    "alt": "A landscape tablet on a rustic pedestal displaying SparkLab semantic search and connected knowledge.",
+    "imageVersion": "9b8c8e7afd4f"
+  },
+  {
+    "title": "Content Strategy",
+    "image": "content-strategy.webp",
+    "description": "Create meaningful content that attracts audiences, builds authority, and drives growth.",
+    "alt": "Hands reviewing printed editorial layouts beside a planning notebook and pencil.",
+    "imageVersion": "0ecc4765208c"
+  },
+  {
+    "title": "AI Automation",
+    "image": "ai-automation.webp",
+    "description": "Connect your tools, automate repetitive work, and build smarter business workflows.",
+    "alt": "A low-angle view of physical server racks, network connections and automation infrastructure.",
+    "imageVersion": "7dcd3c2789ac"
+  },
+  {
+    "title": "Analytics & Growth",
+    "image": "analytics-growth.webp",
+    "description": "Turn business data into actionable insights and measurable digital growth.",
+    "alt": "A large projection screen presenting SparkLab revenue, conversion and growth analytics in a conference room.",
+    "imageVersion": "eb7b17e7aa32"
+  }
+]
