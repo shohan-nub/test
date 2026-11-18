@@ -1,5 +1,4 @@
 import {spawn} from 'node:child_process';
-import {writeFileSync} from 'node:fs';
 const child=spawn('C:/Program Files/Google/Chrome/Application/chrome.exe',['--headless=new','--mute-audio','--no-first-run','--remote-debugging-port=9229','--user-data-dir=C:/Users/MRB/AppData/Local/Temp/sparklab-footer-verify','about:blank'],{stdio:'ignore'});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));let socket,id=0,formMode='success';const pending=new Map(),errors=[],requests=[];
 const cmd=(method,params={})=>new Promise((resolve,reject)=>{const key=++id;pending.set(key,{resolve,reject});socket.send(JSON.stringify({id:key,method,params}));});

@@ -1,6 +1,0 @@
-.globe{position:relative;width:100%;max-width:480px;margin:0;aspect-ratio:1;pointer-events:none;isolation:isolate}
-.globe::before{content:"";position:absolute;z-index:-1;inset:19%;border-radius:50%;background:rgba(185,86,45,.12);filter:blur(45px)}
-.globe canvas{display:block;width:100%;height:100%}
-.globe figcaption{position:absolute;bottom:3%;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:9px;text-align:center;font:500 8px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.15em;color:#c4b4a3}
-.globe figcaption span{width:4px;height:4px;border-radius:50%;background:#db9366;box-shadow:0 0 10px rgba(219,147,102,.25)}
-@media(max-width:640px){.globe{max-width:360px;margin-inline:auto}.globe figcaption{font-size:7px;letter-spacing:.12em}}

@@ -6,16 +6,16 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
 import ServicesShowcase from "./ServicesShowcase";
 import SeoGeoShowcase from "./components/SeoGeoShowcase";
-import Footer from "./components/Footer";
+import CreativePortfolioGallery from "./components/CreativePortfolioGallery";
 import Image from "next/image";
 import { brandLogo } from "./components/brand";
 import soundStyles from "./components/ShowreelSound.module.css";
+import { useViewportVideo } from "./components/useViewportVideo";
 
 const photos = {
   collage1: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85",
   collage2: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",
   collage3: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85",
-  footer: "https://images.unsplash.com/photo-1643539515100-f55ad1e51ab8?auto=format&fit=crop&w=2200&q=90",
 };
 
 const technologies = [
@@ -83,6 +83,7 @@ function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
 
 function ProjectShowreel() {
   const video = useRef<HTMLVideoElement>(null);
+  const playIfVisible = useViewportVideo(video, "/card5.mp4");
   const [muted, setMuted] = useState(true);
   const [feedback, setFeedback] = useState("");
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,13 +106,15 @@ function ProjectShowreel() {
       setMuted(media.muted || media.volume === 0);
       announce(enable ? "Sound On" : "Sound Off");
       // play() preserves currentTime and also recovers a policy-paused video.
-      if (enable || media.paused) await media.play();
-    } catch {
+      if (enable || media.paused) await playIfVisible.current();
+    } catch (error) {
       if (request !== soundRequest.current) return;
+      // A viewport pause can interrupt a pending play() request.
+      if (error instanceof DOMException && error.name === "AbortError") return;
       media.muted = true;
       setMuted(true);
       announce("Sound unavailable. Try again.");
-      void media.play().catch(() => { /* Leave the control available for another user gesture. */ });
+      void playIfVisible.current().catch(() => { /* Leave the control available for another user gesture. */ });
     }
   };
 
@@ -120,7 +123,6 @@ function ProjectShowreel() {
     if (!media) return;
     const reveal = () => { media.dataset.ready = "true"; };
     const hide = () => { delete media.dataset.ready; };
-    const play = () => { void media.play().catch(() => { /* Autoplay can be restricted by the browser. */ }); };
     const syncSound = () => {
       const silent = media.muted || media.volume === 0;
       setMuted(silent);
@@ -129,19 +131,15 @@ function ProjectShowreel() {
     media.muted = true;
     media.defaultMuted = true;
     media.addEventListener("loadeddata", reveal);
-    media.addEventListener("canplay", play);
     media.addEventListener("error", hide);
     media.addEventListener("volumechange", syncSound);
     if (media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) reveal();
-    play();
     return () => {
       media.removeEventListener("loadeddata", reveal);
-      media.removeEventListener("canplay", play);
       media.removeEventListener("error", hide);
       media.removeEventListener("volumechange", syncSound);
       if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
       soundRequest.current += 1;
-      media.pause();
     };
   }, []);
 
@@ -150,7 +148,7 @@ function ProjectShowreel() {
     event.preventDefault();
     void toggleSound();
   }}>
-    <video ref={video} className="project-showreel" src="/card5.mp4" autoPlay muted={muted} loop playsInline preload="auto" aria-label="SparkLab creative showreel" />
+    <video ref={video} className="project-showreel" muted={muted} loop playsInline preload="metadata" aria-label="SparkLab creative showreel" />
     <button className={soundStyles.control} type="button" aria-label={muted ? "Enable showreel sound" : "Mute showreel sound"} aria-pressed={!muted} onClick={event => {
       event.stopPropagation();
       const touch = window.matchMedia("(pointer: coarse)").matches || ("pointerType" in event.nativeEvent && event.nativeEvent.pointerType === "touch");
@@ -197,25 +195,9 @@ const projects = [
 
 function OverviewVideo() {
   const video = useRef<HTMLVideoElement>(null);
+  useViewportVideo(video, "/creative-loop.mp4", true);
 
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncMotion = () => {
-      const element = video.current;
-      if (!element) return;
-      if (media.matches) {
-        element.pause();
-        element.currentTime = 0;
-      } else {
-        void element.play().catch(() => {});
-      }
-    };
-    syncMotion();
-    media.addEventListener("change", syncMotion);
-    return () => media.removeEventListener("change", syncMotion);
-  }, []);
-
-  return <video ref={video} autoPlay muted loop playsInline preload="auto" aria-hidden="true"><source src="/creative-loop.mp4" type="video/mp4" /></video>;
+  return <video ref={video} muted loop playsInline preload="metadata" aria-hidden="true" />;
 }
 
 const consultationPhrases = ["Automate Customer Replies", "Generate Reports Automatically", "Handle Follow-up Calls", "Capture & Qualify Leads", "Schedule Appointments", "Manage Customer Inquiries", "Send Order Notifications", "Sync Business Data"];
@@ -256,7 +238,7 @@ export default function Home() {
   useEffect(() => {
     const element = root.current;
     if (!element) return;
-    const sections = element.querySelectorAll<HTMLElement>("section[id], footer[id]");
+    const sections = element.querySelectorAll<HTMLElement>("section[id]");
     const observer = new IntersectionObserver((entries) => {
       const visible = entries
         .filter((entry) => entry.isIntersecting)
@@ -491,13 +473,13 @@ export default function Home() {
 
       <SeoGeoShowcase />
 
+      <CreativePortfolioGallery />
+
       <section className="manifesto section-pad" id="manifesto">
         <div className="manifesto-top rise"><p className="eyebrow dark-eyebrow">BEHIND THE SPARK</p><span className="manifesto-star">✳</span><span className="manifesto-edition">SPARK LAB<br />OUR STORY · 01</span></div>
         <div className="manifesto-layout"><div className="manifesto-copy"><h2><span className="manifesto-words">More </span> <span className="manifesto-words serif-word">Than</span><br /><span className="manifesto-words">Just</span> <span className="manifesto-words coral-type">Technology.</span></h2><p className="manifesto-body rise">We believe great work comes from curiosity, collaboration, and a little courage to think differently.</p><a className="text-link rise" href="#contact">MEET THE STUDIO<Arrow /></a><span className="hand-note">Make Room For Creativity<b>↗</b></span></div>
           <div className="manifesto-collage"><figure className="collage-shot collage-one"><img className="reveal-image" src={photos.collage1} alt="Creative professionals collaborating around a table in a modern studio" /><figcaption>Somewhere along the coast, Italy</figcaption></figure><figure className="collage-shot collage-two"><img className="reveal-image" src={photos.collage2} alt="Software developer working on a laptop in a modern workspace" /><figcaption>Blue beneath the surface</figcaption></figure><figure className="collage-shot collage-three"><img className="reveal-image" src={photos.collage3} alt="Professionals collaborating during a modern office meeting" /><span>Take a breath.</span></figure><span className="collage-scribble">Always Question <br />The Ordinary</span></div></div>
       </section>
-
-      <Footer />
     </main>
   );
 }
