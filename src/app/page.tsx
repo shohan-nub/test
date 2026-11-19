@@ -7,8 +7,8 @@ import worldLand from "./world-land.json";
 import ServicesShowcase from "./ServicesShowcase";
 import SeoGeoShowcase from "./components/SeoGeoShowcase";
 import CreativePortfolioGallery from "./components/CreativePortfolioGallery";
-import Image from "next/image";
-import { brandLogo } from "./components/brand";
+import FinalContact from "./components/FinalContact";
+import SiteNav from "./components/SiteNav";
 import soundStyles from "./components/ShowreelSound.module.css";
 import { useViewportVideo } from "./components/useViewportVideo";
 
@@ -234,21 +234,6 @@ function ConsultationPhrases() {
 
 export default function Home() {
   const root = useRef<HTMLElement>(null);
-  const [activeSection, setActiveSection] = useState("discover");
-  useEffect(() => {
-    const element = root.current;
-    if (!element) return;
-    const sections = element.querySelectorAll<HTMLElement>("section[id]");
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-      const active = visible[0]?.target;
-      if (active instanceof HTMLElement) setActiveSection(active.id);
-    }, { rootMargin: "-24% 0px -56% 0px", threshold: [0, 0.08, 0.2, 0.4] });
-    for (const section of sections) observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const section = root.current?.querySelector<HTMLElement>(".statistics-strip");
@@ -367,14 +352,9 @@ export default function Home() {
   }, []);
 
   return (
-    <main ref={root} data-active-section={activeSection}>
+    <main ref={root}>
       <section className="hero" id="discover" aria-label="Spark Lab digital studio">
-        <header className="nav-shell">
-          <a className="wordmark" href="#discover" aria-label="Spark Lab home"><Image className="navbar-brand-logo" {...brandLogo} alt="SparkLab" priority sizes="(max-width: 640px) 108px, 132px" /></a>
-          <nav className="main-nav" aria-label="Main navigation">{[["discover", "Studio"], ["experiences", "Services"], ["manifesto", "About Us"]].map(([id, label]) => <a key={id} href={`#${id}`} className={activeSection === id ? "is-active" : undefined} aria-current={activeSection === id ? "location" : undefined} onClick={() => setActiveSection(id)}>{label}</a>)}</nav>
-          <a className="nav-cta magnetic" href="https://shohan-portfolio-tau.vercel.app/" target="_blank" rel="noopener noreferrer">Contact Us<Arrow diagonal /></a>
-          <a className="mobile-menu" href="#experiences" aria-label="Explore services">Services <span>↓</span></a>
-        </header>
+        <SiteNav />
         <div className="hero-content">
           <h1><span className="hero-line">Ideas Without <span className="hero-accent">Borders.</span></span></h1>
           <p className="hero-description">Building digital experiences and intelligent solutions for businesses without boundaries.</p>
@@ -480,6 +460,7 @@ export default function Home() {
         <div className="manifesto-layout"><div className="manifesto-copy"><h2><span className="manifesto-words">More </span> <span className="manifesto-words serif-word">Than</span><br /><span className="manifesto-words">Just</span> <span className="manifesto-words coral-type">Technology.</span></h2><p className="manifesto-body rise">We believe great work comes from curiosity, collaboration, and a little courage to think differently.</p><a className="text-link rise" href="#contact">MEET THE STUDIO<Arrow /></a><span className="hand-note">Make Room For Creativity<b>↗</b></span></div>
           <div className="manifesto-collage"><figure className="collage-shot collage-one"><img className="reveal-image" src={photos.collage1} alt="Creative professionals collaborating around a table in a modern studio" /><figcaption>Somewhere along the coast, Italy</figcaption></figure><figure className="collage-shot collage-two"><img className="reveal-image" src={photos.collage2} alt="Software developer working on a laptop in a modern workspace" /><figcaption>Blue beneath the surface</figcaption></figure><figure className="collage-shot collage-three"><img className="reveal-image" src={photos.collage3} alt="Professionals collaborating during a modern office meeting" /><span>Take a breath.</span></figure><span className="collage-scribble">Always Question <br />The Ordinary</span></div></div>
       </section>
+      <FinalContact />
     </main>
   );
 }

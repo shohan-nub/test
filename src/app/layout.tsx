@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import OpeningLoader from "./components/OpeningLoader";
+import { siteOrigin, siteSocialImage } from "./site-metadata";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: siteOrigin ? new URL(siteOrigin) : undefined,
+  alternates: siteOrigin ? { canonical: new URL("/", siteOrigin).href } : undefined,
   icons: {
     icon: "/sparklab-icon-clear.svg",
     shortcut: "/sparklab-icon-clear.svg",
@@ -20,12 +23,15 @@ export const metadata: Metadata = {
       "We create modern websites, powerful software, and intelligent automation that help businesses grow.",
     siteName: "Spark Lab",
     type: "website",
+    url: siteOrigin ? new URL("/", siteOrigin).href : undefined,
+    images: siteSocialImage ? [{ url: siteSocialImage, alt: "SparkLab emblem" }] : undefined,
   },
   twitter: {
-    card: "summary_large_image",
+    card: siteSocialImage ? "summary_large_image" : "summary",
     title: "Spark Lab | Digital Experiences & AI Solutions",
     description:
       "Modern websites, powerful software, and intelligent AI automation by Spark Lab.",
+    images: siteSocialImage ? [siteSocialImage] : undefined,
   },
 };
 
