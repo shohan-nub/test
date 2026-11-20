@@ -1,5 +1,5 @@
 .shell {
-  --line: #e7dcd2;
+  --line: #e4d8cd;
   --text: #645a53;
   position: relative;
   isolation: isolate;
@@ -15,7 +15,7 @@
   height: min(820px, 105svh);
   background:
     radial-gradient(circle, rgb(145 93 58 / .16) .8px, transparent 1.1px) 0 0 / 18px 18px,
-    radial-gradient(ellipse at 80% 24%, #fbe8d9, transparent 65%);
+    radial-gradient(ellipse at 80% 24%, #f8e7da, transparent 68%);
   mask-image: linear-gradient(black 30%, transparent);
   pointer-events: none;
   content: "";
@@ -41,7 +41,10 @@
 .container :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--theme-deep); outline-offset: 3px; }
 .container :is(section, article)[id] { scroll-margin-top: 18px; }
 
-.intro { min-width: 0; padding-block: clamp(32px, 6vw, 88px) clamp(42px, 6.8vw, 96px); }
+.intro {
+  min-width: 0;
+  padding-block: clamp(28px, 5vw, 68px) clamp(32px, 5.8vw, 76px);
+}
 
 .eyebrow {
   margin: 0;
@@ -67,30 +70,22 @@
 }
 
 .intro h1 {
-  max-width: 920px;
-  margin: 18px 0 0;
+  max-width: 29ch;
+  margin: 15px 0 0;
   font-family: var(--font-display);
-  font-size: clamp(47px, 7.2vw, 104px);
-  font-weight: 600;
-  letter-spacing: -.075em;
-  line-height: .94;
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -.055em;
+  line-height: 1.05;
+  text-wrap: balance;
 }
-
-.intro em {
-  color: var(--theme-deep);
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -.065em;
-}
-
-.intro h1 em { display: block; }
 
 .introCopy {
-  max-width: 54ch;
-  margin: clamp(18px, 3vw, 30px) 0 0;
+  max-width: 55ch;
+  margin: clamp(14px, 2vw, 22px) 0 0;
   color: var(--text);
-  font-size: clamp(15px, 1.65vw, 19px);
-  line-height: 1.65;
+  font-size: clamp(16px, 1.55vw, 18px);
+  line-height: 1.6;
   text-wrap: pretty;
 }
 
@@ -120,21 +115,34 @@
   padding: 10px 18px;
   border: 1px solid transparent;
   border-radius: 999px;
-  transition: background .22s ease, box-shadow .22s ease, color .22s ease;
+  background: var(--theme-ink);
+  color: var(--theme-bg);
+  cursor: pointer;
+  transition: background-color .22s ease, color .22s ease;
 }
 
-.button { background: var(--theme-ink); color: var(--theme-bg); cursor: pointer; }
 .button > span { color: #f2b48e; }
 .button:disabled { opacity: .68; cursor: wait; }
 .textLink > span { color: var(--theme-deep); }
+.textLink { transition: color .2s ease; }
 .textLink:hover { color: var(--theme-deep); text-decoration: underline; text-underline-offset: 4px; }
-.button:hover:not(:disabled) { background: #48332a; box-shadow: 0 5px 12px rgb(70 40 24 / .15); }
+.button:hover:not(:disabled) { background: #48332a; }
 
-.callCard, .inquiryCard {
-  border: 1px solid var(--line);
-  border-radius: clamp(23px, 3vw, 33px);
-  background: linear-gradient(145deg, #fff, #fffbf6);
-  box-shadow: 0 12px 30px rgb(65 40 22 / .055), inset 0 1px white;
+.closing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 28px;
+  padding-block: clamp(22px, 3.5vw, 44px);
+  border-block: 1px solid var(--line);
+}
+
+.closing h2 {
+  margin: 0;
+  font: 650 clamp(24px, 3vw, 38px) / 1.1 var(--font-display);
+  letter-spacing: -.04em;
+  text-wrap: balance;
 }
 
 .callCard > p {
@@ -147,19 +155,25 @@
 
 .contactGrid {
   display: grid;
-  grid-template-columns: minmax(0, .77fr) minmax(0, 1.23fr);
+  grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr);
   align-items: start;
-  gap: clamp(15px, 2.4vw, 29px);
+  gap: clamp(26px, 5vw, 72px);
 }
 
-.callCard, .inquiryCard { min-width: 0; padding: clamp(19px, 3.5vw, 42px); }
-.callCard { background: radial-gradient(ellipse at 4% 6%, #fae5d5, transparent 67%), #fffaf5; }
-.calendarIcon { display: block; width: 48px; height: 48px; margin-bottom: 20px; color: var(--theme-deep); }
+.callCard, .inquiryCard { min-width: 0; padding: clamp(20px, 3vw, 34px); }
+.callCard { padding-inline: 0; border-top: 1px solid var(--line); }
+.inquiryCard {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgb(255 253 249 / .76);
+}
+.calendarIcon { display: block; width: 40px; height: 40px; margin-bottom: 16px; color: var(--theme-deep); }
 
 .callCard h2, .inquiryCard h2 {
   margin: 0 0 11px;
-  font: 600 clamp(26px, 3vw, 39px) / 1.05 var(--font-display);
-  letter-spacing: -.05em;
+  font: 650 clamp(24px, 2.8vw, 34px) / 1.1 var(--font-display);
+  letter-spacing: -.04em;
+  text-wrap: balance;
 }
 
 .callDetails { margin: 22px 0; }
@@ -168,17 +182,19 @@
 .callDetails dt { color: var(--text); font-size: 13px; }
 .callDetails dd { margin: 0; color: var(--theme-ink); font-size: 13px; font-weight: 650; text-align: right; }
 .callAction { margin-top: 8px; }
+.callAction a { min-height: 46px; box-shadow: none; }
+.callAction a::after { display: none; }
 
-.formNote { margin: 0 0 20px; color: var(--text); font-size: 13px; line-height: 1.4; }
-.formFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 13px; }
+.formNote { margin: 0 0 23px; color: var(--text); font-size: 13px; line-height: 1.45; }
+.formFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px 14px; }
 .formFields label { display: grid; min-width: 0; align-content: end; gap: 6px; font-size: 13px; font-weight: 650; line-height: 1.3; }
 .fullField { grid-column: 1 / -1; }
 
 .formFields :is(input, select, textarea) {
   width: 100%;
   min-width: 0;
-  min-height: 45px;
-  padding: 9px 11px;
+  min-height: 46px;
+  padding: 10px 12px;
   border: 1px solid #d8cabe;
   border-radius: 9px;
   background: #fffdf9;
@@ -186,8 +202,12 @@
   font-family: inherit;
   font-size: 16px;
   font-weight: 400;
+  transition: border-color .2s ease, background-color .2s ease;
 }
 
+.formFields :is(input, select, textarea):focus { border-color: var(--theme-deep); background: white; }
+.formFields :is(input, select, textarea):focus-visible { outline-width: 1px; outline-offset: 2px; }
+.formFields :is(input, select, textarea):hover:not(:focus) { border-color: #bba594; }
 .formFields textarea { resize: vertical; }
 .trap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .formActions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 15px; margin-top: 20px; }
@@ -199,40 +219,45 @@
   .contactGrid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 730px) {
-  .intro h1 { font-size: clamp(42px, 9vw, 65px); }
-}
-
 @media (max-width: 640px) {
   .navSpace { height: 84px; }
   .formFields { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 380px) {
-  .intro h1 { font-size: clamp(37px, 11vw, 42px); }
-}
-
 @media (prefers-reduced-motion: no-preference) {
-  .intro:not(:focus-within) > *, .callCard:not(:focus-within), .inquiryCard:not(:focus-within) {
-    animation: enter .64s cubic-bezier(.22, 1, .36, 1) backwards;
+  .intro:not(:focus-within) > *, .callCard:not(:focus-within), .inquiryCard:not(:target, :focus-within) {
+    animation: enter .55s cubic-bezier(.22, 1, .36, 1) backwards;
   }
 
   .intro:not(:focus-within) h1 { animation-delay: .045s; }
-  .intro:not(:focus-within) .introCopy { animation-delay: .1s; }
-  .shell::before { animation: ambient 10s ease-out both; }
+  .intro:not(:focus-within) .introCopy, .callCard:not(:focus-within) { animation-delay: .09s; }
+  .inquiryCard:not(:target, :focus-within) { animation-delay: .15s; }
+  .shell::before { animation: ambient 2s ease-out both; }
 
+  @supports (animation-timeline: view()) {
+    .reveal:not(:target, :focus-within), .stagger:not(:focus-within) > * {
+      animation: enter linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 28%;
+    }
+    .revealLater:not(:target, :focus-within), .stagger:not(:focus-within) > :nth-child(even) {
+      animation-range: entry 6% entry 38%;
+    }
+    :target > .reveal { animation: none; }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .button, .textLink, .formFields :is(input, select, textarea) { transition: none; }
 }
 
 @keyframes enter {
-  from { opacity: .28; transform: translateY(13px); }
+  from { opacity: .68; transform: translateY(9px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes ambient {
-  from { opacity: .68; }
+  from { opacity: .82; }
   to { opacity: 1; }
 }
 

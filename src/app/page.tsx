@@ -4,42 +4,12 @@ import { type TransitionEvent, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
-import ServicesShowcase from "./ServicesShowcase";
 import SeoGeoShowcase from "./components/SeoGeoShowcase";
 import CreativePortfolioGallery from "./components/CreativePortfolioGallery";
 import FinalContact from "./components/FinalContact";
 import SiteNav from "./components/SiteNav";
 import soundStyles from "./components/ShowreelSound.module.css";
 import { useViewportVideo } from "./components/useViewportVideo";
-
-const photos = {
-  collage1: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=85",
-  collage2: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",
-  collage3: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85",
-};
-
-const technologies = [
-  ["HTML5", "html-5"], ["CSS3", "css"], ["JavaScript", "javascript"], ["TypeScript", "typescript-icon"],
-  ["React", "react"], ["Next.js", "nextjs-icon"], ["Tailwind CSS", "tailwindcss-icon"], ["Bootstrap", "bootstrap"],
-  ["Node.js", "nodejs-icon"], ["Express.js", "express"], ["NestJS", "nestjs"], ["WordPress", "wordpress-icon"],
-  ["Shopify", "shopify"], ["PostgreSQL", "postgresql"], ["MongoDB", "mongodb-icon"], ["MySQL", "mysql-icon"],
-  ["Redis", "redis"], ["SQLite", "sqlite"], ["Supabase", "supabase-icon"], ["Firebase", "firebase"],
-  ["Drizzle ORM", "drizzle-orm"], ["Prisma", "prisma"], ["pgvector", "postgresql"], ["OpenAI", "openai-icon"],
-  ["Google Gemini", "google-gemini"], ["n8n", "n8n-icon"], ["OpenClaw", "openclaw"], ["Ollama", "ollama"],
-  ["LangChain", "langchain-icon"], ["Docker", "docker-icon"], ["Kubernetes", "kubernetes"], ["AWS", "aws"],
-  ["Vercel", "vercel-icon"], ["Cloudflare", "cloudflare-icon"], ["GitHub Actions", "github-actions"], ["Figma", "figma"],
-  ["GitHub", "github-icon"],
-] as const;
-
-const technologyRows = [technologies.slice(0, 13), technologies.slice(13, 25), technologies.slice(25)];
-
-function Arrow({ diagonal = false }: { diagonal?: boolean }) {
-  return <span aria-hidden="true" className="arrow">{diagonal ? "↗" : "→"}</span>;
-}
-
-function PlatformEmblem({ platform }: { platform: "clutch" | "behance" | "fiverr" | "dribbble" }) {
-  return <span className={"platform-logo platform-logo-" + platform} aria-hidden="true"><img src={"/brands/" + platform + (platform === "clutch" ? ".webp" : ".svg")} alt="" width="96" height="52" /></span>;
-}
 
 const mapRoutes = [
   { name: "New York", x: 294, y: 153, path: "M 751 211 Q 520 14 294 153" },
@@ -162,29 +132,6 @@ function ProjectShowreel() {
   </div>;
 }
 
-function CreativePreview({ index }: { index: number }) {
-  const imageRef = useRef<HTMLImageElement>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const image = imageRef.current;
-    if (!image) return;
-    let disposed = false;
-    const reveal = async () => {
-      if (!image.complete || !image.naturalWidth) return;
-      try { await image.decode(); } catch { return; }
-      if (!disposed) setReady(true);
-    };
-    image.addEventListener("load", reveal);
-    void reveal(); // Cached images can finish loading before hydration.
-    return () => { disposed = true; image.removeEventListener("load", reveal); };
-  }, []);
-
-  return <div className={`creative-preview${ready ? " is-ready" : ""}`}>
-    <img ref={imageRef} src={`/creative-showcase/project-${index + 1}.webp`} alt="" width="640" height="480" loading="eager" decoding="async" />
-  </div>;
-}
-
 const projects = [
   { title: "Website 1", category: "Design", image: "/p1.webp", tone: "apricot", description: "A clear, considered website experience with thoughtful details and a distinctive visual language.", scope: "Website design · UX" },
   { title: "Website 2", category: "Development", image: "/p2.webp", tone: "butter", description: "A responsive digital experience that brings intuitive navigation and everyday functionality together.", scope: "Web development" },
@@ -236,23 +183,6 @@ export default function Home() {
   const root = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const section = root.current?.querySelector<HTMLElement>(".statistics-strip");
-    if (!section) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      observer.disconnect();
-      for (const counter of section.querySelectorAll<HTMLElement>("[data-counter]")) {
-        const target = Number(counter.dataset.counter);
-        const decimals = Number(counter.dataset.decimals);
-        const value = { current: 0 };
-        gsap.to(value, { current: target, duration: 1.8, ease: "power2.out", onUpdate: () => { counter.textContent = value.current.toFixed(decimals); }, onComplete: () => { counter.textContent = target.toFixed(decimals); } });
-      }
-    }, { threshold: 0.25 });
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const element = root.current;
     if (!element) return;
@@ -261,21 +191,6 @@ export default function Home() {
     // Keep teardown owned by one GSAP context; self-reverting matchMedia cleanups caused the prior recursion.
     const ctx = gsap.context(() => {
       if (!reduceMotion) {
-        const creative = element.querySelector<HTMLElement>(".creative-statement");
-        if (creative) {
-          const previews = gsap.utils.toArray<HTMLElement>(".creative-preview", creative);
-          const directions = [[-.34, -.25], [.3, -.22], [-.3, .24], [.34, .24], [-.2, -.32], [.21, -.31], [-.12, .38], [.14, .37], [-.4, .02], [.4, -.02]];
-          gsap.from(creative.querySelector("h2"), { y: 16, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: creative, start: "top 75%", once: true } });
-          const creativeTimeline = gsap.timeline({ scrollTrigger: { trigger: creative, start: "top top", end: () => `+=${Math.max(650, creative.clientHeight * 1.15)}`, pin: true, scrub: .45, invalidateOnRefresh: true, anticipatePin: 1 } });
-          previews.forEach((preview, index) => {
-            const [x, y] = directions[index];
-            // One continuous journey avoids a velocity jump between emergence and exit.
-            const start = .08 + index * .08;
-            const duration = 2.4 + (index % 3) * .12;
-            creativeTimeline.fromTo(preview, { x: 0, y: 0, opacity: .25 }, { x: () => x * window.innerWidth * 2.7, y: () => y * window.innerHeight * 2.7, opacity: 1, ease: "sine.inOut", duration }, start);
-            creativeTimeline.to(preview, { opacity: 0, ease: "sine.inOut", duration: .65 }, start + duration - .65);
-          });
-        }
         const showcase = element.querySelector<HTMLElement>(".experiences");
         const stack = showcase?.querySelector<HTMLElement>(".capability-stack");
         const cards = stack ? gsap.utils.toArray<HTMLElement>(".capability-card", stack) : [];
@@ -319,16 +234,6 @@ export default function Home() {
         if (overview) {
           gsap.from(overview.querySelector("h2"), { y: 20, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview, start: "top 82%", once: true } });
           gsap.from(overview.querySelectorAll(".service-overview-card"), { y: 22, opacity: 0, stagger: .12, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview.querySelector(".service-overview-grid"), start: "top 86%", once: true } });
-        }
-        for (const image of element.querySelectorAll<HTMLElement>(".reveal-image")) {
-          gsap.fromTo(image, { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 1.05, ease: "power3.inOut", scrollTrigger: { trigger: image, start: "top 82%", once: true } });
-        }
-        for (const item of element.querySelectorAll<HTMLElement>(".rise")) {
-          gsap.from(item, { y: 30, opacity: 0, duration: .75, ease: "power2.out", scrollTrigger: { trigger: item, start: "top 88%", once: true } });
-        }
-        gsap.from(element.querySelectorAll(".manifesto-words"), { y: 42, opacity: 0, stagger: .1, duration: .8, scrollTrigger: { trigger: element.querySelector(".manifesto"), start: "top 70%", once: true } });
-        for (const shot of element.querySelectorAll<HTMLElement>(".collage-shot")) {
-          gsap.from(shot, { y: 32, rotate: 0, scale: .96, opacity: 0, duration: .85, ease: "power3.out", scrollTrigger: { trigger: shot, start: "top 86%", once: true } });
         }
         for (const button of element.querySelectorAll<HTMLElement>(".magnetic")) {
           const onMove = (event: PointerEvent) => {
@@ -392,32 +297,9 @@ export default function Home() {
         <ConsultationPhrases />
         </div>
       </section>
-      <section className="statistics-strip" aria-label="Client and platform statistics">
-        <div className="statistics-grid">
-          {[[49, "+", "Client Reviews on Clutch.co", "clutch"], [50, "+", "Feature Project on Behance", "behance"], [225, "+", "Client Reviews on Fiverr", "fiverr"], [3.5, "M+", "Monthly View on Dribbble", "dribbble"]].map(([value, suffix, label, platform]) => <div className="statistic" key={label as string}><PlatformEmblem platform={platform as "clutch" | "behance" | "fiverr" | "dribbble"} /><p className="statistic-value"><span data-counter={value} data-decimals={value === 3.5 ? 1 : 0}>0</span>{suffix}</p><p className="statistic-label">{label}</p></div>)}
-        </div>
-      </section>
-
       <div className="text-marquee" aria-label="Digital innovation, creative technology, intelligent automation, built for what's next, ideas into reality, design meets technology">
         <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
       </div>
-
-      <section className="creative-statement" aria-labelledby="creative-statement-title">
-        <div className="creative-previews" aria-hidden="true">
-          {Array.from({ length: 10 }, (_, index) => <CreativePreview key={index} index={index} />)}
-        </div>
-        <h2 id="creative-statement-title">
-          <span className="creative-line"><span className="creative-line-inner">From stunning <em>websites</em></span></span>
-          <span className="creative-line"><span className="creative-line-inner">to powerful web applications,</span></span>
-          <span className="creative-line"><span className="creative-line-inner">we&apos;re ready to bring your ideas</span></span>
-          <span className="creative-line"><span className="creative-line-inner">to life with exceptional <em>design.</em></span></span>
-        </h2>
-      </section>
-
-      <section className="technology-strip" aria-label="Technologies we use">
-        <p className="technology-intro">POWERED BY THE TECHNOLOGY WE TRUST</p>
-        <div className="technology-rows">{technologyRows.map((row, rowIndex) => <div className="technology-row" key={rowIndex}><div className="technology-track">{[0, 1].map((copy) => <div className="technology-sequence" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>{row.map(([name, icon]) => <div className="technology-mark" key={`${copy}-${name}`} title={name}><img src={`https://cdn.jsdelivr.net/gh/gilbarbara/logos@master/logos/${icon}.svg`} alt={copy === 0 ? `${name} logo` : ""} width="72" height="34" /></div>)}</div>)}</div></div>)}</div>
-      </section>
 
       <div className="text-marquee text-marquee-reverse" aria-label="Creative technology, built for what's next, ideas into reality, design meets technology, digital experiences">
         <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["CREATIVE TECHNOLOGY", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY", "DIGITAL EXPERIENCES"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
@@ -449,17 +331,9 @@ export default function Home() {
         </div>
       </section>
 
-      <ServicesShowcase />
-
       <SeoGeoShowcase />
 
       <CreativePortfolioGallery />
-
-      <section className="manifesto section-pad" id="manifesto">
-        <div className="manifesto-top rise"><p className="eyebrow dark-eyebrow">BEHIND THE SPARK</p><span className="manifesto-star">✳</span><span className="manifesto-edition">SPARK LAB<br />OUR STORY · 01</span></div>
-        <div className="manifesto-layout"><div className="manifesto-copy"><h2><span className="manifesto-words">More </span> <span className="manifesto-words serif-word">Than</span><br /><span className="manifesto-words">Just</span> <span className="manifesto-words coral-type">Technology.</span></h2><p className="manifesto-body rise">We believe great work comes from curiosity, collaboration, and a little courage to think differently.</p><a className="text-link rise" href="#contact">MEET THE STUDIO<Arrow /></a><span className="hand-note">Make Room For Creativity<b>↗</b></span></div>
-          <div className="manifesto-collage"><figure className="collage-shot collage-one"><img className="reveal-image" src={photos.collage1} alt="Creative professionals collaborating around a table in a modern studio" /><figcaption>Somewhere along the coast, Italy</figcaption></figure><figure className="collage-shot collage-two"><img className="reveal-image" src={photos.collage2} alt="Software developer working on a laptop in a modern workspace" /><figcaption>Blue beneath the surface</figcaption></figure><figure className="collage-shot collage-three"><img className="reveal-image" src={photos.collage3} alt="Professionals collaborating during a modern office meeting" /><span>Take a breath.</span></figure><span className="collage-scribble">Always Question <br />The Ordinary</span></div></div>
-      </section>
       <FinalContact />
     </main>
   );

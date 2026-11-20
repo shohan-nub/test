@@ -27,7 +27,7 @@ export default function FinalContact() {
       <div className={styles.card} ref={cardRef}>
         <div className={styles.portrait}>
           <Image
-            src="/Confident Studio Portrait with Orange Emblem.png"
+            src="/Confident Studio Portrait with Orange Emblem .png"
             width={1254}
             height={1254}
             sizes="(max-width: 580px) 86vw, (max-width: 719px) 480px, (max-width: 1200px) 37vw, 430px"

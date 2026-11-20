@@ -47,18 +47,18 @@ export default function InquiryForm() {
 
   return (
     <form className={styles.form} method="post" onSubmit={submit} aria-describedby="inquiry-required">
-      <p id="inquiry-required" className={styles.formNote}>All fields are required except company name.</p>
+      <p id="inquiry-required" className={styles.formNote}>All fields are required except company.</p>
       <div className={styles.formFields}>
         <label>Full Name <input name="name" autoComplete="name" required maxLength={100} /></label>
-        <label>Email Address <input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
-        <label className={styles.fullField}>Company / Business Name <input name="company" autoComplete="organization" maxLength={150} /></label>
-        <label>Service Interested In
+        <label>Email <input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
+        <label className={styles.fullField}>Company <input name="company" autoComplete="organization" maxLength={150} /></label>
+        <label>Service
           <select key={selectedService} name="service" defaultValue={selectedService} required>
             <option value="" disabled>Select a service</option>
             {services.map(service => <option key={service.id} value={service.id}>{service.title}</option>)}
           </select>
         </label>
-        <label>Estimated Project Budget
+        <label>Estimated Budget
           <select name="budget" defaultValue="" required>
             <option value="" disabled>Select a range</option>
             {inquiryBudgets.map(budget => <option key={budget.id} value={budget.id}>{budget.label}</option>)}
@@ -71,7 +71,7 @@ export default function InquiryForm() {
       </div>
       <div className={styles.formActions}>
         <button type="submit" className={styles.button} disabled={sending}>
-          {sending ? "Sending…" : "Send Project Inquiry"} <span aria-hidden="true">↗</span>
+          {sending ? "Sending…" : "Send Inquiry"} <span aria-hidden="true">↗</span>
         </button>
         {notice && <p className={styles.notice} role={notice.type === "error" ? "alert" : "status"}>{notice.message}</p>}
       </div>

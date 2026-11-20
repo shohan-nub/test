@@ -5,30 +5,29 @@ import { pageMetadata } from "../../site-metadata";
 import PageIntro from "../PageIntro";
 import shared from "../AgencyPages.module.css";
 import DiscoveryGraphic from "./DiscoveryGraphic";
+import PlatformStatistics from "./PlatformStatistics";
+import TechnologyStack from "./TechnologyStack";
 import styles from "./Services.module.css";
 
-const description = "From websites and applications to automation and intelligent business systems, we turn complex ideas into practical digital solutions.";
+const description = "We build AI-powered automation, websites, web applications, mobile apps, and custom software. We also help businesses improve search visibility and build a recognizable brand.";
 const dollars = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 export const metadata = pageMetadata("/services", "Services & Pricing", description);
 
 export default function ServicesPage() {
   return (
-    <div className={styles.page}>
-      <div className={styles.intro}>
-        <PageIntro label="What we build" heading={<>Digital Experiences. <em>Intelligent Solutions.</em></>} description={description} />
-      </div>
+    <>
+      <PageIntro label="Services" heading="Digital Services for Businesses" description={description} />
 
       <nav className={styles.index} aria-label="Jump to a service">
-        {services.map((service, index) => (
+        {services.map(service => (
           <a href={`#${service.id}`} key={service.id}>
-            <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
             {service.title}
           </a>
         ))}
       </nav>
 
-      {services.map((service, index) => (
+      {services.map(service => (
         <article
           className={styles.service}
           data-service={service.id}
@@ -37,11 +36,10 @@ export default function ServicesPage() {
           aria-labelledby={`${service.id}-title`}
           tabIndex={-1}
         >
-          <div className={styles.copy}>
-            <p className={shared.eyebrow}>Service {String(index + 1).padStart(2, "0")}</p>
+          <div className={`${styles.copy} ${shared.reveal}`}>
             <h2 id={`${service.id}-title`}>{service.title}</h2>
             <p className={styles.description}>{service.description}</p>
-            <ul className={styles.capabilities} aria-label="Capabilities">
+            <ul className={styles.capabilities} aria-label="Capabilities" role="list">
               {service.capabilities.map(capability => <li key={capability}>{capability}</li>)}
             </ul>
             <div className={styles.actions}>
@@ -54,7 +52,7 @@ export default function ServicesPage() {
               </Link>
             </div>
           </div>
-          <div className={styles.visual}>
+          <div className={`${styles.visual} ${shared.reveal} ${shared.revealLater}`}>
             <div className={styles.photo}>
               <Image src={service.image.src} alt={service.image.alt} fill sizes="(max-width: 740px) 90vw, (max-width: 1200px) 48vw, 640px" />
             </div>
@@ -63,11 +61,15 @@ export default function ServicesPage() {
         </article>
       ))}
 
-      <p className={styles.disclaimer}>Project ranges are indicative. Final pricing depends on scope, requirements, and complexity.</p>
-      <section className={styles.closing} aria-labelledby="services-cta-heading">
+      <p className={styles.disclaimer}>Final pricing depends on the scope and complexity of your project.</p>
+
+      <PlatformStatistics />
+      <TechnologyStack />
+
+      <section className={`${shared.closing} ${shared.reveal}`} aria-labelledby="services-cta-heading">
         <h2 id="services-cta-heading">Have a project in mind?</h2>
         <Link className={shared.button} href="/contact">Let’s talk <span aria-hidden="true">↗</span></Link>
       </section>
-    </div>
+    </>
   );
 }

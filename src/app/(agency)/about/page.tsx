@@ -8,24 +8,20 @@ import styles from "./About.module.css";
 export const metadata = pageMetadata("/about", "About SparkLab", about.description);
 
 export default function AboutPage() {
-  const [firstLine, secondLine] = about.heading;
-
   return (
-    <div className={styles.page}>
-      <PageIntro label="About SparkLab" heading={<>{firstLine} <em>{secondLine}</em></>} description={about.description} />
+    <>
+      <PageIntro label="About SparkLab" heading={about.heading} description={about.description} />
 
-      <div className={styles.principles}>
-        {about.principles.map(({ title, copy }, index) => (
-          <section key={title} className={styles.principle}>
-            <h2><span aria-hidden="true">0{index + 1}</span>{title}</h2>
-            <p>{copy}</p>
-          </section>
-        ))}
-      </div>
+      {about.principles.map(({ title, copy }) => (
+        <section key={title} className={`${styles.principle} ${shared.reveal}`}>
+          <h2>{title}</h2>
+          <p>{copy}</p>
+        </section>
+      ))}
 
-      <section className={styles.process} aria-labelledby="process-heading">
-        <h2 id="process-heading"><span aria-hidden="true">03</span>How We Work</h2>
-        <ol className={styles.steps} role="list">
+      <section className={`${styles.process} ${shared.reveal}`} aria-labelledby="process-heading">
+        <h2 id="process-heading">How We Work</h2>
+        <ol className={`${styles.steps} ${shared.stagger}`} role="list">
           {about.process.map(({ title, copy }, index) => (
             <li key={title}>
               <span className={shared.eyebrow} aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
@@ -36,10 +32,10 @@ export default function AboutPage() {
         </ol>
       </section>
 
-      <section className={styles.closing} aria-labelledby="about-cta-heading">
+      <section className={`${shared.closing} ${shared.reveal}`} aria-labelledby="about-cta-heading">
         <h2 id="about-cta-heading">Have an idea worth building?</h2>
         <Link className={shared.button} href="/contact">Let&apos;s Talk <span aria-hidden="true">↗</span></Link>
       </section>
-    </div>
+    </>
   );
 }
