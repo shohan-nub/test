@@ -5,7 +5,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
 import SeoGeoShowcase from "./components/SeoGeoShowcase";
-import CreativePortfolioGallery from "./components/CreativePortfolioGallery";
+import ProjectShowcase from "./components/ProjectShowcase";
+import { WorkflowVisual, workflowStages } from "./components/WorkflowVisuals";
+import workflowStyles from "./components/WorkflowVisuals.module.css";
 import FinalContact from "./components/FinalContact";
 import SiteNav from "./components/SiteNav";
 import soundStyles from "./components/ShowreelSound.module.css";
@@ -39,16 +41,6 @@ function GlobalMap() {
       <circle className="map-origin" cx="751" cy="211" r="5" />
     </svg>
   </div>;
-}
-
-function CapabilityMedia({ src, alt }: { src: string; alt: string }) {
-  const [imageFailed, setImageFailed] = useState(false);
-
-  return (
-    <div className="capability-media">
-      {!imageFailed && <img src={src} alt={alt} onError={() => setImageFailed(true)} />}
-    </div>
-  );
 }
 
 function ProjectShowreel() {
@@ -132,13 +124,7 @@ function ProjectShowreel() {
   </div>;
 }
 
-const projects = [
-  { title: "Website 1", category: "Design", image: "/p1.webp", tone: "apricot", description: "A clear, considered website experience with thoughtful details and a distinctive visual language.", scope: "Website design · UX" },
-  { title: "Website 2", category: "Development", image: "/p2.webp", tone: "butter", description: "A responsive digital experience that brings intuitive navigation and everyday functionality together.", scope: "Web development" },
-  { title: "Website 3", category: "AI & Automation", image: "/p3.webp", tone: "coral", description: "An approachable interface for connected workflows, useful insights, and simpler daily tasks.", scope: "Product design · Automation" },
-  { title: "Website 4", category: "Branding", image: "/p4.webp", tone: "sage", description: "An expressive brand experience, connecting a confident identity with a cohesive digital presence.", scope: "Brand identity · Website" },
-  { title: "Website 5", category: "UI/UX", image: "/p5.webp", tone: "charcoal", description: "A focused digital experience where considered design and practical technology work together.", scope: "UI/UX · Development" },
-] as const;
+const workflowPhrases = ["RESEARCH WITH PURPOSE", "DESIGN WITH CLARITY", "BUILD WITH PRECISION", "LAUNCH WITH CONFIDENCE"];
 
 function OverviewVideo() {
   const video = useRef<HTMLVideoElement>(null);
@@ -221,10 +207,8 @@ export default function Home() {
           const statement = showcase.querySelector<HTMLElement>(".project-statement-track");
           const phrase = statement?.querySelector<HTMLElement>(".project-statement-phrase");
           if (statement && phrase) {
-            // Use the stack's existing duration and ScrollTrigger, without
-            // extending its pin, changing card timing, or adding another trigger.
             cardTimeline.fromTo(statement, { x: 0 }, {
-              x: () => -phrase.getBoundingClientRect().width,
+              x: () => -phrase.offsetWidth,
               duration: cardTimeline.duration(),
               ease: "none",
             }, 0);
@@ -297,15 +281,7 @@ export default function Home() {
         <ConsultationPhrases />
         </div>
       </section>
-      <div className="text-marquee" aria-label="Digital innovation, creative technology, intelligent automation, built for what's next, ideas into reality, design meets technology">
-        <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
-      </div>
-
-      <div className="text-marquee text-marquee-reverse" aria-label="Creative technology, built for what's next, ideas into reality, design meets technology, digital experiences">
-        <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{["CREATIVE TECHNOLOGY", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY", "DIGITAL EXPERIENCES"].map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
-      </div>
-
-      <section className="experiences section-pad" id="experiences" aria-label="Selected projects">
+      <section className="experiences section-pad" id="experiences" aria-label="SparkLab workflow and showreel">
         <h2 className="project-statement">
           <span className="project-statement-track">
             <span className="project-statement-phrase">BE VISIBLE. BE DISCOVERED. <em>BE UNSTOPPABLE.</em></span>
@@ -313,27 +289,31 @@ export default function Home() {
           </span>
         </h2>
         <div className="capability-stack">
-          {projects.map((project, index) => <article className={`capability-card capability-card-${project.tone}`} key={project.image}>
-            <div className="capability-surface">
-              {index < 4 && <>
-                <div className="capability-copy">
-                  <p className="capability-label">{project.category}<span>{String(index + 1).padStart(2, "0")} / 05</span></p>
-                  <h3>{project.title}</h3>
-                  <p className="project-summary">{project.description}</p>
-                  <dl className="project-details"><div><dt>Scope</dt><dd>{project.scope}</dd></div><div><dt>Duration</dt><dd>To be confirmed</dd></div></dl>
-                  <a className="capability-action" href="#contact">View Project <span aria-hidden="true">→</span></a>
-                </div>
-                <CapabilityMedia src={project.image} alt={`${project.title} project preview`} />
-              </>}
-              {index === 4 && <ProjectShowreel />}
+          {workflowStages.map((step, index) => <article className={`capability-card capability-card-${step.tone}`} key={step.id} aria-labelledby={`workflow-${step.id}`}>
+            <div className={`capability-surface ${workflowStyles.surface}`}>
+              <div className={`capability-copy ${workflowStyles.copy}`}>
+                <p className="capability-label">{step.stage}<span>{String(index + 1).padStart(2, "0")} / 04</span></p>
+                <h3 id={`workflow-${step.id}`}>{step.title}</h3>
+                <ul className={workflowStyles.points} role="list">
+                  {step.points.map((point) => <li key={point}>{point}</li>)}
+                </ul>
+              </div>
+              <WorkflowVisual stage={step.id} />
             </div>
           </article>)}
+          <article className="capability-card capability-card-charcoal">
+            <div className="capability-surface"><ProjectShowreel /></div>
+          </article>
         </div>
       </section>
 
+      <div className="text-marquee text-marquee-reverse" aria-label={workflowPhrases.join(" ✳ ") + " ✳"}>
+        <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{workflowPhrases.map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
+      </div>
+
       <SeoGeoShowcase />
 
-      <CreativePortfolioGallery />
+      <ProjectShowcase />
       <FinalContact />
     </main>
   );

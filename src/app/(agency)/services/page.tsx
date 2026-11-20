@@ -19,6 +19,8 @@ export default function ServicesPage() {
     <>
       <PageIntro label="Services" heading="Digital Services for Businesses" description={description} />
 
+      <PlatformStatistics />
+
       <nav className={styles.index} aria-label="Jump to a service">
         {services.map(service => (
           <a href={`#${service.id}`} key={service.id}>
@@ -63,7 +65,6 @@ export default function ServicesPage() {
 
       <p className={styles.disclaimer}>Final pricing depends on the scope and complexity of your project.</p>
 
-      <PlatformStatistics />
       <TechnologyStack />
 
       <section className={`${shared.closing} ${shared.reveal}`} aria-labelledby="services-cta-heading">

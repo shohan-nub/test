@@ -10,17 +10,22 @@ export const metadata = pageMetadata("/about", "About SparkLab", about.descripti
 export default function AboutPage() {
   return (
     <>
-      <PageIntro label="About SparkLab" heading={about.heading} description={about.description} />
+      <div className={styles.overview}>
+        <PageIntro label="About SparkLab" heading={about.heading} description={about.description} />
+        <div className={`${styles.principles} ${shared.stagger}`}>
+          {about.principles.map(({ title, copy }) => (
+            <section key={title} className={styles.principle}>
+              <h2>{title}</h2>
+              <p>{copy}</p>
+            </section>
+          ))}
+        </div>
+      </div>
 
-      {about.principles.map(({ title, copy }) => (
-        <section key={title} className={`${styles.principle} ${shared.reveal}`}>
-          <h2>{title}</h2>
-          <p>{copy}</p>
-        </section>
-      ))}
-
-      <section className={`${styles.process} ${shared.reveal}`} aria-labelledby="process-heading">
-        <h2 id="process-heading">How We Work</h2>
+      <section className={styles.process} aria-labelledby="process-heading">
+        <div className={shared.reveal}>
+          <h2 id="process-heading">How We Work</h2>
+        </div>
         <ol className={`${styles.steps} ${shared.stagger}`} role="list">
           {about.process.map(({ title, copy }, index) => (
             <li key={title}>

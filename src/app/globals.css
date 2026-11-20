@@ -333,16 +333,16 @@ main :is(.hero,.service-overview,.consultation-section,.experiences){background:
 :root{--showcase-charcoal:#242321}
 .experiences{position:relative;z-index:31;isolation:isolate;height:100svh;min-height:0;padding:0;display:grid;place-items:center;overflow:hidden;background:#fffcf8;color:#242321}
 .capability-stack{--stack-step:10px;position:relative;width:min(1200px,88%);max-width:none;height:min(520px,calc(100svh - 120px));margin:0;overflow:visible}
-.project-statement{--heading-card-height:min(520px,calc(100svh - 120px));position:absolute;z-index:0;inset:0 0 auto;display:flex;align-items:center;height:calc((100svh - var(--heading-card-height))/2);margin:0;overflow:hidden;color:var(--theme-ink);font-family:var(--font-display,Arial,Helvetica,sans-serif);font-size:clamp(24px,min(9.2vw,calc((100svh - var(--heading-card-height))*.36)),144px);font-weight:600;line-height:1.1;letter-spacing:-.055em}
-.project-statement-track{display:flex;flex:none;width:max-content;padding-left:clamp(20px,4vw,64px);will-change:transform}
-.project-statement-phrase{display:block;flex:none;padding:.06em .6em .06em 0;white-space:nowrap}
+.project-statement{--heading-card-height:min(520px,calc(100svh - 120px));position:absolute;z-index:0;inset:0 0 auto;display:grid;place-items:center;height:calc((100svh - var(--heading-card-height))/2);margin:0;padding-inline:5%;overflow:hidden;color:var(--theme-ink);font-family:var(--font-display,Arial,Helvetica,sans-serif);font-size:clamp(19px,min(4.7vw,calc((100svh - var(--heading-card-height))*.305)),70px);font-weight:600;line-height:1.08;letter-spacing:-.045em;text-align:center}
+.project-statement-phrase{display:block;text-wrap:balance}
 .project-statement-phrase em{padding-right:.06em;color:var(--theme-deep);font-family:var(--font-serif);font-weight:400;font-style:italic;letter-spacing:-.055em}
+@media(prefers-reduced-motion:no-preference){.project-statement{display:flex;align-items:center;padding-inline:0}.project-statement-track{display:flex;flex:none;width:max-content;will-change:transform}.project-statement-phrase{flex:none;min-width:100vw;padding-inline:5vw;white-space:nowrap}}
 /* The final video surface naturally covers the heading as it fills the viewport. */
 .experiences>.capability-stack{z-index:1}
 @media(max-width:900px){.project-statement{--heading-card-height:min(500px,calc(100svh - 100px))}}
-@media(max-width:640px){.project-statement{--heading-card-height:min(550px,calc(100svh - 72px));font-size:clamp(24px,min(10.8vw,calc((100svh - var(--heading-card-height))*.36)),52px)}}
+@media(max-width:640px){.project-statement{--heading-card-height:min(550px,calc(100svh - 72px));font-size:clamp(18px,min(6.05vw,calc((100svh - var(--heading-card-height))*.325)),30px)}}
 @media(max-width:900px) and (max-height:540px){.project-statement{--heading-card-height:calc(100svh - 64px)}}
-@media(prefers-reduced-motion:reduce){.project-statement{position:relative;height:auto;padding:18px 0 30px;font-size:clamp(28px,7vw,88px)}.project-statement-track{will-change:auto}}
+@media(prefers-reduced-motion:reduce){.project-statement{position:relative;height:auto;padding:18px 5% 30px;font-size:clamp(21px,4.7vw,70px)}.project-statement-phrase[aria-hidden="true"]{display:none}}
 .capability-card,.capability-card:first-child{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;overflow:visible;transform:none}
 .capability-card+.capability-card{margin-top:0}
 .capability-card:nth-child(n){--cap-offset:0px}

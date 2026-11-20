@@ -11,7 +11,7 @@ const statistics = [
 
 export default function PlatformStatistics() {
   return (
-    <section id="platform-statistics" className={shared.reveal} aria-labelledby="platform-statistics-heading">
+    <section id="platform-statistics" className={`${styles.platformStatistics} ${shared.reveal}`} aria-labelledby="platform-statistics-heading">
       <h2 id="platform-statistics-heading" className={styles.supportingHeading}>Platform Statistics</h2>
       <ul className={styles.statistics} role="list">
         {statistics.map(({ logo, width, height, value, description }) => (
