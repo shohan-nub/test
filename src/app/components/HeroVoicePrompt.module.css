@@ -1,0 +1,67 @@
+.placement {
+  position: relative;
+  z-index: 3;
+  width: min(100%, 354px);
+  align-self: center;
+  margin-top: -24px;
+}
+
+@media (max-width: 640px) {
+  .placement { margin-top: -20px; }
+}
+
+.card { width: 100%; }
+
+.card > div {
+  background: #fffaf2;
+  box-shadow: 0 0 0 1px rgb(162 84 50 / .25), 0 10px 26px -17px rgb(106 58 35 / .32);
+  transition: background-color .26s ease, box-shadow .26s ease;
+}
+
+.card textarea::placeholder { color: #5b4940; }
+
+.placement:focus-within .card > div {
+  background: #fff5e9;
+  box-shadow: 0 0 0 1px rgb(181 89 47 / .36), 0 12px 28px -16px rgb(130 66 35 / .36);
+}
+
+/* This preview doesn't accept attachments. */
+.card button[aria-label="Add"] { display: none; }
+
+/* Let the picker expand down inside the card. */
+.card div:has(> [data-menu] > [role="listbox"]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+}
+
+.card [data-menu]:has(> [role="listbox"]) { display: contents; }
+
+.card [role="listbox"] {
+  position: relative;
+  inset: auto;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: end;
+  margin-bottom: 0;
+}
+
+.caption {
+  margin: 9px 10px 0;
+  color: #6e5d51;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card { opacity: .79; transition: opacity .26s ease; }
+  .placement:hover .card, .placement:focus-within .card { opacity: 1; }
+  .placement:hover .card > div {
+    background: #fff5e9;
+    box-shadow: 0 0 0 1px rgb(181 89 47 / .36), 0 12px 28px -16px rgb(130 66 35 / .36);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .card > div { transition: none; }
+}

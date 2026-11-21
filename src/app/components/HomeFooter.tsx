@@ -6,7 +6,6 @@ import Link from "next/link";
 import { brandLogo } from "./brand";
 import { GlobeCard } from "./motion-brew/globe-card";
 import { ParticleCard } from "./motion-brew/particle-card";
-import { RotatingText } from "./motion-brew/rotating-text";
 import styles from "./HomeFooter.module.css";
 
 const places = [
@@ -32,15 +31,9 @@ export default function HomeFooter() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div>
-          <div className={styles.brandCard}>
-            <Link className={styles.logo} href="/" aria-label="SparkLab home">
-              <Image {...brandLogo} alt="SparkLab" sizes="150px" />
-            </Link>
-            <div className={styles.signature}>
-              <Image {...brandLogo} width={96} height={22} alt="" />
-              <span>© SparkLab</span>
-            </div>
-          </div>
+          <Link className={styles.logo} href="/" aria-label="SparkLab home">
+            <Image {...brandLogo} alt="SparkLab" sizes="150px" />
+          </Link>
           <p className={styles.description}>Building digital experiences and intelligent solutions for businesses without boundaries.</p>
           <div className={styles.details}>
             <nav aria-label="Footer navigation">
@@ -68,7 +61,6 @@ export default function HomeFooter() {
             {mounted && <GlobeFallback>
               <GlobeCard standalone members={places} arcs={3} turn={90} />
             </GlobeFallback>}
-            <RotatingText text="Digital Innovation • Creative Technology • " label="Digital Innovation and Creative Technology" size={96} duration={30} boost={2} className={styles.ring} />
           </div>
           <ParticleCard
             title="Ideas without borders"

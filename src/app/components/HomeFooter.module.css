@@ -14,22 +14,8 @@
   margin-inline: auto;
 }
 
-.brandCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: clamp(12px, 2.6vw, 30px);
-  padding: clamp(14px, 2vw, 22px);
-  border: 1px solid #b9562d26;
-  border-radius: 14px;
-  background: rgb(255 251 246 / .82);
-}
-
-.logo { display: block; width: 150px; min-width: 0; }
-.brandCard img { display: block; width: 100%; height: auto; }
-.signature { display: grid; flex: 0 0 auto; gap: 4px; padding-inline-start: clamp(12px, 2.2vw, 24px); border-inline-start: 1px solid #b9562d26; }
-.signature img { width: 90px; }
-.signature span { color: #655b53; font-size: 10px; }
+.logo { display: block; width: min(100%, 150px); }
+.logo img { display: block; width: 100%; height: auto; }
 .description { max-width: 40ch; margin: 17px 0 27px; color: #655b53; font-size: 14px; line-height: 1.65; }
 .footer a:focus-visible { outline: 2px solid var(--theme-deep); outline-offset: 4px; }
 
@@ -72,7 +58,6 @@
 
 .visual { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); align-items: center; gap: clamp(14px, 2vw, 28px); }
 .globeStage { position: relative; width: 100%; aspect-ratio: 1; }
-.globeStage .ring { position: absolute; right: 0; bottom: -14px; color: var(--theme-deep); }
 .particle { width: 100%; padding: clamp(12px, 1.5vw, 18px); border: 1px solid #b9562d26; border-radius: 16px; box-shadow: 0 12px 32px -24px #6b432955; }
 .particle > div:has(> canvas) { height: clamp(118px, 13vw, 170px); touch-action: pan-y; }
 .particle h3 { margin-top: 6px; font-size: 16px; }
@@ -81,7 +66,6 @@
 
 @media (max-width: 960px) {
   .inner { grid-template-columns: 1fr; }
-  .brandCard { max-width: 420px; }
   .visual { width: min(100%, 660px); justify-self: center; }
 }
 

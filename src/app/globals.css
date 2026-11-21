@@ -238,6 +238,7 @@ body{background:#f5f4f0}
 .site-navigation .nav-cta:focus-visible,.site-navigation .main-nav a:focus-visible,.site-navigation .mobile-menu:focus-visible{outline:2px solid #b9562d;outline-offset:4px}
 @media(min-width:641px){.site-navigation .main-nav{font-size:15px}}
 @media(min-width:641px) and (max-width:760px){.site-navigation .main-nav a{padding-inline:8px}}
+@media(min-width:761px){.site-navigation .main-nav{gap:clamp(12px,1.2vw,18px)}}
 .site-navigation .mobile-menu{display:none}
 .hero .hero-content{position:absolute;z-index:2;top:clamp(155px,21vh,230px);left:7.5%;width:auto;max-width:620px}
 .hero .hero-kicker{margin:0 0 26px;color:#a45b39;font-size:10px;font-weight:700;letter-spacing:.18em}
@@ -272,12 +273,12 @@ body{background:#f5f4f0}
 body{background:var(--theme-bg);color:var(--theme-ink)}
 ::selection{background:#f5d2bd;color:var(--theme-ink)}
 
-/* Hero: heading, map, then statistics in normal document flow. */
-.hero{height:auto;min-height:0;max-height:none;display:flex;flex-direction:column;align-items:center;padding:150px 5% 55px;background:radial-gradient(ellipse at 5% 24%,rgba(217,107,50,.07),transparent 32%),radial-gradient(ellipse at 95% 73%,rgba(217,107,50,.06),transparent 30%),var(--theme-bg);color:var(--theme-ink)}
+/* Keep the heading, map and voice prompt in normal document flow. */
+.hero{height:auto;min-height:0;max-height:none;display:flex;flex-direction:column;align-items:center;padding:126px 5% 55px;background:radial-gradient(ellipse at 5% 24%,rgba(217,107,50,.07),transparent 32%),radial-gradient(ellipse at 95% 73%,rgba(217,107,50,.06),transparent 30%),var(--theme-bg);color:var(--theme-ink)}
 .site-navigation.nav-shell{top:24px}
 .hero .hero-content{position:relative;inset:auto;z-index:2;width:100%;max-width:1200px;text-align:center}
 .hero .hero-content::before{display:none}
-.hero h1{font-size:clamp(66px,8.7vw,130px);line-height:1;letter-spacing:-.075em;white-space:normal}
+.hero h1{max-width:92%;margin-inline:auto;font-size:clamp(48.576px,6.4vw,95.68px);line-height:1;letter-spacing:-.075em;white-space:normal}
 .hero .hero-line{white-space:normal}
 .hero .hero-accent{font-family:var(--font-serif);font-style:italic;font-weight:400}
 .hero-description{max-width:510px;margin:22px auto 0;font-size:16px}
@@ -291,7 +292,7 @@ body{background:var(--theme-bg);color:var(--theme-ink)}
 .hero-action:active{transform:translateY(0)}.hero-action:focus-visible{outline:2px solid var(--theme-deep);outline-offset:3px}
 @media(max-width:640px){.hero-actions{gap:8px;margin-top:16px}.hero-action{min-height:44px;padding:10px 14px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){.hero-action{transition:none}.hero-action:hover{transform:none}}
-.hero-map{position:relative;inset:auto;z-index:1;width:min(100%,1380px);margin:28px auto 0}
+.hero-map{position:relative;inset:auto;z-index:1;width:min(calc(100% + 6vw),1476px);margin:28px 0 0}
 .hero-map svg{width:100%;height:auto}
 .hero-statistics{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);width:min(720px,100%);margin:0 auto;gap:20px;text-align:center;color:var(--theme-ink)}
 .hero-statistics div{display:grid;gap:9px}.hero-statistics strong{font-size:clamp(28px,3.1vw,43px);font-weight:600;letter-spacing:-.06em;line-height:1}.hero-statistics span{color:var(--theme-muted);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
@@ -313,8 +314,18 @@ body{background:var(--theme-bg);color:var(--theme-ink)}
 .dark-eyebrow{color:var(--theme-muted)}
 .light-eyebrow{color:rgba(255,252,248,.86)}
 
-@media(max-width:900px){.hero{min-height:0;padding:145px 5% 55px}.hero .hero-content{inset:auto;width:100%}.hero h1{font-size:clamp(60px,9.7vw,88px)}.hero-map{inset:auto;width:100%;margin-top:30px}.hero-statistics{margin-top:8px}}
-@media(max-width:640px){.hero{height:auto;min-height:0;max-height:none;padding:125px 5% 48px}.hero .hero-content{inset:auto;width:100%}.hero h1{font-size:clamp(47px,10.7vw,68px);line-height:1}.hero-description{max-width:320px;margin:18px auto 0;font-size:14px}.hero-map{inset:auto;width:100%;margin-top:30px}.hero-statistics{gap:6px;margin-top:16px}.hero-statistics strong{font-size:27px}.hero-statistics span{font-size:7px;letter-spacing:.09em}.text-marquee{height:36px}}
+@media(max-width:900px){.hero{min-height:0;padding:124px 5% 55px}.hero .hero-content{inset:auto;width:100%}.hero h1{font-size:clamp(44.16px,7.136vw,64.768px)}.hero-map{margin-top:38px}.hero-statistics{margin-top:8px}}
+@media(max-width:640px){.hero{height:auto;min-height:0;max-height:none;padding:108px 5% 48px}.hero .hero-content{inset:auto;width:100%}.hero h1{max-width:73.6%;font-size:clamp(34.592px,7.872vw,50.048px);line-height:1}.hero-description{max-width:320px;margin:18px auto 0;font-size:14px}.hero-map{margin-top:46px}.hero-statistics{gap:6px;margin-top:16px}.hero-statistics strong{font-size:27px}.hero-statistics span{font-size:7px;letter-spacing:.09em}.text-marquee{height:36px}}
+@media (min-width: 901px) {
+  .hero { padding-top: clamp(102px, calc(13.5svh - 6px), 126px); }
+  .hero-description { max-width: 675px; margin-top: clamp(13px, 1.8svh, 22px); }
+  .hero-actions { margin-top: clamp(13px, 1.8svh, 20px); }
+  .hero-map {
+    /* The 2:1 map can grow again on taller screens without pushing the prompt out of short laptop layouts. */
+    width: min(calc(100% + 6vw), 1476px, max(572px, calc(170svh - 664px + max(0px, 100svh - 900px))));
+    margin-top: clamp(10px, calc(9.5svh - 75px), 24px);
+  }
+}
 @media(prefers-reduced-motion:reduce){.map-route{animation:none;stroke-dashoffset:0;opacity:.7}.map-node{animation:none}}
 
 /* One shared atmosphere sits behind content; opaque dark sections cover it. */

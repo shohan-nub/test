@@ -215,12 +215,22 @@
 .notice[role="alert"] { color: #963b24; }
 .returnLinks { justify-content: space-between; margin-top: 20px; }
 
+@media (min-width: 641px) and (max-height: 950px) {
+  .intro { padding-block: clamp(24px, 4.7svh, 48px) clamp(28px, 5svh, 48px); }
+  .intro h1 { font-size: clamp(36px, 4.6vw, 60px); }
+  .contactGrid { gap: clamp(24px, 4vw, 56px); }
+  .callCard, .inquiryCard { padding-block: clamp(18px, 3.1svh, 29px); }
+  .callDetails { margin-block: 15px; }
+  .callDetails div { padding-block: 7px; }
+}
+
 @media (max-width: 840px) {
   .contactGrid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
   .navSpace { height: 84px; }
+  .intro { padding-block: 22px 28px; }
   .formFields { grid-template-columns: 1fr; }
 }
 

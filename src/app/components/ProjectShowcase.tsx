@@ -49,12 +49,6 @@ const nexrViews = [
 ];
 const layerSpring = { stiffness: 230, damping: 27, mass: 0.82 };
 const tiltSpring = { stiffness: 225, damping: 24, mass: 0.82 };
-const technologies = [
-  ["Next.js", "nextjs-icon"], ["React", "react"], ["TypeScript", "typescript-icon"],
-  ["JavaScript", "javascript"], ["WordPress", "wordpress-icon"],
-  ["Tailwind CSS", "tailwindcss-icon"], ["PostgreSQL", "postgresql"],
-] as const;
-
 function trackPointer(event: PointerEvent<HTMLButtonElement>) {
   if (event.pointerType === "touch") return;
   const surface = event.currentTarget;
@@ -245,19 +239,6 @@ export default function ProjectShowcase() {
                 <span>{project.category}</span>
               </div>
             </article>
-          ))}
-        </div>
-      </div>
-      <div className={styles.technologyStrip} role="group" aria-label="Technologies we use">
-        <div className={styles.technologyTrack}>
-          {[0, 1].map((copy) => (
-            <div className={styles.technologySequence} key={copy} aria-hidden={copy === 1 ? true : undefined}>
-              {[0, 1].flatMap((repeat) => technologies.map(([name, icon]) => (
-                <div className={styles.technologyMark} key={`${repeat}-${name}`} title={name}>
-                  <Image src={`/technology-stack/${icon}.svg`} alt={copy === 0 && repeat === 0 ? name : ""} width={72} height={34} loading="eager" unoptimized />
-                </div>
-              )))}
-            </div>
           ))}
         </div>
       </div>

@@ -5,7 +5,7 @@ import { RotatingText } from "./motion-brew/rotating-text";
 import styles from "./HomeFaq.module.css";
 
 const questions = [
-  { id: "why-sparklab", question: "Why SparkLab Best?", answer: "SparkLab brings websites, web applications, mobile apps, custom software, and AI-powered automation together under one roof. You can work with one team across your complete digital project." },
+  { id: "why-sparklab", question: "Why SparkLab Best Agency?", answer: "SparkLab brings websites, web applications, mobile apps, custom software, and AI-powered automation together under one roof. You can work with one team across your complete digital project." },
   { id: "entire-project", question: "Can SparkLab Manage My Entire Software Project?", answer: "Yes. We support projects from planning and strategy through UI/UX design, development, deployment, and ongoing improvements. Each stage builds on decisions made with you earlier in the project." },
   { id: "limited-budget", question: "What If I Have a Limited Budget?", answer: "We can help you prioritize essential features, explore alternative approaches, and consider suitable software rental options where available. That gives you a way to start with what your business needs most." },
   { id: "design-inspiration", question: "Can You Build Software Inspired by Existing Designs or Products?", answer: "Yes. We can discuss what you find useful in existing designs, interfaces, or products and use those references to inform an original solution tailored to your brand, business requirements, and functionality needs." },

@@ -15,6 +15,7 @@ import { MagneticButton } from "./components/motion-brew/magnetic-button";
 import { FlipWords } from "./components/motion-brew/flip-words";
 import { BackspaceText } from "./components/motion-brew/backspace-text";
 import CalBookingButton from "./components/CalBookingButton";
+import HeroVoicePrompt from "./components/HeroVoicePrompt";
 import SiteNav from "./components/SiteNav";
 import soundStyles from "./components/ShowreelSound.module.css";
 import { useViewportVideo } from "./components/useViewportVideo";
@@ -287,6 +288,7 @@ export default function Home() {
           </div>
         </div>
         <GlobalMap />
+        <HeroVoicePrompt />
       </section>
       <section className="service-overview section-pad" aria-labelledby="service-overview-heading">
         <header className="service-overview-heading">

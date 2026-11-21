@@ -5,7 +5,7 @@
     radial-gradient(ellipse at top right, #faeadc85, transparent 58%) no-repeat,
     radial-gradient(circle, #98614329 .65px, transparent .95px) 0 0 / 18px 18px,
     var(--theme-bg);
-  padding-block: clamp(42px, 5.8vw, 84px) clamp(38px, 5vw, 76px);
+  padding-block: clamp(42px, 5.8vw, 84px) clamp(24px, 3.2vw, 48px);
 }
 
 .inner { width: min(94%, 1240px); margin-inline: auto; }
@@ -97,13 +97,6 @@
 .caption h3 { margin: 0; font-size: clamp(13px, 1.25vw, 18px); font-weight: 650; line-height: 1.15; letter-spacing: -.025em; }
 .caption span { color: #765647; font-size: 11px; }
 
-.technologyStrip { margin-top: clamp(36px, 5vw, 64px); overflow: hidden; }
-.technologyTrack { display: flex; width: max-content; animation: technology-scroll 42s linear infinite; }
-.technologySequence { display: flex; flex: none; align-items: center; min-width: 100vw; gap: clamp(18px, 2vw, 28px); padding-right: clamp(18px, 2vw, 28px); }
-.technologyMark { display: grid; flex: none; place-items: center; width: 82px; height: 42px; opacity: .2; }
-.technologyMark img { width: 72px; height: 34px; object-fit: contain; }
-@keyframes technology-scroll { to { transform: translateX(-50%); } }
-
 .preview[data-effect="depth"] {
   perspective: 780px;
   background: radial-gradient(ellipse at 68% 25%, #fff4df, #d8b395);
@@ -150,7 +143,6 @@
 
 @media (hover: hover) {
   .preview:hover { --engaged: 1; }
-  .technologyStrip:hover .technologyTrack { animation-play-state: paused; }
 }
 
 @media (min-width: 981px) {
@@ -170,7 +162,4 @@
 
 @media (prefers-reduced-motion: reduce) {
   .preview :is(.imagePlane, .detail), .preview::after { transition: none !important; }
-  .technologyTrack { animation: none; }
-  .technologySequence + .technologySequence { display: none; }
-  .technologyStrip { overflow-x: auto; }
 }

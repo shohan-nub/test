@@ -72,8 +72,14 @@
 .steps h3 { margin: 7px 0 5px; font-size: clamp(19px, 2vw, 24px); font-weight: 650; letter-spacing: -.035em; }
 .steps p { max-width: 30ch; margin: 0; color: var(--text); font-size: 14px; line-height: 1.5; text-wrap: pretty; }
 
+@media (min-width: 701px) and (max-height: 950px) {
+  .overview { gap: clamp(26px, 5.6vw, 84px); padding-block: clamp(30px, 6svh, 56px) clamp(24px, 5.3svh, 50px); }
+  .overview > header h1 { font-size: clamp(39px, 5vw, 68px); }
+}
+
 @media (max-width: 700px) {
   .overview, .process { grid-template-columns: minmax(0, 1fr); }
+  .overview { padding-top: 26px; }
   .overview > header h1 { font-size: clamp(36px, 7.8vw, 52px); }
   .overview::before { inset-inline-start: 10%; }
 }

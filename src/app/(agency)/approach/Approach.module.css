@@ -24,6 +24,12 @@
 .booking { margin: 0; }
 .bookingLink { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 18px; border: 1px solid #bda998; border-radius: 999px; background: #fffaf6; font-size: 13px; font-weight: 700; }
 .bookingLink:hover { background: #ffede1; }
+@media (min-width: 641px) and (max-height: 950px) {
+  .hero { gap: clamp(24px, 3.5vw, 40px); }
+  .heroCta { margin-top: 24px; }
+  .heroAside { padding-bottom: clamp(28px, 5svh, 50px); }
+  .hero + .section { padding-top: clamp(40px, 6.5svh, 68px); }
+}
 @media(max-width:900px) { .process { grid-template-columns: repeat(2, minmax(0, 1fr)); } .process li { min-height: 190px; } }
 @media(max-width:640px) { .hero, .difference, .collaboration { grid-template-columns: 1fr; } .heroAside { display: none; } .process { gap: 10px; margin-top: 28px; } .process li { min-height: 190px; padding: 18px; } .process h3 { margin-top: 25px; font-size: 17px; } .principles { gap: 12px; } .closing { border-radius: 20px; } }
 @media(max-width:360px) { .process, .principles { grid-template-columns: 1fr; } .process li { min-height: 0; } }
