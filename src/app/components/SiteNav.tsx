@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useId, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useId, useRef, useState, type FocusEvent, type PointerEvent } from "react";
 import { brandLogo } from "./brand";
 
 const primaryLinks = [
@@ -13,9 +13,26 @@ const primaryLinks = [
 ] as const;
 
 function Navigation({ pathname }: { pathname: string }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
   const menuId = useId();
+
+  function warmRoute(href: string) {
+    if (href !== pathname) router.prefetch(href);
+  }
+
+  function routeIntent(href: string) {
+    return {
+      prefetch: false as const,
+      onPointerEnter: (event: PointerEvent<HTMLAnchorElement>) => {
+        if (event.pointerType === "mouse") warmRoute(href);
+      },
+      onFocus: (event: FocusEvent<HTMLAnchorElement>) => {
+        if (event.currentTarget.matches(":focus-visible")) warmRoute(href);
+      },
+    };
+  }
 
   return (
     <header
@@ -30,7 +47,7 @@ function Navigation({ pathname }: { pathname: string }) {
         }
       }}
     >
-      <Link className="wordmark" href="/" aria-label="SparkLab home" onClick={() => setOpen(false)}>
+      <Link className="wordmark" href="/" {...routeIntent("/")} aria-label="SparkLab home" onClick={() => setOpen(false)}>
         <Image className="navbar-brand-logo" {...brandLogo} alt="SparkLab" loading="eager" sizes="(max-width: 640px) 108px, 132px" />
       </Link>
       <button
@@ -45,12 +62,12 @@ function Navigation({ pathname }: { pathname: string }) {
       </button>
       <nav id={menuId} className="main-nav" data-open={open} aria-label="Main navigation">
         {primaryLinks.map(({ href, label }) => (
-          <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={() => setOpen(false)}>
+          <Link key={href} href={href} {...routeIntent(href)} aria-current={pathname === href ? "page" : undefined} onClick={() => setOpen(false)}>
             {label}
           </Link>
         ))}
       </nav>
-      <Link className={`nav-cta${pathname === "/" ? " magnetic" : ""}`} href="/contact" aria-current={pathname === "/contact" ? "page" : undefined} onClick={() => setOpen(false)}>
+      <Link className={`nav-cta${pathname === "/" ? " magnetic" : ""}`} href="/contact" {...routeIntent("/contact")} aria-current={pathname === "/contact" ? "page" : undefined} onClick={() => setOpen(false)}>
         Contact Us <span aria-hidden="true" className="arrow">↗</span>
       </Link>
     </header>

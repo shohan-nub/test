@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
+import type { gsap } from "gsap";
 import styles from "./SeoGeoShowcase.module.css";
 import services from "./seo-geo-services.json";
 import { useNearViewport } from "./useNearViewport";
@@ -18,6 +18,7 @@ export default function SeoGeoShowcase() {
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const root = useRef<HTMLElement>(null);
   const near = useNearViewport(root, "240px");
+  const [engine, setEngine] = useState<typeof gsap>();
   const cards = useRef<Array<HTMLDivElement | null>>([]);
   const previous = useRef(0);
   const initialized = useRef(false);
@@ -25,6 +26,15 @@ export default function SeoGeoShowcase() {
   const navigate = (direction: number) => {
     setActive(index => (index + direction + count) % count);
   };
+
+  useEffect(() => {
+    if (!near) return;
+    let mounted = true;
+    void import("gsap").then(({ gsap }) => {
+      if (mounted) setEngine(gsap);
+    }).catch(() => { /* Manual navigation still works with the static transforms. */ });
+    return () => { mounted = false; };
+  }, [near]);
 
   useEffect(() => {
     const node = root.current;
@@ -36,21 +46,21 @@ export default function SeoGeoShowcase() {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let timer: gsap.core.Tween | undefined;
+    let timer = 0;
     const schedule = () => {
-      timer?.kill();
+      window.clearTimeout(timer);
       if (visible && playing && !dragging && !media.matches && !document.hidden) {
-        timer = gsap.delayedCall(1.7, () => setActive(index => (index + 1) % count));
+        timer = window.setTimeout(() => setActive(index => (index + 1) % count), 1700);
       }
     };
     schedule();
     media.addEventListener("change", schedule);
     document.addEventListener("visibilitychange", schedule);
-    return () => { timer?.kill(); media.removeEventListener("change", schedule); document.removeEventListener("visibilitychange", schedule); };
+    return () => { window.clearTimeout(timer); media.removeEventListener("change", schedule); document.removeEventListener("visibilitychange", schedule); };
   }, [active, visible, dragging, playing]);
 
   useEffect(() => {
-    if (!near) return;
+    if (!engine) return;
     const media = window.matchMedia("(max-width: 640px)");
     const tablet = window.matchMedia("(max-width: 900px)");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -62,10 +72,10 @@ export default function SeoGeoShowcase() {
         const oldDistance = slot(index, previous.current);
         const rotation = media.matches ? 6 : tablet.matches ? 10 : 14;
         const position = { x: 0, xPercent: distance * 84, rotationY: distance === 0 ? 0 : distance < 0 ? rotation : -rotation, scale: distance === 0 ? 1 : .82, z: distance === 0 ? 0 : media.matches ? -45 : tablet.matches ? -70 : -100, autoAlpha: Math.abs(distance) <= 1 ? 1 : 0 };
-        gsap.set(card, { zIndex: distance === 0 ? 3 : Math.abs(distance) === 1 ? 2 : 1 });
+        engine.set(card, { zIndex: distance === 0 ? 3 : Math.abs(distance) === 1 ? 2 : 1 });
         // Offstage cards wrap while invisible; only adjacent cards cross the stage.
-        if (instant || reduced.matches || Math.abs(distance) > 1 && Math.abs(oldDistance) > 1) gsap.set(card, position);
-        else gsap.to(card, { ...position, duration: .75, ease: "power3.inOut", overwrite: true });
+        if (instant || reduced.matches || Math.abs(distance) > 1 && Math.abs(oldDistance) > 1) engine.set(card, position);
+        else engine.to(card, { ...position, duration: .75, ease: "power3.inOut", overwrite: true });
       });
       previous.current = active;
     };
@@ -75,8 +85,8 @@ export default function SeoGeoShowcase() {
     media.addEventListener("change", resize);
     tablet.addEventListener("change", resize);
     reduced.addEventListener("change", resize);
-    return () => { media.removeEventListener("change", resize); tablet.removeEventListener("change", resize); reduced.removeEventListener("change", resize); nodes.forEach(card => { if (card) gsap.killTweensOf(card); }); };
-  }, [active, near]);
+    return () => { media.removeEventListener("change", resize); tablet.removeEventListener("change", resize); reduced.removeEventListener("change", resize); nodes.forEach(card => { if (card) engine.killTweensOf(card); }); };
+  }, [active, engine]);
 
   const release = (cancelled = false) => {
     const gesture = drag.current;
@@ -84,10 +94,10 @@ export default function SeoGeoShowcase() {
     drag.current = null;
     setDragging(false);
     if (!cancelled && Math.abs(gesture.dx) > 45) navigate(gesture.dx < 0 ? 1 : -1);
-    else gsap.to(cards.current.filter(Boolean), { x: 0, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : .45, ease: "power3.out", overwrite: "auto" });
+    else engine?.to(cards.current.filter(Boolean), { x: 0, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : .45, ease: "power3.out", overwrite: "auto" });
   };
 
-  return <section ref={root} className={styles.section} id="destinations" aria-labelledby="visibility-title">
+  return <section ref={root} className={styles.section} id="destinations" data-visible={visible} aria-labelledby="visibility-title">
     <div className={styles.heading}>
       <h2 id="visibility-title">Be Seen. Be Found.<br /><em>Be Chosen.</em></h2>
       <p className={styles.intro}>Helping businesses grow through search visibility, intelligent discovery, and connected digital systems.</p>
@@ -96,13 +106,15 @@ export default function SeoGeoShowcase() {
       <div className={styles.stage} role="group" tabIndex={0} aria-label="Use left and right arrow keys, or swipe, to explore services"
         onKeyDown={event => { if (event.key === "ArrowRight" || event.key === "ArrowLeft") { event.preventDefault(); navigate(event.key === "ArrowRight" ? 1 : -1); } }}
         onPointerDown={event => { if (!event.isPrimary || event.button !== 0) return; drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, dx: 0 }; event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); }}
-        onPointerMove={event => { const gesture = drag.current; if (!gesture || gesture.id !== event.pointerId) return; gesture.dx = event.clientX - gesture.x; if (Math.abs(gesture.dx) > Math.abs(event.clientY - gesture.y)) gsap.set(cards.current.filter(Boolean), { x: gesture.dx * .55 }); }}
+        onPointerMove={event => { const gesture = drag.current; if (!gesture || gesture.id !== event.pointerId) return; gesture.dx = event.clientX - gesture.x; if (Math.abs(gesture.dx) > Math.abs(event.clientY - gesture.y)) engine?.set(cards.current.filter(Boolean), { x: gesture.dx * .55 }); }}
         onPointerUp={event => { release(); if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}
         onPointerCancel={() => release(true)} onLostPointerCapture={() => release(true)}>
-        {services.map((service, index) => <div key={service.image} className={styles.card} ref={node => { cards.current[index] = node; }}
+        {services.map((service, index) => {
+          const initialSlot = slot(index, engine ? 0 : active);
+          return <div key={service.image} className={styles.card} ref={node => { cards.current[index] = node; }}
           data-artwork={failedImages.includes(service.image) ? "error" : "available"}
           role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${count}: ${service.title}`} aria-hidden={index !== active}
-          style={{ transform: `translateX(${slot(index, 0) * 84}%) scale(${index === 0 ? 1 : .82})`, opacity: Math.abs(slot(index, 0)) <= 1 ? 1 : 0, zIndex: index === 0 ? 3 : 1 }}>
+          style={{ transform: `translateX(${initialSlot * 84}%) scale(${initialSlot === 0 ? 1 : .82})`, opacity: Math.abs(initialSlot) <= 1 ? 1 : 0, zIndex: initialSlot === 0 ? 3 : 1 }}>
           {!failedImages.includes(service.image) ? <Image
             src={`/seo-geo-showcase/${service.image}?v=${service.imageVersion}`} alt={service.alt}
             fill sizes="(max-width: 640px) 82vw, (max-width: 900px) 64vw, (max-width: 1200px) 52vw, 640px"
@@ -114,7 +126,7 @@ export default function SeoGeoShowcase() {
             <h3>{service.title}</h3>
             <p>{service.description}</p>
           </div>
-        </div>)}
+        </div>})}
       </div>
       <div className={styles.controls}>
         <span className={styles.counter}>{String(active + 1).padStart(2, "0")} <span>/ 07</span></span>

@@ -16,11 +16,9 @@
 
 import * as React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
 import { type ClassValue, clsx } from "clsx";
-import gsap from "gsap";
 import { useReducedMotionPreference } from "./useReducedMotionPreference";
-import { AnimatePresence, motion, type Transition, useAnimation, useReducedMotion, type Variants } from "motion/react";
+import { animate, AnimatePresence, motion, type Transition, useAnimation, useReducedMotion, type Variants } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -839,13 +837,12 @@ XIcon.displayName = "XIcon";
  * opens upward with a sliding highlight, and the send button wakes once there
  * is text. Reduced motion keeps every state but holds the glow still.
  *
- * Engine: GSAP (a ticker feeding the voice into a WebGL fragment shader,
+ * Engine: requestAnimationFrame (feeding the voice into a WebGL fragment shader,
  * tweens for the listening energy, quick setters for the mic's level ring and
  * a blur in for each heard word), with motion/react for the height glide and
  * the menu.
  */
 
-gsap.registerPlugin(useGSAP);
 
 export interface VoicePromptMode {
   id: string;
@@ -941,6 +938,8 @@ const DEFAULT_SCRIPT =
 /** Lines the heard words show at once, and their height in px (leading-7). */
 const LINES = 2;
 const LINE = 28;
+const quarticOut = (t: number) => 1 - (1 - t) ** 4;
+const cubicInOut = (t: number) => t < .5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
 
 const rgb = (hex: string) => {
   const h = hex.replace("#", "");
@@ -968,6 +967,8 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
     const uid = React.useId();
     const root = React.useRef<HTMLDivElement>(null);
     const canvas = React.useRef<HTMLCanvasElement>(null);
+    const energyMotion = React.useRef<ReturnType<typeof animate> | null>(null);
+    const wordMotions = React.useRef(new Set<ReturnType<typeof animate>>());
     const wakeGlow = React.useRef<() => void>(() => {});
     const ring = React.useRef<HTMLSpanElement>(null);
     const words = React.useRef<HTMLParagraphElement>(null);
@@ -1048,13 +1049,27 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
     };
     React.useEffect(() => {
       const session = live.current;
+      const words = wordMotions.current;
       return () => {
         session.listening = false;
         session.request++;
         release();
-        gsap.killTweensOf(session.energy);
+        energyMotion.current?.stop();
+        words.forEach(animation => animation.stop());
+        words.clear();
       };
     }, []);
+
+    const moveEnergy = (value: number, duration: number, ease: (p: number) => number) => {
+      const energy = live.current.energy;
+      energyMotion.current?.stop();
+      if (still) energy.v = value;
+      else energyMotion.current = animate(energy.v, value, {
+        duration,
+        ease,
+        onUpdate: (next) => { energy.v = next; },
+      });
+    };
 
     const start = async () => {
       const request = ++live.current.request;
@@ -1064,12 +1079,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
       live.current.listening = true;
       setListening(true);
       wakeGlow.current();
-      gsap.to(live.current.energy, {
-        v: 1,
-        duration: still ? 0 : 0.9,
-        ease: "power3.out",
-        overwrite: true,
-      });
+      moveEnergy(1, 0.9, quarticOut);
       if (!microphone || !navigator.mediaDevices?.getUserMedia) return;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -1099,12 +1109,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
       live.current.request++;
       release();
       setListening(false);
-      gsap.to(live.current.energy, {
-        v: 0,
-        duration: still ? 0 : 0.7,
-        ease: "power2.inOut",
-        overwrite: true,
-      });
+      moveEnergy(0, 0.7, cubicInOut);
       if (keep && live.current.heard > 0) {
         const got = said.slice(0, live.current.heard).join(" ");
         setText((t) => (t.trim() ? `${t.trimEnd()} ${got}` : got));
@@ -1118,49 +1123,44 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
       setText("");
     };
 
-    // Each newly heard word sharpens out of a blur, and past two lines the
-    // text glides up so the newest line always sits at the bottom.
-    useGSAP(
-      () => {
-        const p = words.current;
-        if (!heard || !p) return;
-        const wordHeight = p.offsetHeight;
-        const over = wordHeight > LINES * LINE;
-        setScrolled(over);
-        gsap.to(p, {
-          y: Math.min(0, LINES * LINE - wordHeight),
-          duration: still ? 0 : 0.7,
-          ease: "power3.out",
-          overwrite: true,
-        });
-        if (still) return;
-        const last = words.current?.querySelector<HTMLElement>(
-          `[data-word="${heard - 1}"]`,
-        );
-        if (last)
-          gsap.fromTo(
-            last,
-            { opacity: 0, y: 8, filter: "blur(8px)" },
-            {
-              opacity: 1,
-              y: 0,
-              filter: "blur(0px)",
-              duration: 0.5,
-              ease: "power3.out",
-            },
-          );
-      },
-      { dependencies: [heard, still] },
-    );
+    const stopOffscreen = React.useEffectEvent(() => stop(false, false));
 
-    // The glow: a GSAP ticker feeds the voice into a WebGL shader that paints a
-    // soft noisy tide with a lit crest.
-    useGSAP(
+    // Measure once for each new word after React commits. Run both animations
+    // through the Motion runtime the voice controls already use.
+    React.useEffect(() => {
+      const p = words.current;
+      if (!heard || !p) return;
+      let line: ReturnType<typeof animate> | undefined;
+      const frame = requestAnimationFrame(() => {
+        const wordHeight = p.offsetHeight;
+        setScrolled(wordHeight > LINES * LINE);
+        line = animate(p, { y: Math.min(0, LINES * LINE - wordHeight) }, {
+          duration: still ? 0 : 0.7, ease: quarticOut,
+        });
+        const last = p.querySelector<HTMLElement>(`[data-word="${heard - 1}"]`);
+        if (last && !still) {
+          const word = animate(last, {
+            opacity: [0, 1], y: [8, 0], filter: ["blur(8px)", "blur(0px)"],
+          }, { duration: 0.5, ease: quarticOut });
+          const animations = wordMotions.current;
+          animations.add(word);
+          void word.then(() => { animations.delete(word); });
+        }
+      });
+      return () => {
+        cancelAnimationFrame(frame);
+        line?.stop();
+      };
+    }, [heard, still]);
+
+    // Keep visible controls ready while the decorative shader initializes.
+    const palette = colors.join(",");
+    React.useEffect(
       () => {
         const el = canvas.current!;
         const host = root.current!;
         const compact = window.matchMedia("(max-width: 767px), (pointer: coarse)");
-        const tones = colors.map(rgb);
+        const tones = palette.split(",").map(rgb);
         const css = (i: number) =>
           `rgb(${tones[Math.min(tones.length - 1, i)]!.join(",")})`;
         const background = `radial-gradient(120% 90% at 50% 110%, ${css(0)}, ${css(1)} 35%, ${css(3)} 60%, transparent 80%)`;
@@ -1346,6 +1346,8 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
         let visible = false;
         let frame = 0;
         let last = 0;
+        let idle = 0;
+        let showingShader = false;
         const running = () => visible && !document.hidden;
         function schedule() {
           const animate = running() && ((!still && !compact.matches) || live.current.listening);
@@ -1355,6 +1357,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
             frame = 0;
             last = 0;
             el.style.background = background;
+            showingShader = false;
             if (previousEnergy > 0) {
               ringStyle?.removeProperty("transform");
               ringStyle?.removeProperty("opacity");
@@ -1373,10 +1376,19 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
             t += dt;
             listen(dt);
             if (!still) {
-              initialize();
+              if (active || !window.requestIdleCallback) initialize();
+              else if (!attempted && !idle && width && height) {
+                idle = window.requestIdleCallback(() => {
+                  idle = 0;
+                  if (running() && !compact.matches) initialize();
+                }, { timeout: 650 });
+              }
               if (draw) {
                 draw();
-                el.style.background = "";
+                if (!showingShader) {
+                  el.style.background = "";
+                  showingShader = true;
+                }
               }
               const energy = live.current.energy.v;
               if (ringStyle && (energy > 0 || previousEnergy > 0)) {
@@ -1389,7 +1401,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           schedule();
         }
         function syncVisibility() {
-          if (!running() && live.current.listening) stop(false, false);
+          if (!running() && live.current.listening) stopOffscreen();
           schedule();
         }
         const observer = new IntersectionObserver(([entry]) => {
@@ -1406,6 +1418,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           compact.removeEventListener("change", schedule);
           document.removeEventListener("visibilitychange", syncVisibility);
           cancelAnimationFrame(frame);
+          if (idle) window.cancelIdleCallback(idle);
           disposeGlow?.();
           ringStyle?.removeProperty("transform");
           ringStyle?.removeProperty("opacity");
@@ -1413,7 +1426,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           wakeGlow.current = () => {};
         };
       },
-      { dependencies: [colors.join(), dark, still, said], revertOnUpdate: true },
+      [palette, dark, still, said],
     );
 
     const ink = dark ? "text-white" : "text-[#242423]";
