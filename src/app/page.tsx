@@ -213,6 +213,28 @@ export default function Home() {
               ease: "none",
             }, 0);
           }
+          // Refresh the function-based positions when the stack's dimensions change,
+          // including after fonts load or a tablet changes orientation.
+          let refreshFrame = 0;
+          let stackWidth = stack.clientWidth;
+          let stackHeight = stack.clientHeight;
+          const scheduleRefresh = () => {
+            cancelAnimationFrame(refreshFrame);
+            refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+          };
+          const observer = new ResizeObserver(() => {
+            if (stack.clientWidth === stackWidth && stack.clientHeight === stackHeight) return;
+            stackWidth = stack.clientWidth;
+            stackHeight = stack.clientHeight;
+            scheduleRefresh();
+          });
+          observer.observe(stack);
+          document.fonts.addEventListener("loadingdone", scheduleRefresh);
+          cleanups.push(() => {
+            observer.disconnect();
+            document.fonts.removeEventListener("loadingdone", scheduleRefresh);
+            cancelAnimationFrame(refreshFrame);
+          });
         }
         const overview = element.querySelector<HTMLElement>(".service-overview");
         if (overview) {
