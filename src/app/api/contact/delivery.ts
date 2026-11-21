@@ -59,20 +59,17 @@ function notification(inquiry: Inquiry) {
 
 export async function deliverInquiry(inquiry: Inquiry): Promise<"sent" | "unconfigured" | "failed"> {
   const to = "heysparklab@gmail.com";
-
+  const host = process.env.SMTP_HOST?.trim();
+  const user = process.env.SMTP_USER?.trim();
+  const port = Number(process.env.SMTP_PORT);
+  const secure = process.env.SMTP_SECURE?.trim().toLowerCase();
   const smtpPass = process.env.SMTP_PASS?.replace(/\s/g, "");
+  const validPort = Number.isInteger(port) && port >= 1 && port <= 65535;
+  const validSecure = secure === "true" || secure === "false";
   const fromName = process.env.CONTACT_FROM_NAME?.trim() || "SparkLab Website";
   const message = notification(inquiry);
 
-  if (smtpPass) {
-    const host = process.env.SMTP_HOST?.trim();
-    const user = process.env.SMTP_USER?.trim();
-    const port = Number(process.env.SMTP_PORT);
-    const secure = process.env.SMTP_SECURE?.trim().toLowerCase();
-    if (!host || !user || !Number.isInteger(port) || port < 1 || port > 65535 || (secure !== "true" && secure !== "false")) {
-      return "unconfigured";
-    }
-
+  if (host && user && smtpPass && validPort && validSecure) {
     const smtp = nodemailer.createTransport({
       host,
       port,
@@ -94,7 +91,17 @@ export async function deliverInquiry(inquiry: Inquiry): Promise<"sent" | "unconf
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = process.env.CONTACT_FROM_EMAIL?.trim();
-  if (!apiKey || !from) return "unconfigured";
+  if (smtpPass || !apiKey || !from) {
+    const invalidSmtpSettings = Object.entries({
+      SMTP_HOST: Boolean(host),
+      SMTP_PORT: validPort,
+      SMTP_SECURE: validSecure,
+      SMTP_USER: Boolean(user),
+      SMTP_PASS: Boolean(smtpPass),
+    }).filter(([, valid]) => !valid).map(([name]) => name);
+    console.error("Contact SMTP settings are missing or invalid:", invalidSmtpSettings.join(", "));
+    return "unconfigured";
+  }
 
   const { data, error } = await new Resend(apiKey).emails.send({
     ...message,

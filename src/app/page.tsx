@@ -9,6 +9,7 @@ import ProjectShowcase from "./components/ProjectShowcase";
 import { WorkflowVisual, workflowStages } from "./components/WorkflowVisuals";
 import workflowStyles from "./components/WorkflowVisuals.module.css";
 import FinalContact from "./components/FinalContact";
+import HomeFaq from "./components/HomeFaq";
 import HomeFooter from "./components/HomeFooter";
 import { MagneticButton } from "./components/motion-brew/magnetic-button";
 import { FlipWords } from "./components/motion-brew/flip-words";
@@ -248,7 +249,7 @@ export default function Home() {
         }
         const overview = element.querySelector<HTMLElement>(".service-overview");
         if (overview) {
-          gsap.from(overview.querySelector("h2"), { y: 20, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview, start: "top 82%", once: true } });
+          gsap.from(overview.querySelector(".service-overview-heading"), { y: 20, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview, start: "top 82%", once: true } });
           gsap.from(overview.querySelectorAll(".service-overview-card"), { y: 22, opacity: 0, stagger: .12, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview.querySelector(".service-overview-grid"), start: "top 86%", once: true } });
         }
         for (const button of element.querySelectorAll<HTMLElement>(".magnetic")) {
@@ -288,8 +289,10 @@ export default function Home() {
         <GlobalMap />
       </section>
       <section className="service-overview section-pad" aria-labelledby="service-overview-heading">
-        <h2 id="service-overview-heading">We build AI-powered automation, websites, web applications, mobile apps, and custom software that help businesses grow.</h2>
-        {motionReady ? <FlipWords before="Built for" words={["Websites", "Automation", "Applications", "Digital Products"]} after="" interval={4000} wordClassName="text-[#b9562d]" className="service-flip" /> : <p className="service-flip">Built for Websites</p>}
+        <header className="service-overview-heading">
+          <h2 id="service-overview-heading">We build AI-powered automation, websites, web applications, mobile apps, and custom software that help businesses grow.</h2>
+          {motionReady ? <FlipWords before="Built for" words={["Websites", "Automation", "Applications", "Digital Products"]} after="" interval={4000} wordClassName="text-[#b9562d]" className="service-flip" /> : <p className="service-flip">Built for <span className="text-[#b9562d]">Websites</span></p>}
+        </header>
         <div className="service-overview-grid">
           <article className="service-overview-card service-overview-dark">
             <span className="service-overview-number">01</span>
@@ -348,6 +351,7 @@ export default function Home() {
 
       <ProjectShowcase />
       <FinalContact />
+      <HomeFaq />
     </main>
     <HomeFooter />
     </>

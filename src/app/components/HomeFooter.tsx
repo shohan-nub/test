@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { brandLogo } from "./brand";
 import { GlobeCard } from "./motion-brew/globe-card";
+import { ParticleCard } from "./motion-brew/particle-card";
 import { RotatingText } from "./motion-brew/rotating-text";
 import styles from "./HomeFooter.module.css";
 
@@ -30,19 +31,60 @@ export default function HomeFooter() {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
-        <div className={styles.brand}>
-          <Link href="/" aria-label="SparkLab home"><Image {...brandLogo} alt="SparkLab" sizes="150px" /></Link>
-          <p>Building digital experiences and intelligent solutions for businesses without boundaries.</p>
-          <nav aria-label="Footer navigation">
-            <Link href="/">Studio</Link><Link href="/services">Services</Link><Link href="/about">About Us</Link><Link href="/contact">Contact Us</Link>
-          </nav>
-          <div className={styles.details}><span>Dhaka, Bangladesh</span><span>Mymensingh, Bangladesh</span><a href="mailto:heysparklab@gmail.com">heysparklab@gmail.com</a></div>
+        <div>
+          <div className={styles.brandCard}>
+            <Link className={styles.logo} href="/" aria-label="SparkLab home">
+              <Image {...brandLogo} alt="SparkLab" sizes="150px" />
+            </Link>
+            <div className={styles.signature}>
+              <Image {...brandLogo} width={96} height={22} alt="" />
+              <span>© SparkLab</span>
+            </div>
+          </div>
+          <p className={styles.description}>Building digital experiences and intelligent solutions for businesses without boundaries.</p>
+          <div className={styles.details}>
+            <nav aria-label="Footer navigation">
+              <h2>Explore</h2>
+              <ul>
+                <li><Link href="/">Studio</Link></li>
+                <li><Link href="/services">Services</Link></li>
+                <li><Link href="/about">About Us</Link></li>
+                <li><Link href="/contact">Contact Us</Link></li>
+              </ul>
+            </nav>
+            <div>
+              <h2>Locations</h2>
+              <ul><li>Dhaka, Bangladesh</li><li>Mymensingh, Bangladesh</li></ul>
+            </div>
+          </div>
+          <a className={styles.email} href="mailto:heysparklab@gmail.com">
+            <span>Email SparkLab</span>
+            <strong>heysparklab@gmail.com</strong>
+            <span className={styles.emailArrow} aria-hidden="true">↗</span>
+          </a>
         </div>
         <div className={styles.visual}>
-          {mounted && <GlobeFallback>
-            <GlobeCard title="Ideas without borders" subtitle="Connected by curiosity and creativity." cta="Explore the studio" href="/about" members={places} arcs={3} turn={90} className={`${styles.globe} shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-16px_rgba(0,0,0,0.18)]`} />
-          </GlobeFallback>}
-          {mounted && <RotatingText text="Digital Innovation • Creative Technology • " label="Digital Innovation and Creative Technology" size={150} duration={30} boost={2} className={styles.ring} />}
+          <div className={styles.globeStage}>
+            {mounted && <GlobeFallback>
+              <GlobeCard standalone members={places} arcs={3} turn={90} />
+            </GlobeFallback>}
+            <RotatingText text="Digital Innovation • Creative Technology • " label="Digital Innovation and Creative Technology" size={96} duration={30} boost={2} className={styles.ring} />
+          </div>
+          <ParticleCard
+            title="Ideas without borders"
+            description="Connected by curiosity and creativity."
+            cta="Explore the studio"
+            href="/about"
+            look="scan"
+            background="#fcf6ee"
+            color="#b9562d"
+            textColor="#28221e"
+            cell={5}
+            spin={0.45}
+            force={0.65}
+            reach={65}
+            className={styles.particle}
+          />
         </div>
       </div>
       <div className={styles.bottom}>© {year} SparkLab</div>

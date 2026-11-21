@@ -151,19 +151,6 @@
   .cta:hover { background: #392c26; box-shadow: 0 5px 14px rgb(58 38 25 / .16); }
 }
 
-.signature {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 13px;
-  margin-top: clamp(28px, 4.2vw, 52px);
-  color: #655b53;
-  font-size: 11px;
-}
-
-.signature img { width: 90px; height: auto; object-fit: contain; }
-.signature span { padding-inline-start: 13px; border-inline-start: 1px solid #ded2c7; }
-
 .cta:focus-visible { outline: 2px solid var(--theme-deep); outline-offset: 2px; }
 
 @media (max-width: 719px) {

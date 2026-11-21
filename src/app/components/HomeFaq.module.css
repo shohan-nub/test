@@ -1,0 +1,64 @@
+.section {
+  padding: clamp(46px, 7vw, 96px) 6%;
+  background: rgb(255 252 248 / .72);
+  color: var(--theme-ink);
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  align-items: start;
+  gap: clamp(28px, 5vw, 64px);
+  max-width: 1120px;
+  margin-inline: auto;
+}
+
+.heading { display: grid; justify-items: start; gap: clamp(16px, 2.5vw, 30px); }
+
+.heading h2 {
+  max-width: 13ch;
+  margin: 0;
+  font: 600 clamp(34px, 4vw, 56px) / 1.04 var(--font-display);
+  letter-spacing: -.06em;
+}
+
+.heading h2 em { color: var(--theme-deep); font-family: var(--font-serif); font-weight: 400; }
+.ring { color: var(--theme-deep); }
+.row { border-bottom: 1px solid #9a62472d; }
+.row:first-child { border-top: 1px solid #9a62472d; }
+.row h3 { margin: 0; }
+
+.row button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 3px 14px 0;
+  color: inherit;
+  font-size: clamp(14px, 1.55vw, 17px);
+  font-weight: 650;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  transition: color .2s ease;
+}
+
+.row button:focus-visible { outline: 2px solid var(--theme-deep); outline-offset: 3px; }
+.row button[aria-expanded="true"] { color: var(--theme-deep); }
+.indicator { display: grid; place-items: center; color: var(--theme-deep); }
+.indicator::before, .indicator::after { grid-area: 1 / 1; width: 12px; height: 1px; background: currentColor; content: ""; }
+.indicator::after { transform: rotate(90deg); transition: transform .24s ease; }
+[aria-expanded="true"] > .indicator::after { transform: rotate(0); }
+
+.answer { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .28s ease, opacity .22s ease; }
+.answer[data-expanded="true"] { grid-template-rows: 1fr; opacity: 1; }
+.answer > div { overflow: hidden; min-height: 0; }
+.answer p { max-width: 57ch; margin: 0; padding: 0 24px 17px 0; color: #655b53; font-size: 14px; line-height: 1.65; }
+
+@media (max-width: 740px) {
+  .inner { grid-template-columns: 1fr; }
+  .heading h2 { max-width: 16ch; }
+}
+@media (prefers-reduced-motion: reduce) { .row button, .answer, .indicator::after { transition: none; } }

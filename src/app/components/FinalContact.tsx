@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { brandLogo } from "./brand";
 import CalBookingButton from "./CalBookingButton";
 import styles from "./FinalContact.module.css";
 
@@ -46,10 +45,6 @@ export default function FinalContact() {
           <p className={styles.invitation}>Have something in mind? Let&apos;s make it happen.</p>
           <CalBookingButton slide />
         </div>
-      </div>
-      <div className={styles.signature}>
-        <Image {...brandLogo} width={96} height={22} alt="SparkLab" />
-        <span>© SparkLab</span>
       </div>
     </section>
   );

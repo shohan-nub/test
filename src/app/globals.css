@@ -395,9 +395,9 @@ main :is(.hero,.service-overview,.consultation-section,.experiences){background:
 
 /* Three-column SparkLab service overview. */
 .service-overview{background:var(--theme-bg);color:var(--theme-ink);padding-top:120px;padding-bottom:120px}
-.service-overview>h2{max-width:980px;margin:0 auto 70px;text-align:center;font-size:clamp(34px,4.1vw,58px);font-weight:550;line-height:1.12;letter-spacing:-.055em}
-.service-overview:has(.service-flip)>h2{margin-bottom:18px}
-.service-flip{min-height:24px;margin:0 auto 42px;text-align:center;color:var(--theme-muted);font-size:14px;font-weight:600}
+.service-overview-heading{display:grid;justify-items:center;gap:16px;max-width:980px;margin:0 auto clamp(24px,3.6vw,42px);text-align:center}
+.service-overview-heading h2{margin:0;font-size:clamp(34px,4.1vw,58px);font-weight:550;line-height:1.12;letter-spacing:-.055em;text-wrap:balance}
+.service-flip{min-height:24px;margin:0;color:var(--theme-muted);font-size:15px;font-weight:600;line-height:24px}
 .consultation-backspace{min-height:3em;font-size:13px;line-height:1.5}
 .service-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;max-width:1440px;margin:0 auto}
 .service-overview-card{min-width:0;min-height:480px;border-radius:24px;overflow:hidden}
@@ -408,8 +408,8 @@ main :is(.hero,.service-overview,.consultation-section,.experiences){background:
 .service-overview-card h3{margin:0;font-size:clamp(28px,2.75vw,40px);font-weight:550;line-height:1.05;letter-spacing:-.055em}
 .service-overview-card p{margin:20px 0 0;font-size:14px;line-height:1.6}.service-overview-dark p{color:#d5d0cb}.service-overview-orange p{color:#514840}
 .service-overview-visual{position:relative;background:#e8e3dd}.service-overview-visual video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-@media(max-width:900px){.service-overview{padding-top:90px;padding-bottom:90px}.service-overview>h2{margin-bottom:48px}.service-overview-grid{gap:12px}.service-overview-card{min-height:410px}.service-overview-card:not(.service-overview-visual){padding:24px}.service-overview-card h3{font-size:clamp(24px,3.5vw,32px)}.service-overview-card p{font-size:13px}}
-@media(max-width:640px){.service-overview{padding:80px 6%}.service-overview>h2{margin-bottom:38px;font-size:clamp(30px,8vw,42px)}.service-overview-grid{grid-template-columns:1fr;gap:14px}.service-overview-card{min-height:380px;border-radius:20px}.service-overview-visual{min-height:0;aspect-ratio:1/1}.service-overview-card:not(.service-overview-visual){padding:28px}.service-overview-card h3{font-size:34px}.service-overview-card p{font-size:14px}}
+@media(max-width:900px){.service-overview{padding-top:90px;padding-bottom:90px}.service-overview-grid{gap:12px}.service-overview-card{min-height:410px}.service-overview-card:not(.service-overview-visual){padding:24px}.service-overview-card h3{font-size:clamp(24px,3.5vw,32px)}.service-overview-card p{font-size:13px}}
+@media(max-width:640px){.service-overview{padding:80px 6%}.service-overview-heading h2{font-size:clamp(30px,8vw,42px)}.service-overview-grid{grid-template-columns:1fr;gap:14px}.service-overview-card{min-height:380px;border-radius:20px}.service-overview-visual{min-height:0;aspect-ratio:1/1}.service-overview-card:not(.service-overview-visual){padding:28px}.service-overview-card h3{font-size:34px}.service-overview-card p{font-size:14px}}
 
 /* Consultation panel and rotating outcomes. */
 .consultation-section{background:#fffcf8;color:#292522}

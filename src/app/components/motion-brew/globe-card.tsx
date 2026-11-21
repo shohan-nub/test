@@ -64,6 +64,8 @@ export interface GlobeCardProps {
   arcs?: number;
   /** Seconds per full turn. `0` holds the globe still. Default `70`. */
   turn?: number;
+  /** Show the animated globe without the card surface or copy. */
+  standalone?: boolean;
   /** Called by the button when there is no `href`. */
   onCta?: () => void;
   className?: string;
@@ -297,6 +299,7 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
       members = DEFAULT_MEMBERS,
       arcs = 6,
       turn = 70,
+      standalone = false,
       onCta,
       className,
     },
@@ -348,9 +351,9 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
       const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
       camera.position.set(0, 0, 6.5);
 
-      // The globe rises from the bottom edge, centered; the pivot takes hover tilt and drag, the globe its slow turn.
+      // The pivot handles hover tilt and drag while the globe turns independently.
       const pivot = new THREE.Group();
-      pivot.position.set(0, -0.65, 0);
+      pivot.position.set(0, standalone ? 0 : -0.65, 0);
       scene.add(pivot);
       const tilt = new THREE.Group();
       tilt.rotation.x = 0.38;
@@ -743,32 +746,34 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         renderer.dispose();
         renderer.domElement.remove();
       };
-    }, []);
+    }, [standalone]);
 
     return (
       <div
         ref={card}
         className={cn(
-          "relative h-[400px] w-[440px] max-w-full overflow-hidden rounded-3xl bg-white text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-16px_rgba(0,0,0,0.18)] dark:bg-zinc-900 dark:text-zinc-100",
+          standalone
+            ? "relative aspect-square w-full max-w-full"
+            : "relative h-[400px] w-[440px] max-w-full overflow-hidden rounded-3xl bg-white text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-16px_rgba(0,0,0,0.18)] dark:bg-zinc-900 dark:text-zinc-100",
           className,
         )}
       >
         {/* A soft colored glow under the globe. */}
-        <div
+        {!standalone && <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 opacity-[0.09]"
           style={{
             background:
               "radial-gradient(70% 90% at 50% 100%, #9150e0 0%, #3d66d6 45%, transparent 80%)",
           }}
-        />
+        />}
         <div
           ref={mount}
           aria-hidden
-          className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
+          className={cn("absolute inset-0 cursor-grab active:cursor-grabbing", standalone ? "touch-pan-y" : "touch-none")}
         />
 
-        <div className="pointer-events-none relative px-6 pt-6">
+        {!standalone && <div className="pointer-events-none relative px-6 pt-6">
           <Reveal
             text={title}
             show={show}
@@ -797,7 +802,7 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
               still={still}
             />
           </motion.div>
-        </div>
+        </div>}
       </div>
     );
   },
