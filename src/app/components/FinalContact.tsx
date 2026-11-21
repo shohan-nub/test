@@ -44,7 +44,7 @@ export default function FinalContact() {
             everything together to turn ideas into reality.
           </p>
           <p className={styles.invitation}>Have something in mind? Let&apos;s make it happen.</p>
-          <CalBookingButton />
+          <CalBookingButton slide />
         </div>
       </div>
       <div className={styles.signature}>

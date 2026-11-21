@@ -84,8 +84,6 @@ export default function SeoGeoShowcase() {
 
   return <section ref={root} className={styles.section} id="destinations" aria-labelledby="visibility-title">
     <div className={styles.heading}>
-      <p className={styles.eyebrow}><span /> WHAT WE MAKE POSSIBLE</p>
-      <p className={styles.kicker}>SEO & GEO — DIGITAL VISIBILITY</p>
       <h2 id="visibility-title">Be Seen. Be Found.<br /><em>Be Chosen.</em></h2>
       <p className={styles.intro}>Helping businesses grow through search visibility, intelligent discovery, and connected digital systems.</p>
     </div>

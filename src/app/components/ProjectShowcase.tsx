@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { type PointerEvent, useState } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { motion, useSpring, useTransform } from "motion/react";
 import assets from "../../../public/creative-portfolio-gallery/sources.json";
 import { ContourFeatureCard } from "./motion-brew/contour-feature-card";
 import { DuoFlip } from "./motion-brew/duo-flip";
@@ -10,11 +10,10 @@ import { TiltCard } from "./motion-brew/tilt-card";
 import { useReducedMotionPreference } from "./motion-brew/useReducedMotionPreference";
 import styles from "./ProjectShowcase.module.css";
 
-type Effect = "tilt" | "slide" | "depth" | "prism" | "fold" | "layers" | "contour" | "light";
+type Effect = "tilt" | "depth" | "prism" | "fold" | "layers" | "contour" | "light";
 
 const projectEntries = [
   { id: "iluf-website", title: "ILUF", category: "Website design", effect: "tilt", alt: "ILUF homepage with curved architectural forms" },
-  { id: "khadi-trip-website", title: "Khadi Trip", category: "Website design", effect: "slide", alt: "Khadi Trip homepage overlooking an island and the ocean" },
   { id: "huse-identity", title: "Huse", category: "Brand identity", effect: "depth", alt: "Huse orange and charcoal identity board with packaging and mobile layouts" },
   { id: "soltek-identity", title: "Soltek", category: "Brand identity", effect: "prism", alt: "Soltek brand applications in yellow and black" },
   { id: "nexr-identity", title: "Nexr", category: "Digital product", effect: "fold", alt: "Nexr green brand system with watch and phone previews" },
@@ -50,6 +49,11 @@ const nexrViews = [
 ];
 const layerSpring = { stiffness: 230, damping: 27, mass: 0.82 };
 const tiltSpring = { stiffness: 225, damping: 24, mass: 0.82 };
+const technologies = [
+  ["Next.js", "nextjs-icon"], ["React", "react"], ["TypeScript", "typescript-icon"],
+  ["JavaScript", "javascript"], ["WordPress", "wordpress-icon"],
+  ["Tailwind CSS", "tailwindcss-icon"], ["PostgreSQL", "postgresql"],
+] as const;
 
 function trackPointer(event: PointerEvent<HTMLButtonElement>) {
   if (event.pointerType === "touch") return;
@@ -69,38 +73,26 @@ function Artwork({ project, decorative = false }: { project: Project; decorative
       src={project.src}
       alt={decorative ? "" : project.alt}
       fill
-      sizes={project.id === "iluf-website" ? "(max-width: 600px) 94vw, (max-width: 980px) 31vw, 600px" : "(max-width: 600px) 45vw, (max-width: 980px) 31vw, 310px"}
+      sizes={project.id === "iluf-website" ? "(max-width: 600px) 45vw, (max-width: 980px) 63vw, 600px" : project.id === "huse-identity" ? "(max-width: 600px) 45vw, (max-width: 980px) 31vw, 600px" : "(max-width: 600px) 45vw, (max-width: 980px) 31vw, 310px"}
       draggable={false}
       className={styles.art}
     />
   );
 }
 
-function LayeredPreview({ project, slide }: { project: Project; slide: boolean }) {
+function DepthPreview({ project }: { project: Project }) {
   const reduced = useReducedMotionPreference();
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const direction = useMotionValue(1);
   const x = useSpring(0.45, layerSpring);
   const y = useSpring(-0.35, layerSpring);
   const open = useSpring(0, layerSpring);
-  const clip = useTransform(() => {
-    const edge = 100 - Math.min(1, Math.max(0, open.get())) * 71;
-    return direction.get() > 0 ? `inset(0 0 0 ${edge}%)` : `inset(0 ${edge}% 0 0)`;
-  });
-  const slideIn = useTransform(() => (1 - open.get()) * direction.get() * 76);
-  const slideOut = useTransform(() => -open.get() * direction.get() * 14);
-  const seam = useTransform(() => {
-    const progress = Math.min(1, Math.max(0, open.get())) * 71;
-    return `${direction.get() > 0 ? 100 - progress : progress}%`;
-  });
   const nearX = useTransform(() => x.get() * open.get() * 22);
   const nearY = useTransform(() => y.get() * open.get() * 16 - open.get() * 7);
   const farX = useTransform(() => -x.get() * open.get() * 13);
   const farY = useTransform(() => -y.get() * open.get() * 11 + open.get() * 6);
   const nearZ = useTransform(open, [0, 1], [0, 77]);
   const rearOpacity = useTransform(open, [0, 1], [0, 0.8]);
-  const seamOpacity = useTransform(open, [0, 0.08, 1], [0, 1, 1]);
 
   const aim = (event: PointerEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -108,7 +100,6 @@ function LayeredPreview({ project, slide }: { project: Project; slide: boolean }
     const ny = Math.max(-1, Math.min(1, 2 * (event.clientY - rect.top) / rect.height - 1));
     x.set(nx);
     y.set(ny);
-    return nx;
   };
 
   return (
@@ -116,17 +107,16 @@ function LayeredPreview({ project, slide }: { project: Project; slide: boolean }
       type="button"
       aria-label={`Explore ${project.title}: ${project.alt}`}
       aria-pressed={pressed}
-      data-effect={slide ? "slide" : "depth"}
+      data-effect="depth"
       className={styles.preview}
       onPointerEnter={(event) => {
         if (reduced || event.pointerType === "touch") return;
-        const nx = aim(event);
-        if (slide && !pressed) direction.set(nx < 0 ? -1 : 1);
+        aim(event);
         setHovered(true);
         open.set(1);
       }}
       onPointerMove={(event) => {
-        if (!slide && !reduced && event.pointerType !== "touch") aim(event);
+        if (!reduced && event.pointerType !== "touch") aim(event);
       }}
       onPointerLeave={() => {
         setHovered(false);
@@ -137,24 +127,12 @@ function LayeredPreview({ project, slide }: { project: Project; slide: boolean }
         open.set(!pressed || hovered ? 1 : 0);
       }}
     >
-      {!slide && (
-        <motion.span className={styles.depthRear} aria-hidden="true" style={reduced ? { opacity: pressed ? 0.8 : 0 } : { x: farX, y: farY, opacity: rearOpacity }}>
-          <Artwork project={project} decorative />
-        </motion.span>
-      )}
-      <motion.span className={styles.imagePlane} style={reduced ? undefined : slide ? { x: slideOut } : { x: nearX, y: nearY, z: nearZ }}>
+      <motion.span className={styles.depthRear} aria-hidden="true" style={reduced ? { opacity: pressed ? 0.8 : 0 } : { x: farX, y: farY, opacity: rearOpacity }}>
+        <Artwork project={project} decorative />
+      </motion.span>
+      <motion.span className={styles.imagePlane} style={reduced ? undefined : { x: nearX, y: nearY, z: nearZ }}>
         <Artwork project={project} />
       </motion.span>
-      {slide && (
-        <>
-          <motion.span className={styles.detail} aria-hidden="true" style={{ clipPath: reduced ? (pressed ? "inset(0 0 0 29%)" : "inset(0 0 0 100%)") : clip }}>
-            <motion.span className={styles.slideDetail} style={reduced ? undefined : { x: slideIn }}>
-              <Artwork project={project} decorative />
-            </motion.span>
-          </motion.span>
-          <motion.span className={styles.slideSeam} aria-hidden="true" style={reduced ? { left: "29%", opacity: pressed ? 1 : 0 } : { left: seam, opacity: seamOpacity }} />
-        </>
-      )}
       <span className={styles.indicator} aria-hidden="true">{pressed ? "−" : "+"}</span>
     </button>
   );
@@ -163,8 +141,8 @@ function LayeredPreview({ project, slide }: { project: Project; slide: boolean }
 function ProjectPreview({ project }: { project: Project }) {
   const [pressed, setPressed] = useState(false);
 
-  if (project.effect === "slide" || project.effect === "depth") {
-    return <LayeredPreview project={project} slide={project.effect === "slide"} />;
+  if (project.effect === "depth") {
+    return <DepthPreview project={project} />;
   }
 
   if (project.effect === "prism") {
@@ -267,6 +245,19 @@ export default function ProjectShowcase() {
                 <span>{project.category}</span>
               </div>
             </article>
+          ))}
+        </div>
+      </div>
+      <div className={styles.technologyStrip} role="group" aria-label="Technologies we use">
+        <div className={styles.technologyTrack}>
+          {[0, 1].map((copy) => (
+            <div className={styles.technologySequence} key={copy} aria-hidden={copy === 1 ? true : undefined}>
+              {[0, 1].flatMap((repeat) => technologies.map(([name, icon]) => (
+                <div className={styles.technologyMark} key={`${repeat}-${name}`} title={name}>
+                  <Image src={`/technology-stack/${icon}.svg`} alt={copy === 0 && repeat === 0 ? name : ""} width={72} height={34} loading="eager" unoptimized />
+                </div>
+              )))}
+            </div>
           ))}
         </div>
       </div>

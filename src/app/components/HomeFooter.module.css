@@ -1,0 +1,16 @@
+.footer { padding: clamp(36px, 5vw, 70px) 6% 24px; color: var(--theme-ink); background: var(--theme-bg); }
+.inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 480px); gap: clamp(30px, 5vw, 70px); align-items: center; max-width: 1120px; margin: 0 auto; }
+.brand > a { display: inline-block; width: 150px; }
+.brand img { width: 100%; height: auto; object-fit: contain; }
+.brand p { max-width: 38ch; margin: 20px 0 24px; color: #655b53; font-size: 14px; line-height: 1.7; }
+.brand nav { display: flex; flex-wrap: wrap; gap: 14px 26px; font-size: 13px; font-weight: 600; }
+.brand a:focus-visible { outline: 2px solid var(--theme-deep); outline-offset: 4px; }
+.brand nav a:hover { color: var(--theme-deep); }
+.details { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; padding-top: 18px; border-top: 1px solid #b9562d25; color: #655b53; font-size: 12px; }
+.details a { color: var(--theme-deep); }
+.visual { position: relative; min-width: 0; min-height: 570px; }
+.globe { width: 100%; height: 410px; border: 1px solid #b9562d25; background: #fffaf4; }
+.globe > div:nth-child(2) { touch-action: pan-y; }
+.ring { margin: 10px auto 0; color: var(--theme-deep); }
+.bottom { max-width: 1120px; margin: 30px auto 0; padding-top: 18px; border-top: 1px solid #b9562d25; color: #77716b; font-size: 11px; }
+@media(max-width:700px) { .inner { grid-template-columns: 1fr; } .visual { max-width: 480px; width: 100%; } }

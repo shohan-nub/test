@@ -5,6 +5,7 @@ type Inquiry = {
   name: string;
   email: string;
   company?: string;
+  subject: string;
   service: string;
   budget?: string;
   timeline?: string;
@@ -29,6 +30,7 @@ function notification(inquiry: Inquiry) {
     ["Name", inquiry.name],
     ["Email", inquiry.email],
     ...(inquiry.company ? [["Company", inquiry.company]] : []),
+    ["Project subject", inquiry.subject],
     ["Interested service", inquiry.service],
     ["Budget range", inquiry.budget ?? "Not provided"],
     ["Timeline", inquiry.timeline ?? "Not provided"],
@@ -40,7 +42,7 @@ function notification(inquiry: Inquiry) {
   ).join("");
 
   return {
-    subject: `New SparkLab Project Inquiry — ${inquiry.name}`,
+    subject: `SparkLab inquiry — ${inquiry.subject}`,
     text: `New SparkLab project inquiry\n\n${fields.map(([label, value]) => `${label}: ${value}`).join("\n")}\n\nProject description\n${inquiry.message}`,
     html: [
       '<div style="background:#faf4ee;padding:18px;color:#28221d;font:15px/1.55 Arial,sans-serif">',
@@ -56,8 +58,7 @@ function notification(inquiry: Inquiry) {
 }
 
 export async function deliverInquiry(inquiry: Inquiry): Promise<"sent" | "unconfigured" | "failed"> {
-  const to = process.env.CONTACT_TO_EMAIL?.trim();
-  if (!to) return "unconfigured";
+  const to = "heysparklab@gmail.com";
 
   const smtpPass = process.env.SMTP_PASS?.replace(/\s/g, "");
   const fromName = process.env.CONTACT_FROM_NAME?.trim() || "SparkLab Website";

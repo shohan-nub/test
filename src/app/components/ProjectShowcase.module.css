@@ -38,7 +38,6 @@
 
 .card { --aspect: 1.56; min-width: 0; }
 .card[data-project="iluf-website"] { --aspect: 2.02; grid-column: span 2; }
-.card[data-project="khadi-trip-website"] { --aspect: 1.83; }
 .card[data-project="huse-identity"] { --aspect: 1.34; }
 .card[data-project="nexr-identity"] { --aspect: 1.62; }
 .card[data-project="sentra-identity"] { --aspect: 1.38; }
@@ -98,21 +97,12 @@
 .caption h3 { margin: 0; font-size: clamp(13px, 1.25vw, 18px); font-weight: 650; line-height: 1.15; letter-spacing: -.025em; }
 .caption span { color: #765647; font-size: 11px; }
 
-.preview[data-effect="slide"] { background: linear-gradient(145deg, #d8dad0, #eae3d7 67%); }
-.preview[data-effect="slide"] .imagePlane { inset: 6%; }
-.preview[data-effect="slide"] .detail { background: #d3c6b4; }
-.slideDetail { position: absolute; inset: 0; }
-.slideDetail .art { object-fit: cover; transform: scale(1.72); transform-origin: 70% 76%; }
-.slideSeam {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 1;
-  width: 1px;
-  background: #fff6e5;
-  box-shadow: 0 0 16px 3px #34231867;
-  pointer-events: none;
-}
+.technologyStrip { margin-top: clamp(36px, 5vw, 64px); overflow: hidden; }
+.technologyTrack { display: flex; width: max-content; animation: technology-scroll 42s linear infinite; }
+.technologySequence { display: flex; flex: none; align-items: center; min-width: 100vw; gap: clamp(18px, 2vw, 28px); padding-right: clamp(18px, 2vw, 28px); }
+.technologyMark { display: grid; flex: none; place-items: center; width: 82px; height: 42px; opacity: .2; }
+.technologyMark img { width: 72px; height: 34px; object-fit: contain; }
+@keyframes technology-scroll { to { transform: translateX(-50%); } }
 
 .preview[data-effect="depth"] {
   perspective: 780px;
@@ -160,19 +150,27 @@
 
 @media (hover: hover) {
   .preview:hover { --engaged: 1; }
+  .technologyStrip:hover .technologyTrack { animation-play-state: paused; }
+}
+
+@media (min-width: 981px) {
+  .card[data-project="huse-identity"] { --aspect: 2.02; grid-column: span 2; }
 }
 
 @media (min-width: 601px) and (max-width: 980px) {
   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .card[data-project="iluf-website"] { grid-column: auto; }
 }
 
 @media (max-width: 600px) {
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card[data-project="iluf-website"] { --aspect: 1.56; grid-column: auto; }
   .preview, .tilt, .contour, .fold { border-radius: 12px; }
   .card[data-project="soltek-identity"] .fold button { width: 29px; height: 29px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .preview :is(.imagePlane, .detail), .preview::after { transition: none !important; }
+  .technologyTrack { animation: none; }
+  .technologySequence + .technologySequence { display: none; }
+  .technologyStrip { overflow-x: auto; }
 }

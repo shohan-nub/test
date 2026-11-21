@@ -58,6 +58,14 @@ export const inquiryBudgets = [
   { id: "unsure", label: "Not Sure Yet" },
 ] as const;
 
+export const contactBudgets = [
+  { id: "under-500", label: "Under $500" },
+  ...inquiryBudgets.slice(0, 3),
+  { id: "5000-plus", label: "$5,000+" },
+] as const;
+
+export const contactTimelines = ["Immediately", "Within 1 Month", "1–3 Months", "Flexible"] as const;
+
 export function findService(id: unknown) {
   return services.find(service => service.id === id);
 }

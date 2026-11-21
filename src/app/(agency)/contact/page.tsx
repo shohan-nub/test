@@ -6,14 +6,14 @@ import PageIntro from "../PageIntro";
 import styles from "../AgencyPages.module.css";
 import InquiryForm from "./InquiryForm";
 
-const description = "Tell us what you need, or book a call to talk it through.";
+const description = "Tell us a little about your project. We'll review your requirements and get back to you as soon as possible.";
 
 export const metadata = pageMetadata("/contact", "Contact & Booking", description);
 
 export default function ContactPage() {
   return (
     <>
-      <PageIntro label="Contact SparkLab" heading="Let’s Talk About Your Project" description={description} />
+      <PageIntro label="Contact SparkLab" heading="Let's Build Something Meaningful." description={description} />
 
       <div className={styles.contactGrid}>
         <section className={styles.callCard} aria-labelledby="discovery-heading">

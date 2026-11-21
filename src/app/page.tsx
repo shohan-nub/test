@@ -1,6 +1,6 @@
 "use client";
 
-import { type TransitionEvent, useEffect, useRef, useState } from "react";
+import { type TransitionEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
@@ -9,6 +9,11 @@ import ProjectShowcase from "./components/ProjectShowcase";
 import { WorkflowVisual, workflowStages } from "./components/WorkflowVisuals";
 import workflowStyles from "./components/WorkflowVisuals.module.css";
 import FinalContact from "./components/FinalContact";
+import HomeFooter from "./components/HomeFooter";
+import { MagneticButton } from "./components/motion-brew/magnetic-button";
+import { FlipWords } from "./components/motion-brew/flip-words";
+import { BackspaceText } from "./components/motion-brew/backspace-text";
+import CalBookingButton from "./components/CalBookingButton";
 import SiteNav from "./components/SiteNav";
 import soundStyles from "./components/ShowreelSound.module.css";
 import { useViewportVideo } from "./components/useViewportVideo";
@@ -124,14 +129,14 @@ function ProjectShowreel() {
   </div>;
 }
 
-const workflowPhrases = ["RESEARCH WITH PURPOSE", "DESIGN WITH CLARITY", "BUILD WITH PRECISION", "LAUNCH WITH CONFIDENCE"];
-
 function OverviewVideo() {
   const video = useRef<HTMLVideoElement>(null);
   useViewportVideo(video, "/creative-loop.mp4", true);
 
   return <video ref={video} muted loop playsInline preload="metadata" aria-hidden="true" />;
 }
+
+const heroMarqueePhrases = ["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"];
 
 const consultationPhrases = ["Automate Customer Replies", "Generate Reports Automatically", "Handle Follow-up Calls", "Capture & Qualify Leads", "Schedule Appointments", "Manage Customer Inquiries", "Send Order Notifications", "Sync Business Data"];
 
@@ -165,8 +170,13 @@ function ConsultationPhrases() {
   </div>;
 }
 
+const subscribeToHydration = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
+
 export default function Home() {
   const root = useRef<HTMLElement>(null);
+  const motionReady = useSyncExternalStore(subscribeToHydration, clientSnapshot, serverSnapshot);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -263,22 +273,23 @@ export default function Home() {
   }, []);
 
   return (
+    <>
     <main ref={root}>
       <section className="hero" id="discover" aria-label="Spark Lab digital studio">
         <SiteNav />
         <div className="hero-content">
           <h1><span className="hero-line">Ideas Without <span className="hero-accent">Borders.</span></span></h1>
           <p className="hero-description">Building digital experiences and intelligent solutions for businesses without boundaries.</p>
+          <div className="hero-actions">
+            <CalBookingButton magnetic label="Book a Discovery Call" className="hero-booking" actionClassName="hero-action hero-action-primary" />
+            <MagneticButton href="/approach" variant="outline" size="sm" strength={0.18} labelStrength={0.08} className="hero-action hero-action-secondary">Explore Our Approach</MagneticButton>
+          </div>
         </div>
         <GlobalMap />
-        <div className="hero-statistics" aria-label="Global reach">
-          <div><strong>7</strong><span>Continents</span></div>
-          <div><strong>195+</strong><span>Sovereign Countries</span></div>
-          <div><strong>1</strong><span>Global Team</span></div>
-        </div>
       </section>
       <section className="service-overview section-pad" aria-labelledby="service-overview-heading">
         <h2 id="service-overview-heading">We build AI-powered automation, websites, web applications, mobile apps, and custom software that help businesses grow.</h2>
+        {motionReady ? <FlipWords before="Built for" words={["Websites", "Automation", "Applications", "Digital Products"]} after="" interval={4000} wordClassName="text-[#b9562d]" className="service-flip" /> : <p className="service-flip">Built for Websites</p>}
         <div className="service-overview-grid">
           <article className="service-overview-card service-overview-dark">
             <span className="service-overview-number">01</span>
@@ -293,11 +304,15 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <div className="text-marquee hero-video-marquee" aria-label={heroMarqueePhrases.join(", ")}>
+        <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{heroMarqueePhrases.map((phrase) => <span className="marquee-phrase" key={phrase}>{phrase}<i>✳</i></span>)}</div>)}</div>
+      </div>
       <section className="consultation-section section-pad" aria-labelledby="consultation-heading">
         <div className="consultation-panel">
         <div className="consultation-copy">
           <h2 id="consultation-heading">Ready to automate and scale your business?</h2>
           <p>Our team is ready to architect, build, and deploy your idea. Book a free consultation to get started.</p>
+          {motionReady ? <BackspaceText before="" words={["Building digital experiences", "Automating business workflows", "Creating intelligent solutions", "Turning ideas into reality"]} pause={2200} wordClassName="text-[#b9562d]" className="consultation-backspace" /> : <p className="consultation-backspace">Building digital experiences</p>}
           <a className="consultation-cta" href="#contact">Book a free consultation <span aria-hidden="true">→</span></a>
         </div>
         <ConsultationPhrases />
@@ -329,14 +344,12 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="text-marquee text-marquee-reverse" aria-label={workflowPhrases.join(" ✳ ") + " ✳"}>
-        <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{workflowPhrases.map((phrase) => <span className="marquee-phrase" key={`${copy}-${phrase}`}>{phrase}<i>✳</i></span>)}</div>)}</div>
-      </div>
-
       <SeoGeoShowcase />
 
       <ProjectShowcase />
       <FinalContact />
     </main>
+    <HomeFooter />
+    </>
   );
 }

@@ -1,5 +1,5 @@
 ﻿import { NextResponse } from "next/server";
-import { findService, inquiryBudgets } from "../../services-data";
+import { contactBudgets, contactTimelines, findService, inquiryBudgets } from "../../services-data";
 import { deliverInquiry } from "./delivery";
 
 const MAX_REQUESTS = 5;
@@ -60,19 +60,20 @@ export async function POST(request: Request) {
   const name = field(body, "name").replace(/\s+/g, " ");
   const email = field(body, "email");
   const company = field(body, "company");
+  const subject = field(body, "subject").replace(/\s+/g, " ");
   const message = field(body, "message");
   const timeline = field(body, "timeline");
   const websiteUrl = field(body, "websiteUrl");
   const selectedService = findService(body.service);
-  const selectedBudget = inquiryBudgets.find(option => option.id === body.budget);
+  const selectedBudget = [...contactBudgets, ...inquiryBudgets].find(option => option.id === body.budget);
   const isProjectInquiry = body.kind === "project-inquiry";
-  const service = isProjectInquiry ? selectedService?.title : field(body, "subject");
+  const service = isProjectInquiry ? (body.service === "other" ? "Other" : selectedService?.title) : subject;
 
-  if (isProjectInquiry && (!selectedService || !selectedBudget)) {
-    return error("Please choose a service and project budget.");
+  if (isProjectInquiry && (!service || (body.budget && !selectedBudget) || (timeline && !contactTimelines.includes(timeline as typeof contactTimelines[number])))) {
+    return error("Please choose valid inquiry options.");
   }
-  if (!name || !email || !service || !message) return error("Please complete all required fields.");
-  if (name.length > 100 || email.length > 254 || service.length > 160 || company.length > 150
+  if (!name || !email || !subject || !service || !message) return error("Please complete all required fields.");
+  if (name.length > 100 || email.length > 254 || subject.length > 160 || service.length > 160 || company.length > 150
       || message.length > 5000 || timeline.length > 150 || websiteUrl.length > 2048) {
     return error("One or more fields exceed the allowed length.");
   }
@@ -86,6 +87,7 @@ export async function POST(request: Request) {
       name,
       email,
       company,
+      subject,
       service,
       budget: selectedBudget?.label,
       timeline: timeline || undefined,
