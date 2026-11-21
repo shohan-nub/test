@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import styles from "./SeoGeoShowcase.module.css";
 import services from "./seo-geo-services.json";
+import { useNearViewport } from "./useNearViewport";
 
 const count = services.length;
 const slot = (index: number, active: number) => ((index - active + count + 3) % count) - 3;
@@ -16,8 +17,10 @@ export default function SeoGeoShowcase() {
   const [playing, setPlaying] = useState(true);
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const root = useRef<HTMLElement>(null);
+  const near = useNearViewport(root, "240px");
   const cards = useRef<Array<HTMLDivElement | null>>([]);
   const previous = useRef(0);
+  const initialized = useRef(false);
   const drag = useRef<{ id: number; x: number; y: number; dx: number } | null>(null);
   const navigate = (direction: number) => {
     setActive(index => (index + direction + count) % count);
@@ -47,6 +50,7 @@ export default function SeoGeoShowcase() {
   }, [active, visible, dragging, playing]);
 
   useEffect(() => {
+    if (!near) return;
     const media = window.matchMedia("(max-width: 640px)");
     const tablet = window.matchMedia("(max-width: 900px)");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -65,13 +69,14 @@ export default function SeoGeoShowcase() {
       });
       previous.current = active;
     };
-    arrange();
+    arrange(!initialized.current);
+    initialized.current = true;
     const resize = () => arrange(true);
     media.addEventListener("change", resize);
     tablet.addEventListener("change", resize);
     reduced.addEventListener("change", resize);
     return () => { media.removeEventListener("change", resize); tablet.removeEventListener("change", resize); reduced.removeEventListener("change", resize); nodes.forEach(card => { if (card) gsap.killTweensOf(card); }); };
-  }, [active]);
+  }, [active, near]);
 
   const release = (cancelled = false) => {
     const gesture = drag.current;
@@ -88,7 +93,7 @@ export default function SeoGeoShowcase() {
       <p className={styles.intro}>Helping businesses grow through search visibility, intelligent discovery, and connected digital systems.</p>
     </div>
     <div className={styles.carousel} role="region" aria-roledescription="carousel" aria-label="Digital visibility capabilities">
-      <div className={styles.stage} tabIndex={0} aria-label="Use left and right arrow keys, or swipe, to explore services"
+      <div className={styles.stage} role="group" tabIndex={0} aria-label="Use left and right arrow keys, or swipe, to explore services"
         onKeyDown={event => { if (event.key === "ArrowRight" || event.key === "ArrowLeft") { event.preventDefault(); navigate(event.key === "ArrowRight" ? 1 : -1); } }}
         onPointerDown={event => { if (!event.isPrimary || event.button !== 0) return; drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, dx: 0 }; event.currentTarget.setPointerCapture(event.pointerId); setDragging(true); }}
         onPointerMove={event => { const gesture = drag.current; if (!gesture || gesture.id !== event.pointerId) return; gesture.dx = event.clientX - gesture.x; if (Math.abs(gesture.dx) > Math.abs(event.clientY - gesture.y)) gsap.set(cards.current.filter(Boolean), { x: gesture.dx * .55 }); }}
@@ -101,7 +106,7 @@ export default function SeoGeoShowcase() {
           {!failedImages.includes(service.image) ? <Image
             src={`/seo-geo-showcase/${service.image}?v=${service.imageVersion}`} alt={service.alt}
             fill sizes="(max-width: 640px) 82vw, (max-width: 900px) 64vw, (max-width: 1200px) 52vw, 640px"
-            draggable={false} loading={Math.abs(slot(index, active)) <= 1 ? "eager" : "lazy"}
+            draggable={false} loading={visible && Math.abs(slot(index, active)) <= 1 ? "eager" : "lazy"}
             onError={() => setFailedImages(images => images.includes(service.image) ? images : [...images, service.image])}
           /> : <span className={styles.imageError}>Image unavailable</span>}
           <div className={styles.caption}>
@@ -113,7 +118,7 @@ export default function SeoGeoShowcase() {
       </div>
       <div className={styles.controls}>
         <span className={styles.counter}>{String(active + 1).padStart(2, "0")} <span>/ 07</span></span>
-        <div className={styles.dots} aria-label="Select a capability">{services.map((service, index) => <button key={service.title} type="button" aria-label={`Show ${service.title}`} aria-current={active === index ? "true" : undefined} onClick={() => setActive(index)}><span /></button>)}</div>
+        <div className={styles.dots} role="group" aria-label="Select a capability">{services.map((service, index) => <button key={service.title} type="button" aria-label={`Show ${service.title}`} aria-current={active === index ? "true" : undefined} onClick={() => setActive(index)}><span /></button>)}</div>
         <div className={styles.arrows}><button type="button" aria-label="Previous capability" onClick={() => navigate(-1)}>←</button><button type="button" aria-label="Next capability" onClick={() => navigate(1)}>→</button><button type="button" aria-label={playing ? "Pause automatic slides" : "Resume automatic slides"} aria-pressed={!playing} onClick={() => setPlaying(value => !value)}>{playing ? "Ⅱ" : "▷"}</button></div>
       </div>
     </div>

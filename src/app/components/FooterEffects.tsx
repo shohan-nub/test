@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { Component, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { observeMotionViewport } from "./observeMotionViewport";
 import { useNearViewport } from "./useNearViewport";
 import styles from "./HomeFooter.module.css";
 
@@ -44,14 +45,24 @@ function ParticlePlaceholder() {
 }
 
 export function FooterEffects() {
-  const ref = useRef<HTMLDivElement>(null);
-  const near = useNearViewport(ref);
+  const globe = useRef<HTMLDivElement>(null);
+  const particle = useRef<HTMLDivElement>(null);
+  const nearParticle = useNearViewport(particle, "120px");
+  const [showGlobe, setShowGlobe] = useState(false);
 
-  return <div ref={ref} className={styles.visual}>
-    <div className={styles.globeStage}>
-      {near && <GlobeFallback><GlobeCard standalone members={places} arcs={3} turn={90} /></GlobeFallback>}
+  useEffect(() => {
+    const node = globe.current;
+    if (!node || showGlobe) return;
+    return observeMotionViewport(node, active => {
+      if (active) setShowGlobe(true);
+    }, window.matchMedia("(max-width: 767px), (pointer: coarse)"));
+  }, [showGlobe]);
+
+  return <div className={styles.visual}>
+    <div ref={globe} className={styles.globeStage}>
+      {showGlobe && <GlobeFallback><GlobeCard standalone members={places} arcs={3} turn={90} /></GlobeFallback>}
     </div>
-    {near ? <ParticleCard
+    <div ref={particle}>{nearParticle ? <ParticleCard
       title={title}
       description={description}
       cta={cta}
@@ -65,6 +76,6 @@ export function FooterEffects() {
       force={0.65}
       reach={65}
       className={styles.particle}
-    /> : <ParticlePlaceholder />}
+    /> : <ParticlePlaceholder />}</div>
   </div>;
 }

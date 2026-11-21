@@ -1,0 +1,14 @@
+.label { position: relative; overflow: hidden; color: #71717a; }
+.pending { color: #52525b; --shine-color: #d4d4d8; --shine-duration: 1.6s; }
+.band {
+  position: absolute;
+  inset: 0;
+  color: var(--shine-color, #18181b);
+  mask-image: linear-gradient(90deg, transparent 25%, black 50%, transparent 75%);
+  transform: translateX(-90%);
+}
+.band > span { display: block; transform: translateX(90%); }
+.moving .band { animation: sweep var(--shine-duration, 2.2s) linear infinite; }
+.moving .band > span { animation: counter-sweep var(--shine-duration, 2.2s) linear infinite; }
+@keyframes sweep { to { transform: translateX(90%); } }
+@keyframes counter-sweep { to { transform: translateX(-90%); } }

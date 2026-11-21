@@ -131,7 +131,8 @@ export function ConsultationPhrases() {
     requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
   };
 
-  return <div ref={viewport} className="consultation-phrases" aria-label={consultationPhrases.join(", ")}>
+  return <div ref={viewport} className="consultation-phrases">
+    <span className="sr-only">{consultationPhrases.join(", ")}</span>
     <div className="consultation-phrases-track" aria-hidden="true" onTransitionEnd={handleTransitionEnd} style={{ transform: `translateY(${(2 - active) / (consultationPhrases.length * 3) * 100}%)`, transition: animate ? undefined : "none" }}>
       {[0, 1, 2].flatMap((copy) => consultationPhrases.map((phrase, index) => <div key={`${copy}-${phrase}`} className={`consultation-phrase${copy * consultationPhrases.length + index === active ? " is-active" : ""}`}>{phrase}</div>))}
     </div>

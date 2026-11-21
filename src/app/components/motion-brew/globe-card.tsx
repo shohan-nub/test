@@ -10,6 +10,7 @@
 import * as React from "react";
 import { type ClassValue, clsx } from "clsx";
 import { ArrowRight } from "lucide-react";
+import { observeMotionViewport } from "../observeMotionViewport";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { twMerge } from "tailwind-merge";
 import * as THREE from "three";
@@ -346,6 +347,8 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       host.appendChild(renderer.domElement);
       renderer.domElement.style.display = "block";
+      renderer.domElement.style.width = "100%";
+      renderer.domElement.style.height = "100%";
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
@@ -557,20 +560,19 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         });
       };
 
-      const size = { w: 0, h: 0 };
-      const resize = () => {
-        renderer.setPixelRatio(Math.min(compact.matches ? 1 : 2, window.devicePixelRatio || 1));
-        size.w = host.clientWidth;
-        size.h = host.clientHeight;
-        renderer.setSize(size.w, size.h, false);
-        renderer.domElement.style.width = "100%";
-        renderer.domElement.style.height = "100%";
-        camera.aspect = size.w / Math.max(1, size.h);
+      const size = { w: 0, h: 0, dpr: 0 };
+      let bounds: { left: number; top: number } | null = null;
+      function resize(w: number, h: number) {
+        const dpr = Math.min(compact.matches ? 1 : 2, window.devicePixelRatio || 1);
+        if (!w || !h || (size.w === w && size.h === h && size.dpr === dpr)) return;
+        Object.assign(size, { w, h, dpr });
+        bounds = null;
+        renderer.setDrawingBufferSize(w, h, dpr);
+        camera.aspect = w / h;
         camera.updateProjectionMatrix();
-        if (settings.current.still) renderer.render(scene, camera);
-      };
-      resize();
-      const ro = new ResizeObserver(resize);
+        if (visible && !raf) raf = requestAnimationFrame(frame);
+      }
+      const ro = new ResizeObserver(([entry]) => resize(entry.contentRect.width, entry.contentRect.height));
       ro.observe(host);
 
       if (settings.current.still)
@@ -669,32 +671,35 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         }
         renderer.render(scene, camera);
       };
-      const schedule = () => {
-        if (visible && !document.hidden) {
+      const stopObserving = observeMotionViewport(host, active => {
+        visible = active;
+        if (active) {
           if (!raf) raf = requestAnimationFrame(frame);
         } else {
           cancelAnimationFrame(raf);
           raf = 0;
           last = 0;
+          bounds = null;
         }
-      };
-      const io = new IntersectionObserver(([entry]) => {
-        visible = entry.isIntersecting;
-        schedule();
-      });
-      io.observe(host);
-      document.addEventListener("visibilitychange", schedule);
-      compact.addEventListener("change", resize);
+      }, compact);
+      const onResolutionChange = () => resize(size.w, size.h);
+      compact.addEventListener("change", onResolutionChange);
 
-      // Drag spins the globe (sideways) and tips it (up and down), leaving momentum behind.
+      // The neutral globe hit surface stays fixed while its scene turns.
       const local = (e: PointerEvent) => {
-        const r = host.getBoundingClientRect();
+        if (!bounds) {
+          const rect = host.getBoundingClientRect();
+          bounds = { left: rect.left + window.scrollX, top: rect.top + window.scrollY };
+        }
         return {
-          x: ((e.clientX - r.left) / r.width) * 2 - 1,
-          y: ((e.clientY - r.top) / r.height) * 2 - 1,
+          x: (e.pageX - bounds.left) / Math.max(1, size.w) * 2 - 1,
+          y: (e.pageY - bounds.top) / Math.max(1, size.h) * 2 - 1,
         };
       };
-      const onEnter = () => void (pointer.current.inside = true);
+      const onEnter = () => {
+        bounds = null;
+        pointer.current.inside = true;
+      };
       const onLeave = () =>
         Object.assign(pointer.current, { inside: false, x: 0, y: 0 });
       const onDown = (e: PointerEvent) => {
@@ -737,9 +742,8 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
       return () => {
         cancelAnimationFrame(raf);
         ro.disconnect();
-        io.disconnect();
-        document.removeEventListener("visibilitychange", schedule);
-        compact.removeEventListener("change", resize);
+        stopObserving();
+        compact.removeEventListener("change", onResolutionChange);
         host.removeEventListener("pointerenter", onEnter);
         host.removeEventListener("pointerleave", onLeave);
         host.removeEventListener("pointerdown", onDown);

@@ -474,7 +474,7 @@ main :is(.hero,.service-overview,.consultation-section,.experiences){background:
 .consultation-phrases{--phrase-step:clamp(66px,6.7vw,96px);height:calc(var(--phrase-step) * 5);overflow:hidden;mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent)}
 .consultation-phrases-track{transition:transform .8s cubic-bezier(.22,1,.36,1);will-change:transform}
 .consultation-phrase{height:var(--phrase-step);display:flex;align-items:center;white-space:nowrap;color:#bdb7b1;opacity:.44;font-size:clamp(20px,2.25vw,35px);font-weight:550;line-height:1;letter-spacing:-.055em;transition:color .7s,opacity .7s}
-.consultation-phrase.is-active{color:#d96b32;opacity:1}
+.consultation-phrase.is-active{color:var(--theme-deep);opacity:1}
 @media(max-width:900px){.consultation-section{padding-top:100px;padding-bottom:100px}.consultation-panel{gap:5%;min-height:0;padding:36px}.consultation-copy h2{font-size:clamp(42px,5.5vw,58px)}.consultation-copy p{font-size:15px}.consultation-phrases{--phrase-step:70px}.consultation-phrase{font-size:clamp(17px,2.3vw,24px)}}
 @media(max-width:640px){.consultation-section{padding:80px 6%}.consultation-panel{grid-template-columns:1fr;gap:52px;padding:28px;border-radius:20px}.consultation-copy h2{font-size:clamp(42px,10.5vw,58px)}.consultation-copy p{margin-top:22px;font-size:15px}.consultation-cta{margin-top:27px}.consultation-phrases{--phrase-step:64px}.consultation-phrase{font-size:clamp(16px,4.5vw,28px)}}
 @media(max-width:360px){.consultation-phrase{white-space:normal;line-height:1.1}} /* Keep longer phrases readable on narrow screens. */

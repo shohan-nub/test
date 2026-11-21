@@ -10,7 +10,7 @@
 import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import * as React from "react";
 import { type ClassValue, clsx } from "clsx";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useInView } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -61,22 +61,25 @@ export const FlipWords = React.forwardRef<HTMLParagraphElement, FlipWordsProps>(
   ref,
 ) {
   const still = useReducedMotionPreference();
+  const text = React.useRef<HTMLParagraphElement>(null);
+  const visible = useInView(text);
+  React.useImperativeHandle(ref, () => text.current!);
   const [index, setIndex] = React.useState(0);
   React.useEffect(() => {
-    if (words.length < 2) return;
+    if (!visible || words.length < 2) return;
     const id = window.setInterval(() => setIndex((i) => (i + 1) % words.length), interval);
     return () => window.clearInterval(id);
-  }, [words.length, interval]);
+  }, [words.length, interval, visible]);
   const word = words[index] ?? "";
 
   return (
-    <p ref={ref} className={cn("text-balance", className)}>
+    <p ref={text} className={cn("text-balance", className)}>
       <span className="sr-only">
         {before} {words.join(", ")} {after}
       </span>
       <span aria-hidden>
         {before}{" "}
-        <motion.span layout={!still} transition={{ duration: 0.4, ease: EASE }} className="relative inline-flex" style={{ perspective: 600 }}>
+        <motion.span layout={!still && visible} transition={{ duration: 0.4, ease: EASE }} className="relative inline-flex" style={{ perspective: 600 }}>
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.span
               key={word}

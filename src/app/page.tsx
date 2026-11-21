@@ -80,12 +80,13 @@ export default function Home() {
             <span className="service-overview-number">02</span>
             <div><h3>Web, Software &amp; Mobile Development</h3><p>We design and develop high-performance websites, custom web applications, mobile experiences, and scalable software tailored to your business.</p></div>
           </article>
-          <div className="service-overview-card service-overview-visual" aria-label="Abstract visual">
+          <div className="service-overview-card service-overview-visual" aria-hidden="true">
             <OverviewVideo />
           </div>
         </div>
       </section>
-      <div className="text-marquee hero-video-marquee" aria-label={heroMarqueePhrases.join(", ")}>
+      <div className="text-marquee hero-video-marquee">
+        <span className="sr-only">{heroMarqueePhrases.join(", ")}</span>
         <div className="text-marquee-track" aria-hidden="true">{[0, 1].map((copy) => <div className="text-marquee-sequence" key={copy}>{heroMarqueePhrases.map((phrase) => <span className="marquee-phrase" key={phrase}>{phrase}<i>✳</i></span>)}</div>)}</div>
       </div>
       <section className="consultation-section section-pad" aria-labelledby="consultation-heading">

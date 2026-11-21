@@ -31,7 +31,7 @@ function Navigation({ pathname }: { pathname: string }) {
       }}
     >
       <Link className="wordmark" href="/" aria-label="SparkLab home" onClick={() => setOpen(false)}>
-        <Image className="navbar-brand-logo" {...brandLogo} alt="SparkLab" priority sizes="(max-width: 640px) 108px, 132px" />
+        <Image className="navbar-brand-logo" {...brandLogo} alt="SparkLab" loading="eager" sizes="(max-width: 640px) 108px, 132px" />
       </Link>
       <button
         ref={toggle}

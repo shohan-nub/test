@@ -17,7 +17,7 @@
 import * as React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { type ClassValue, clsx } from "clsx";
-import { motion, useAnimation, useAnimationFrame, useMotionValue, useReducedMotion, type Variants } from "motion/react";
+import { motion, useAnimation, useInView, useMotionValue, useReducedMotion, type Variants } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -163,7 +163,7 @@ ArrowUpRightIcon.displayName = "ArrowUpRightIcon";
  * Hovering speeds the spin up and the arrow in the middle turns to point the
  * way; leaving eases the spin back down. Reduced motion keeps the ring still.
  *
- * Engine: motion/react (useAnimationFrame drives the rotation so the speed can
+ * Engine: motion/react (viewport-gated frames drive the rotation so the speed can
  * ease between rates without restarting the loop).
  */
 
@@ -190,13 +190,25 @@ export const RotatingText = React.forwardRef<HTMLDivElement, RotatingTextProps>(
   const rotate = useMotionValue(0);
   const speed = React.useRef(1);
   const [hover, setHover] = React.useState(false);
-
-  useAnimationFrame((_, delta) => {
-    if (still) return;
-    // Ease the speed toward its target so hover feels like a push, not a jump.
+  const element = React.useRef<HTMLDivElement>(null);
+  const visible = useInView(element);
+  React.useImperativeHandle(ref, () => element.current!);
+  const update = React.useEffectEvent((delta: number) => {
     speed.current += ((hover ? boost : 1) - speed.current) * Math.min(1, delta / 220);
     rotate.set((rotate.get() + (360 / (duration * 1000)) * delta * speed.current) % 360);
   });
+
+  React.useEffect(() => {
+    if (!visible || still) return;
+    let last = performance.now();
+    function tick(now: number) {
+      update(Math.min(50, now - last));
+      last = now;
+      frame = requestAnimationFrame(tick);
+    }
+    let frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [visible, still]);
 
   // Repeat the text until it fills the ring reasonably.
   const ring = text.repeat(Math.max(1, Math.ceil(28 / text.length)));
@@ -205,7 +217,7 @@ export const RotatingText = React.forwardRef<HTMLDivElement, RotatingTextProps>(
 
   return (
     <div
-      ref={ref}
+      ref={element}
       role="img"
       aria-label={label ?? text.replace(/[•·]/g, "").trim()}
       onPointerEnter={() => setHover(true)}

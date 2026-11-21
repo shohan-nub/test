@@ -10,7 +10,8 @@
 import * as React from "react";
 import { type ClassValue, clsx } from "clsx";
 import { ArrowRight } from "lucide-react";
-import { useAnimate, useAnimationFrame, useReducedMotion } from "motion/react";
+import { observeMotionViewport } from "../observeMotionViewport";
+import { useAnimate, useReducedMotion } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -37,7 +38,7 @@ function cn(...inputs: ClassValue[]): string {
  * decorative; the title, line and button stay real content. Reduced
  * motion draws a still, assembled frame.
  *
- * Engine: motion/react (useAnimationFrame runs the particle springs and wave;
+ * Engine: a viewport-gated animation frame runs the particle springs and wave;
  * everything is drawn to one canvas, so thousands of cells stay smooth).
  */
 
@@ -184,7 +185,10 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
       cover: Float32Array;
       halo: Float32Array;
     } | null>(null);
-    const [size, setSize] = React.useState({ w: 0, h: 0 });
+    const [size, setSize] = React.useState({ w: 0, h: 0, dpr: 1, compact: false });
+    const context = React.useRef<CanvasRenderingContext2D | null>(null);
+    const bounds = React.useRef<{ left: number; top: number } | null>(null);
+    const wake = React.useRef(() => {});
     const sim = React.useRef({
       cols: 0,
       rows: 0,
@@ -197,7 +201,6 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
       halo: new Float32Array(0),
       time: 0,
       introAt: -1,
-      visible: true,
       pointer: { x: 0, y: 0, sx: 0, sy: 0, amount: 0, active: false },
       ripples: [] as { x: number; y: number; t: number }[],
       drawn: false,
@@ -224,28 +227,35 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
           if (!alive) return;
           mask.current = m;
           sim.current.drawn = false;
+          wake.current();
         });
       return () => {
         alive = false;
       };
     }, [svg]);
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
       const el = field.current;
       if (!el) return;
-      const measure = () => setSize({ w: el.clientWidth, h: el.clientHeight });
-      measure();
-      const ro = new ResizeObserver(measure);
-      ro.observe(el);
-      const io = new IntersectionObserver(([e]) => {
-        sim.current.visible = !!e?.isIntersecting;
-        if (e?.isIntersecting && sim.current.introAt < 0)
-          sim.current.introAt = sim.current.time;
+      const compact = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+      let w = 0;
+      let h = 0;
+      const update = () => {
+        const dpr = Math.min(compact.matches ? 1 : 2, window.devicePixelRatio || 1);
+        bounds.current = null;
+        setSize(size => size.w === w && size.h === h && size.dpr === dpr && size.compact === compact.matches
+          ? size : { w, h, dpr, compact: compact.matches });
+      };
+      const ro = new ResizeObserver(([entry]) => {
+        w = entry.contentRect.width;
+        h = entry.contentRect.height;
+        update();
       });
-      io.observe(el);
+      ro.observe(el);
+      compact.addEventListener("change", update);
       return () => {
         ro.disconnect();
-        io.disconnect();
+        compact.removeEventListener("change", update);
       };
     }, []);
 
@@ -253,12 +263,13 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
     React.useEffect(() => {
       const c = canvas.current;
       if (!c || !size.w) return;
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      c.width = Math.round(size.w * dpr);
-      c.height = Math.round(size.h * dpr);
+      c.width = Math.round(size.w * size.dpr);
+      c.height = Math.round(size.h * size.dpr);
+      context.current ??= c.getContext("2d");
+      const spacing = size.compact ? cell * 1.12 : cell;
       const s = sim.current;
-      s.cols = Math.floor(size.w / cell);
-      s.rows = Math.floor(size.h / cell);
+      s.cols = Math.floor(size.w / spacing);
+      s.rows = Math.floor(size.h / spacing);
       const n = s.cols * s.rows;
       s.dx = new Float32Array(n);
       s.dy = new Float32Array(n);
@@ -278,12 +289,12 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
       s.drawn = false;
     }, [size, cell, still]);
 
-    useAnimationFrame((_, delta) => {
+    const drawFrame = React.useEffectEvent((delta: number) => {
       const s = sim.current;
       const m = mask.current;
-      const c = canvas.current;
+      const ctx = context.current;
       const set = settings.current;
-      if (!c || !m || !s.cols || !s.visible) return;
+      if (!ctx || !m || !s.cols || !s.rows) return;
       if (set.still && s.drawn) return;
       const dt = Math.min(delta, 50) / 1000;
       s.time += dt;
@@ -297,6 +308,7 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
       const cx = W / 2;
       const cy = H / 2;
       const S = Math.min(W, H) * 0.92;
+      const maxDistance = Math.hypot(cx, cy);
       const theta = set.still ? 0 : (s.time * set.spin * Math.PI * 2) / 60;
       const cos = Math.cos(-theta);
       const sin = Math.sin(-theta);
@@ -349,7 +361,7 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
           const hy = (r + 0.5) * rs;
           // Intro: particles near the centre start first, so the shape assembles outward.
           const wait =
-            (Math.hypot(hx - cx, hy - cy) / Math.hypot(cx, cy)) * 0.7;
+            (Math.hypot(hx - cx, hy - cy) / maxDistance) * 0.7;
           if (intro < wait) continue;
           let tx = 0;
           let ty = 0;
@@ -402,8 +414,7 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
         }
 
       // Draw.
-      const ctx = c.getContext("2d")!;
-      const dpr = c.width / W;
+      const dpr = size.dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = set.color;
@@ -498,9 +509,54 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
       s.drawn = true;
     });
 
+    React.useEffect(() => {
+      const el = field.current;
+      if (!el || !size.w || !size.h) return;
+      const compact = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+      let active = false;
+      let frame = 0;
+      let last = 0;
+      const schedule = () => {
+        if (!frame && active && mask.current && !(still && sim.current.drawn)) {
+          frame = requestAnimationFrame(tick);
+        }
+      };
+      function tick(now: number) {
+        frame = 0;
+        const elapsed = last ? now - last : 1000 / 60;
+        if (!compact.matches || !last || elapsed >= 32) {
+          drawFrame(elapsed);
+          last = now;
+        }
+        schedule();
+      }
+      const cleanup = observeMotionViewport(el, visible => {
+        active = visible;
+        if (active) {
+          if (sim.current.introAt < 0) sim.current.introAt = sim.current.time;
+          schedule();
+        } else {
+          sim.current.pointer.active = false;
+          bounds.current = null;
+          cancelAnimationFrame(frame);
+          frame = 0;
+          last = 0;
+        }
+      }, compact);
+      wake.current = schedule;
+      return () => {
+        cleanup();
+        cancelAnimationFrame(frame);
+        wake.current = () => {};
+      };
+    }, [size, still]);
+
     const local = (e: React.PointerEvent) => {
-      const r = field.current!.getBoundingClientRect();
-      return { x: e.clientX - r.left, y: e.clientY - r.top };
+      if (!bounds.current) {
+        const rect = field.current!.getBoundingClientRect();
+        bounds.current = { left: rect.left + window.scrollX, top: rect.top + window.scrollY };
+      }
+      return { x: e.pageX - bounds.current.left, y: e.pageY - bounds.current.top };
     };
 
     const Cta = href ? "a" : "button";
@@ -533,8 +589,9 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
         <div
           ref={field}
           aria-hidden
-          className="relative -mx-2 -mt-1 h-[324px] cursor-crosshair touch-none"
+          className="relative -mx-2 -mt-1 h-[324px] cursor-crosshair touch-pan-y"
           onPointerEnter={(e) => {
+            bounds.current = null;
             const { x, y } = local(e);
             Object.assign(sim.current.pointer, { x, y, sx: x, sy: y });
           }}
@@ -542,6 +599,7 @@ export const ParticleCard = React.forwardRef<HTMLDivElement, ParticleCardProps>(
             Object.assign(sim.current.pointer, local(e), { active: true })
           }
           onPointerLeave={() => (sim.current.pointer.active = false)}
+          onPointerCancel={() => (sim.current.pointer.active = false)}
           onPointerDown={(e) => {
             // A droplet: a ripple ring spreads out from the press.
             if (still) return;

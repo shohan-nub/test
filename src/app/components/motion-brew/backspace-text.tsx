@@ -10,7 +10,7 @@
 import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import * as React from "react";
 import { type ClassValue, clsx } from "clsx";
-import { motion } from "motion/react";
+import { motion, useInView } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -61,13 +61,16 @@ export const BackspaceText = React.forwardRef<HTMLParagraphElement, BackspaceTex
   ref,
 ) {
   const still = useReducedMotionPreference();
+  const text = React.useRef<HTMLParagraphElement>(null);
+  const visible = useInView(text);
+  React.useImperativeHandle(ref, () => text.current!);
   const [index, setIndex] = React.useState(0);
   const [count, setCount] = React.useState(0);
   const [deleting, setDeleting] = React.useState(false);
   const word = words[index % words.length] ?? "";
 
   React.useEffect(() => {
-    if (still) return;
+    if (still || !visible) return;
     let delay = deleting ? deleteSpeed : typeSpeed;
     if (!deleting && count === word.length) delay = pause;
     if (deleting && count === 0) delay = 300;
@@ -81,12 +84,12 @@ export const BackspaceText = React.forwardRef<HTMLParagraphElement, BackspaceTex
       }
     }, delay);
     return () => window.clearTimeout(id);
-  }, [count, deleting, word, words.length, typeSpeed, deleteSpeed, pause, still]);
+  }, [count, deleting, word, words.length, typeSpeed, deleteSpeed, pause, still, visible]);
 
   const shown = still ? word : word.slice(0, count);
 
   return (
-    <p ref={ref} className={cn(className)}>
+    <p ref={text} className={cn(className)}>
       <span className="sr-only">
         {before} {words.join(" ")}
       </span>
@@ -107,7 +110,7 @@ export const BackspaceText = React.forwardRef<HTMLParagraphElement, BackspaceTex
         </span>
         <motion.span
           className="ml-[0.06em] inline-block h-[0.95em] w-[0.08em] translate-y-[0.12em] rounded-full bg-current align-baseline"
-          animate={still ? undefined : { opacity: [1, 1, 0, 0] }}
+          animate={still || !visible ? undefined : { opacity: [1, 1, 0, 0] }}
           transition={{ duration: 1, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
         />
       </span>

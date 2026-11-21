@@ -1003,12 +1003,20 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
     // Grow the field with its text, up to three lines.
     React.useLayoutEffect(() => {
       const el = field.current;
-      if (!el) return;
+      if (!el || CSS.supports("field-sizing", "content")) return;
       el.style.height = "0px";
       const next = Math.min(72, Math.max(24, el.scrollHeight));
       el.style.height = `${next}px`;
       setHeight(next);
     }, [text]);
+
+    React.useEffect(() => {
+      const el = field.current;
+      if (!el || !CSS.supports("field-sizing", "content")) return;
+      const observer = new ResizeObserver(([entry]) => setHeight(entry.contentRect.height));
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, []);
 
     // Close the mode menu on a click elsewhere or Escape.
     React.useEffect(() => {
@@ -1166,17 +1174,8 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           dpr = Math.min(compact.matches ? 1 : 2, window.devicePixelRatio || 1);
         });
         resize.observe(el);
-        // One setter per axis: quickSetter's "scale" shorthand writes a stray
-        // "scaleX,scaleY" attribute instead of a transform (Safari throws on it).
-        const setScaleX = ring.current
-          ? gsap.quickSetter(ring.current, "scaleX")
-          : null;
-        const setScaleY = ring.current
-          ? gsap.quickSetter(ring.current, "scaleY")
-          : null;
-        const setRing = ring.current
-          ? gsap.quickSetter(ring.current, "opacity")
-          : null;
+        const ringStyle = ring.current?.style;
+        let previousEnergy = 0;
         const toneAt = (i: number) =>
           tones[Math.min(tones.length - 1, i)]!.map((c) => c / 255) as [
             number,
@@ -1356,6 +1355,11 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
             frame = 0;
             last = 0;
             el.style.background = background;
+            if (previousEnergy > 0) {
+              ringStyle?.removeProperty("transform");
+              ringStyle?.removeProperty("opacity");
+              previousEnergy = 0;
+            }
           }
           host.toggleAttribute("data-glow-moving", running() && !still && !compact.matches);
         }
@@ -1375,9 +1379,11 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
                 el.style.background = "";
               }
               const energy = live.current.energy.v;
-              setScaleX?.(1 + level * 0.9 * energy);
-              setScaleY?.(1 + level * 0.9 * energy);
-              setRing?.(0.6 * energy);
+              if (ringStyle && (energy > 0 || previousEnergy > 0)) {
+                ringStyle.transform = `scale(${1 + level * 0.9 * energy})`;
+                ringStyle.opacity = `${0.6 * energy}`;
+              }
+              previousEnergy = energy;
             }
           }
           schedule();
@@ -1401,6 +1407,8 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           document.removeEventListener("visibilitychange", syncVisibility);
           cancelAnimationFrame(frame);
           disposeGlow?.();
+          ringStyle?.removeProperty("transform");
+          ringStyle?.removeProperty("opacity");
           host.removeAttribute("data-glow-moving");
           wakeGlow.current = () => {};
         };
@@ -1495,7 +1503,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
                   send();
                 }
               }}
-              style={{ height }}
+              style={{ fieldSizing: "content", minHeight: 24, maxHeight: 72 }}
               className={cn(
                 "block w-full resize-none bg-transparent text-base leading-6 outline-none transition-opacity duration-200 disabled:opacity-0",
                 dark

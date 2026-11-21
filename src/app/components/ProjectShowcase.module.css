@@ -61,6 +61,11 @@
 .tilt { border-radius: 16px; box-shadow: 0 2px 6px #5537210d, 0 20px 36px -24px #55372166; }
 .tilt .preview { box-shadow: none; }
 .fold { width: 100%; border-radius: 16px; }
+.foldArtwork { position: relative; overflow: hidden; background: #f4ede4; }
+.foldCaption { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: calc(3.9773% + 10px); padding-inline: 4px; font-size: 14px; color: #242423; }
+.foldCaption small { margin-right: 10px; font-size: 12px; color: #a1a1aa; }
+.foldArrows { display: flex; flex: none; gap: 6px; }
+.foldArrows i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #8d452b14; color: #8d452b; font: 500 19px / 1 var(--font-display); }
 .contour { background: radial-gradient(ellipse at 62% 34%, #fff7ec, #ead2bd); }
 
 .preview, .preview:visited { color: var(--theme-ink); }
@@ -73,6 +78,7 @@
 
 .tilt .preview:focus-visible { outline-offset: -4px; }
 .imagePlane, .detail { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.imagePlane, .detail, .foldArtwork { content-visibility: auto; }
 .art { object-fit: contain; }
 .indicator, .contour::after {
   position: absolute;
@@ -158,6 +164,7 @@
   .card[data-project="iluf-website"] { --aspect: 1.56; grid-column: auto; }
   .preview, .tilt, .contour, .fold { border-radius: 12px; }
   .card[data-project="soltek-identity"] .fold button { width: 29px; height: 29px; }
+  .foldArrows i { width: 29px; height: 29px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

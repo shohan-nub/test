@@ -54,6 +54,8 @@ function cn(...inputs: ClassValue[]): string {
 
 export interface DuoFlipImage {
   src: string;
+  srcSet?: string;
+  sizes?: string;
   alt: string;
   /** A short caption under the card. */
   label?: string;
@@ -322,6 +324,7 @@ export const DuoFlip = React.forwardRef<HTMLDivElement, DuoFlipProps>(
     const root = React.useRef<HTMLDivElement>(null);
     React.useImperativeHandle(ref, () => root.current as HTMLDivElement);
     const stage = React.useRef<HTMLDivElement>(null);
+    const stageWidth = React.useRef(0);
     const canvas = React.useRef<HTMLCanvasElement>(null);
     const inView = useInView(root, { amount: 0.25 });
     const seen = useInView(root, { once: true, amount: 0.3 });
@@ -520,12 +523,15 @@ export const DuoFlip = React.forwardRef<HTMLDivElement, DuoFlipProps>(
         img.onerror = () => {
           if (alive) setFailed(true);
         };
+        const view = images.find(image => image.src === src);
+        if (view?.sizes) img.sizes = view.sizes;
+        if (view?.srcSet) img.srcset = view.srcSet;
         img.src = src;
       }
 
       const draw = () => {
         const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-        const cw = box.clientWidth;
+        const cw = stageWidth.current;
         if (!cw) return;
         const ch = cw / aspect;
         const W = Math.max(1, Math.round((cw + PAD_X * 2) * dpr));
@@ -593,8 +599,10 @@ export const DuoFlip = React.forwardRef<HTMLDivElement, DuoFlipProps>(
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       };
       api.current = { draw };
-      draw();
-      const ro = new ResizeObserver(draw);
+      const ro = new ResizeObserver(([entry]) => {
+        stageWidth.current = entry.contentRect.width;
+        draw();
+      });
       ro.observe(box);
       return () => {
         alive = false;
@@ -655,7 +663,7 @@ export const DuoFlip = React.forwardRef<HTMLDivElement, DuoFlipProps>(
       }
       const tr = turn.current;
       if (!tr) return;
-      const w = stage.current?.clientWidth ?? 1;
+      const w = Math.max(1, stageWidth.current);
       tr.t = Math.min(1, Math.max(0, (dx * tr.dir) / (w * 0.9)));
       api.current?.draw();
     };
@@ -740,6 +748,8 @@ export const DuoFlip = React.forwardRef<HTMLDivElement, DuoFlipProps>(
                 <motion.img
                   key={index}
                   src={images[index]?.src}
+                  srcSet={images[index]?.srcSet}
+                  sizes={images[index]?.sizes}
                   alt=""
                   draggable={false}
                   loading="lazy"

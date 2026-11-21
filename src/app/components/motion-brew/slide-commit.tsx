@@ -16,10 +16,11 @@
 
 import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import * as React from "react";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import { type ClassValue, clsx } from "clsx";
-import { animate, AnimatePresence, motion, type Transition, useAnimation, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { animate, AnimatePresence, motion, type Transition, useAnimation, useInView, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { twMerge } from "tailwind-merge";
+import shimmer from "./SlideCommitShimmer.module.css";
 
 // cn(): merges Tailwind classes, later ones win.
 /** Merge Tailwind classes, letting later classes win conflicts. */
@@ -88,20 +89,20 @@ const ChevronRightIcon = forwardRef<
     // Reduced motion keeps the icon still.
     const wrap = useRef<HTMLSpanElement>(null);
     const reduced = useReducedMotion();
-    const [hosted, setHosted] = useState(false);
+    const hosted = useRef(false);
     useEffect(() => {
       const fake = {} as React.MouseEvent<HTMLSpanElement>;
       if (reduced) {
-        setHosted(true);
+        hosted.current = true;
         return;
       }
       if (active !== undefined) {
-        setHosted(true);
+        hosted.current = true;
         (active ? handleMouseEnter : handleMouseLeave)(fake);
         return;
       }
       const host = wrap.current?.parentElement?.closest<HTMLElement>("button, a, [role=button], [role=menuitem], [role=tab], [role=switch], [role=radio], label");
-      setHosted(!!host);
+      hosted.current = !!host;
       if (!host) return;
       const on = () => handleMouseEnter(fake);
       const off = () => handleMouseLeave(fake);
@@ -118,8 +119,8 @@ const ChevronRightIcon = forwardRef<
       ref={wrap}
       className={cn("inline-grid size-6 shrink-0 place-items-center align-middle [&>svg]:size-full", className)}
       style={size ? { width: size, height: size, ...style } : style}
-      onMouseEnter={hosted ? undefined : handleMouseEnter}
-      onMouseLeave={hosted ? undefined : handleMouseLeave}
+      onMouseEnter={event => { if (!hosted.current) handleMouseEnter(event); }}
+      onMouseLeave={event => { if (!hosted.current) handleMouseLeave(event); }}
       {...props}
     >
       <svg
@@ -203,6 +204,13 @@ const TRACK = "rgba(36, 36, 35, 0.06)";
 const GLIDE = [0.22, 1, 0.36, 1] as const;
 const HOME = { type: "spring", stiffness: 520, damping: 26 } as const;
 
+function ShimmerLabel({ text, moving, pending }: { text: string; moving: boolean; pending?: boolean }) {
+  return <span className={cn(shimmer.label, moving && shimmer.moving, pending && shimmer.pending)}>
+    {text}
+    <span className={shimmer.band} aria-hidden="true"><span>{text}</span></span>
+  </span>;
+}
+
 export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
   function SlideCommit(
     {
@@ -218,6 +226,7 @@ export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
   ) {
     const still = useReducedMotionPreference();
     const track = React.useRef<HTMLDivElement>(null);
+    const visible = useInView(track);
     React.useImperativeHandle(ref, () => track.current as HTMLDivElement);
     const [phase, setPhase] = React.useState<Phase>("idle");
     const [armed, setArmed] = React.useState(false);
@@ -234,9 +243,9 @@ export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
     React.useLayoutEffect(() => {
       const el = track.current;
       if (!el) return;
-      const measure = () => setMax(el.clientWidth - HANDLE - PAD * 2);
-      measure();
-      const ro = new ResizeObserver(measure);
+      const ro = new ResizeObserver(([entry]) => {
+        setMax(Math.max(0, entry.contentRect.width - HANDLE - PAD * 2));
+      });
       ro.observe(el);
       return () => ro.disconnect();
     }, []);
@@ -382,19 +391,7 @@ export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
           }
         >
           {phase === "idle" ? (
-            <span
-              className={cn(
-                "bg-clip-text text-transparent",
-                !still && "animate-[slide-commit-shine_2.2s_linear_infinite]",
-              )}
-              style={{
-                backgroundImage:
-                  "linear-gradient(90deg, #71717a 0%, #71717a 40%, #18181b 50%, #71717a 60%, #71717a 100%)",
-                backgroundSize: "250% 100%",
-              }}
-            >
-              {label}
-            </span>
+            <ShimmerLabel text={label} moving={visible && !still} />
           ) : (
             <AnimatePresence mode="popLayout" initial={false}>
               {done ? (
@@ -415,16 +412,6 @@ export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
                 // While it works, a light sweeps through the label and its dots, like the idle shimmer.
                 <motion.span
                   key="pending"
-                  className={cn(
-                    "bg-clip-text text-transparent",
-                    !still &&
-                      "animate-[slide-commit-shine_1.6s_linear_infinite]",
-                  )}
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(90deg, #52525b 0%, #52525b 38%, #d4d4d8 50%, #52525b 62%, #52525b 100%)",
-                    backgroundSize: "250% 100%",
-                  }}
                   initial={
                     still
                       ? { opacity: 0 }
@@ -438,7 +425,7 @@ export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
                   }
                   transition={{ duration: 0.32, ease: GLIDE }}
                 >
-                  {pendingLabel}...
+                  <ShimmerLabel text={`${pendingLabel}...`} moving={visible && !still} pending />
                 </motion.span>
               )}
             </AnimatePresence>
@@ -573,7 +560,6 @@ export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
               : ""}
         </span>
 
-        <style>{`@keyframes slide-commit-shine { from { background-position: 100% 0 } to { background-position: -150% 0 } }`}</style>
       </motion.div>
     );
   },

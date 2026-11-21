@@ -1,14 +1,22 @@
 "use client";
 
-import Image from "next/image";
-import { type PointerEvent, useState } from "react";
+import dynamic from "next/dynamic";
+import Image, { getImageProps } from "next/image";
+import { type PointerEvent, useRef, useState } from "react";
 import { motion, useSpring, useTransform } from "motion/react";
 import assets from "../../../public/creative-portfolio-gallery/sources.json";
-import { ContourFeatureCard } from "./motion-brew/contour-feature-card";
-import { DuoFlip } from "./motion-brew/duo-flip";
 import { TiltCard } from "./motion-brew/tilt-card";
 import { useReducedMotionPreference } from "./motion-brew/useReducedMotionPreference";
+import { useNearViewport } from "./useNearViewport";
 import styles from "./ProjectShowcase.module.css";
+
+const duo = () => import("./motion-brew/duo-flip").then(module => module.DuoFlip);
+const contour = () => import("./motion-brew/contour-feature-card").then(module => module.ContourFeatureCard);
+
+const tileSizes = "(max-width: 600px) 46vw, (max-width: 980px) 31vw, (max-width: 1320px) 23vw, 298px";
+const wideSizes = "(max-width: 600px) 46vw, (max-width: 980px) 63vw, (max-width: 1320px) 47vw, 612px";
+const detailSizes = "(max-width: 600px) 85vw, (max-width: 980px) 58vw, (max-width: 1320px) 43vw, 552px";
+const depthSizes = "(max-width: 600px) 48vw, (max-width: 980px) 32vw, (max-width: 1320px) 51vw, 662px";
 
 type Effect = "tilt" | "depth" | "prism" | "fold" | "layers" | "contour" | "light";
 
@@ -39,14 +47,42 @@ const projects = projectEntries.map((project) => ({ ...project, src: assetPath(p
 type Project = (typeof projects)[number];
 const soltek = projects.find(({ effect }) => effect === "prism")!;
 const nexr = projects.find(({ effect }) => effect === "fold")!;
+function responsiveView(src: string, alt: string, sizes = tileSizes) {
+  const { props } = getImageProps({ src, alt, fill: true, sizes });
+  return { src: props.src, srcSet: props.srcSet, sizes: props.sizes, alt };
+}
+
 const soltekViews = [
-  { src: soltek.src, alt: soltek.alt, label: "Identity system" },
-  { src: assetPath("soltek-logo"), alt: "Soltek logo on a monochrome architectural photograph", label: "Logo study" },
+  { ...responsiveView(soltek.src, soltek.alt), label: "Identity system" },
+  { ...responsiveView(assetPath("soltek-logo"), "Soltek logo on a monochrome architectural photograph"), label: "Logo study" },
 ];
 const nexrViews = [
-  { src: nexr.src, alt: nexr.alt },
-  { src: nexr.src, alt: "Detail of the Nexr watch interface and surrounding brand artwork", zoom: 1.85, focus: [0.62, 0.59] as const },
+  responsiveView(nexr.src, nexr.alt, detailSizes),
+  { ...responsiveView(nexr.src, "Detail of the Nexr watch interface and surrounding brand artwork", detailSizes), zoom: 1.85, focus: [0.62, 0.59] as const },
 ];
+
+function FoldPlaceholder({ project }: { project: typeof soltek }) {
+  const prism = project.effect === "prism";
+  return <div>
+    <div className={styles.foldArtwork} style={{ aspectRatio: prism ? 1.76 : 1.62, borderRadius: prism ? 15 : 16 }}>
+      <Artwork project={project} />
+      {!prism && <span className={styles.indicator} aria-hidden="true">+</span>}
+    </div>
+    {prism && <div aria-hidden="true" className={styles.foldCaption}>
+      <span><small>01 / 02</small> Identity system</span>
+      <span className={styles.foldArrows}><i>?</i><i>?</i></span>
+    </div>}
+  </div>;
+}
+
+const SoltekFold = dynamic(duo, { ssr: false, loading: () => <FoldPlaceholder project={soltek} /> });
+const NexrFold = dynamic(duo, { ssr: false, loading: () => <FoldPlaceholder project={nexr} /> });
+const ContourFeatureCard = dynamic(contour, { ssr: false, loading: () => <ContourPlaceholder /> });
+
+function ContourPlaceholder() {
+  return <div className={styles.contour}><Artwork project={projects.find(project => project.effect === "contour")!} /></div>;
+}
+
 const layerSpring = { stiffness: 230, damping: 27, mass: 0.82 };
 const tiltSpring = { stiffness: 225, damping: 24, mass: 0.82 };
 function trackPointer(event: PointerEvent<HTMLButtonElement>) {
@@ -67,7 +103,7 @@ function Artwork({ project, decorative = false }: { project: Project; decorative
       src={project.src}
       alt={decorative ? "" : project.alt}
       fill
-      sizes={project.id === "iluf-website" ? "(max-width: 600px) 45vw, (max-width: 980px) 63vw, 600px" : project.id === "huse-identity" ? "(max-width: 600px) 45vw, (max-width: 980px) 31vw, 600px" : "(max-width: 600px) 45vw, (max-width: 980px) 31vw, 310px"}
+      sizes={project.id === "iluf-website" ? wideSizes : project.id === "huse-identity" ? depthSizes : tileSizes}
       draggable={false}
       className={styles.art}
     />
@@ -132,7 +168,7 @@ function DepthPreview({ project }: { project: Project }) {
   );
 }
 
-function ProjectPreview({ project }: { project: Project }) {
+function ProjectPreview({ project, near }: { project: Project; near: boolean }) {
   const [pressed, setPressed] = useState(false);
 
   if (project.effect === "depth") {
@@ -140,8 +176,9 @@ function ProjectPreview({ project }: { project: Project }) {
   }
 
   if (project.effect === "prism") {
+    if (!near) return <FoldPlaceholder project={project} />;
     return (
-      <DuoFlip
+      <SoltekFold
         images={soltekViews}
         label="Soltek identity views"
         autoplay={false}
@@ -159,8 +196,9 @@ function ProjectPreview({ project }: { project: Project }) {
   }
 
   if (project.effect === "fold") {
+    if (!near) return <FoldPlaceholder project={project} />;
     return (
-      <DuoFlip
+      <NexrFold
         images={nexrViews}
         label="Nexr project and design detail"
         autoplay={false}
@@ -179,6 +217,7 @@ function ProjectPreview({ project }: { project: Project }) {
   }
 
   if (project.effect === "contour") {
+    if (!near) return <ContourPlaceholder />;
     return (
       <ContourFeatureCard
         className={styles.contour}
@@ -223,8 +262,10 @@ function ProjectPreview({ project }: { project: Project }) {
 }
 
 export default function ProjectShowcase() {
+  const ref = useRef<HTMLElement>(null);
+  const near = useNearViewport(ref, "380px");
   return (
-    <section className={styles.section} id="creative-portfolio" aria-labelledby="creative-portfolio-heading">
+    <section ref={ref} className={styles.section} id="creative-portfolio" aria-labelledby="creative-portfolio-heading">
       <div className={styles.inner}>
         <header className={styles.heading}>
           <h2 id="creative-portfolio-heading">Selected Work</h2>
@@ -233,7 +274,7 @@ export default function ProjectShowcase() {
         <div className={styles.grid}>
           {projects.map((project) => (
             <article key={project.id} data-project={project.id} className={styles.card} aria-labelledby={`work-${project.id}`}>
-              <ProjectPreview project={project} />
+              <ProjectPreview project={project} near={near} />
               <div className={styles.caption}>
                 <h3 id={`work-${project.id}`}>{project.title}</h3>
                 <span>{project.category}</span>
