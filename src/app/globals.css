@@ -404,6 +404,50 @@ main :is(.hero,.service-overview,.consultation-section,.experiences){background:
 @media(prefers-reduced-motion:reduce){.experiences{height:auto;display:block;padding:48px 0 0}.capability-stack{width:100%;height:auto;display:grid;gap:20px;padding-bottom:0}.capability-card,.capability-card:first-child{position:relative;inset:auto;width:min(1200px,90%);height:520px;margin-inline:auto}.capability-card-charcoal{width:100%;height:100svh}.capability-surface{min-height:0}.capability-card-charcoal .capability-surface{width:100%;height:100%;left:0;border-radius:0}.capability-media img,.capability-action{transition:none}}
 @media(max-width:640px) and (prefers-reduced-motion:reduce){.capability-card,.capability-card:first-child{height:550px}.capability-card-charcoal{height:100svh}}
 
+/* The desktop track reserves its scroll distance before GSAP is loaded. */
+.workflow-showreel{position:relative;aspect-ratio:16/9;background:var(--showcase-charcoal)}
+.workflow-track>.experiences{display:block;height:auto;padding:48px 0 0}
+.workflow-track .project-statement{position:relative;height:auto;display:block;padding:0 5% 28px;font-size:clamp(22px,4.7vw,48px)}
+.workflow-track .project-statement-track{display:block;width:auto}
+.workflow-track .project-statement-phrase{min-width:0;padding:0;white-space:normal}
+.workflow-track .project-statement-phrase[aria-hidden="true"]{display:none}
+.workflow-track .capability-stack{display:grid;gap:22px;width:min(1200px,90%);height:auto;margin:0 auto 28px}
+.workflow-track .capability-card{position:relative;inset:auto;width:100%;height:auto;margin:0}
+.workflow-track .capability-card>.capability-surface{position:relative;height:auto;min-height:378px}
+.workflow-track .capability-card .capability-surface::before,
+.workflow-track .capability-card .capability-surface::after{animation-play-state:paused}
+.workflow-track .capability-card[data-workflow-active] .capability-surface::before,
+.workflow-track .capability-card[data-workflow-active] .capability-surface::after{animation-play-state:running}
+
+[data-voice-shimmer]{animation:voice-shimmer 8s linear infinite paused}
+[data-glow-moving] [data-voice-shimmer]{animation-play-state:running}
+[data-voice-shimmer][data-listening]{animation-duration:4s}
+@keyframes voice-shimmer{to{rotate:360deg}}
+
+@media(max-width:640px){
+  .workflow-track .capability-card>.capability-surface{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 260px;gap:18px;min-height:0;padding:20px}
+  .workflow-track .capability-copy h3{font-size:clamp(26px,7vw,38px)}
+  .hero-map .map-node-glow,.hero-map .map-routes>g:nth-child(even) .map-particle{display:none}
+  .hero-map .map-route{animation:none;stroke-dashoffset:0;opacity:.58}
+  .hero .hero-accent{animation:none}
+  main::after{animation:none}
+  .site-navigation.nav-shell{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(248,245,240,.94)}
+}
+.hero-map:not([data-map-playing]) :is(.map-route,.map-node){animation-play-state:paused}
+
+@media(min-width:1100px) and (min-height:620px) and (prefers-reduced-motion:no-preference){
+  .workflow-track:not([data-stack-failed]){height:580svh}
+  .workflow-track:not([data-stack-failed])>.experiences{position:sticky;top:0;height:100svh;padding:0;display:grid;place-items:center}
+  .workflow-track:not([data-stack-failed]) .project-statement{position:absolute;display:flex;height:calc((100svh - var(--heading-card-height))/2);padding:0;font-size:clamp(19px,min(4.7vw,calc((100svh - var(--heading-card-height))*.305)),70px)}
+  .workflow-track:not([data-stack-failed]) .project-statement-track{display:flex;width:max-content}
+  .workflow-track:not([data-stack-failed]) .project-statement-phrase{display:block;min-width:100vw;padding-inline:5vw;white-space:nowrap}
+  .workflow-track:not([data-stack-failed]) .capability-stack{display:block;width:min(1200px,88%);height:min(520px,calc(100svh - 120px));margin:0}
+  .workflow-track:not([data-stack-failed]) .capability-card{position:absolute;inset:0;height:100%}
+  .workflow-track:not([data-stack-failed]) .capability-card>.capability-surface{position:absolute;height:100%;min-height:0}
+  .workflow-track:not([data-stack-failed]) .workflow-showreel{position:absolute;inset:0;z-index:5;aspect-ratio:auto}
+  .workflow-track:not([data-stack-failed]):not([data-stack-ready]) :is(.capability-card:not(:first-child),.workflow-showreel){visibility:hidden;transform:translateY(100svh)}
+}
+
 /* Three-column SparkLab service overview. */
 .service-overview{background:var(--theme-bg);color:var(--theme-ink);padding-top:120px;padding-bottom:120px}
 .service-overview-heading{display:grid;justify-items:center;gap:16px;max-width:980px;margin:0 auto clamp(24px,3.6vw,42px);text-align:center}

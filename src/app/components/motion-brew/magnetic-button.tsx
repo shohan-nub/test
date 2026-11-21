@@ -7,9 +7,10 @@
  * helper. Needs React 18 or 19 and Tailwind CSS v4.
  */
 
+import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import * as React from "react";
 import { type ClassValue, clsx } from "clsx";
-import { type HTMLMotionProps, motion, type SpringOptions, useMotionTemplate, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
+import { type HTMLMotionProps, motion, type SpringOptions, useMotionTemplate, useMotionValue, useSpring, useTransform } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -103,7 +104,7 @@ export const MagneticButton = React.forwardRef<
   },
   ref,
 ) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionPreference();
 
   // Raw cursor offset from center, in px.
   const dx = useMotionValue(0);

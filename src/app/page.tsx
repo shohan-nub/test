@@ -1,12 +1,8 @@
-"use client";
-
-import { type TransitionEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import worldLand from "./world-land.json";
 import SeoGeoShowcase from "./components/SeoGeoShowcase";
 import ProjectShowcase from "./components/ProjectShowcase";
-import { WorkflowVisual, workflowStages } from "./components/WorkflowVisuals";
+import { workflowStages } from "./components/workflow-stages";
+import { DeferredWorkflowVisual, WorkflowMotion } from "./components/WorkflowMotion";
 import workflowStyles from "./components/WorkflowVisuals.module.css";
 import FinalContact from "./components/FinalContact";
 import HomeFaq from "./components/HomeFaq";
@@ -17,8 +13,8 @@ import { BackspaceText } from "./components/motion-brew/backspace-text";
 import CalBookingButton from "./components/CalBookingButton";
 import HeroVoicePrompt from "./components/HeroVoicePrompt";
 import SiteNav from "./components/SiteNav";
-import soundStyles from "./components/ShowreelSound.module.css";
-import { useViewportVideo } from "./components/useViewportVideo";
+import { ConsultationPhrases, OverviewVideo, ProjectShowreel } from "./components/HomeMedia";
+import MapMotion from "./components/MapMotion";
 
 const mapRoutes = [
   { name: "New York", x: 294, y: 153, path: "M 751 211 Q 520 14 294 153" },
@@ -31,7 +27,7 @@ const mapRoutes = [
 
 function GlobalMap() {
   return <div className="hero-map" role="img" aria-label="An illustrated world map showing connections from Dhaka to cities around the world">
-    <svg viewBox="0 0 1000 500" aria-hidden="true">
+    <svg id="hero-world-map" viewBox="0 0 1000 500" aria-hidden="true">
       <defs>
         <pattern id="map-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.25" fill="#6e6861" /></pattern>
         <filter id="node-glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="5" /></filter>
@@ -47,236 +43,16 @@ function GlobalMap() {
       <circle className="map-origin-halo" cx="751" cy="211" r="13" />
       <circle className="map-origin" cx="751" cy="211" r="5" />
     </svg>
+    <MapMotion />
   </div>;
-}
-
-function ProjectShowreel() {
-  const video = useRef<HTMLVideoElement>(null);
-  const playIfVisible = useViewportVideo(video, "/card5.mp4");
-  const [muted, setMuted] = useState(true);
-  const [feedback, setFeedback] = useState("");
-  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const soundRequest = useRef(0);
-
-  const announce = (message: string) => {
-    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
-    setFeedback(message);
-    feedbackTimer.current = setTimeout(() => setFeedback(""), 2800);
-  };
-
-  const toggleSound = async () => {
-    const media = video.current;
-    if (!media) return;
-    const request = ++soundRequest.current;
-    const enable = media.muted || media.volume === 0;
-    try {
-      if (enable) media.volume = .65;
-      media.muted = !enable;
-      setMuted(media.muted || media.volume === 0);
-      announce(enable ? "Sound On" : "Sound Off");
-      // play() preserves currentTime and also recovers a policy-paused video.
-      if (enable || media.paused) await playIfVisible.current();
-    } catch (error) {
-      if (request !== soundRequest.current) return;
-      // A viewport pause can interrupt a pending play() request.
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      media.muted = true;
-      setMuted(true);
-      announce("Sound unavailable. Try again.");
-      void playIfVisible.current().catch(() => { /* Leave the control available for another user gesture. */ });
-    }
-  };
-
-  useEffect(() => {
-    const media = video.current;
-    if (!media) return;
-    const reveal = () => { media.dataset.ready = "true"; };
-    const hide = () => { delete media.dataset.ready; };
-    const syncSound = () => {
-      const silent = media.muted || media.volume === 0;
-      setMuted(silent);
-      if (silent) setFeedback(message => message === "Sound On" ? "" : message);
-    };
-    media.muted = true;
-    media.defaultMuted = true;
-    media.addEventListener("loadeddata", reveal);
-    media.addEventListener("error", hide);
-    media.addEventListener("volumechange", syncSound);
-    if (media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) reveal();
-    return () => {
-      media.removeEventListener("loadeddata", reveal);
-      media.removeEventListener("error", hide);
-      media.removeEventListener("volumechange", syncSound);
-      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
-      soundRequest.current += 1;
-    };
-  }, []);
-
-  return <div className={soundStyles.root} onDoubleClick={event => {
-    if ((event.target as HTMLElement).closest("button")) return;
-    event.preventDefault();
-    void toggleSound();
-  }}>
-    <video ref={video} className="project-showreel" muted={muted} loop playsInline preload="metadata" aria-label="SparkLab creative showreel" />
-    <button className={soundStyles.control} type="button" aria-label={muted ? "Enable showreel sound" : "Mute showreel sound"} aria-pressed={!muted} onClick={event => {
-      event.stopPropagation();
-      const touch = window.matchMedia("(pointer: coarse)").matches || ("pointerType" in event.nativeEvent && event.nativeEvent.pointerType === "touch");
-      // Every touch tap is intentional; a desktop button double-click toggles once.
-      if (touch || event.detail < 2) void toggleSound();
-    }}>
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4V4Z" />{muted ? <path d="m16 9 6 6m0-6-6 6" /> : <><path d="M15 8a6 6 0 0 1 0 8" /><path d="M18 5a10 10 0 0 1 0 14" /></>}</svg>
-      <span className={soundStyles.label} data-visible={muted || !!feedback} aria-hidden="true">{feedback || (muted ? <><span className={soundStyles.desktopHint}>Double-click for sound</span><span className={soundStyles.touchHint}>Tap for sound</span></> : "Sound On")}</span>
-    </button>
-    <span className={soundStyles.status} role="status">{feedback}</span>
-  </div>;
-}
-
-function OverviewVideo() {
-  const video = useRef<HTMLVideoElement>(null);
-  useViewportVideo(video, "/creative-loop.mp4", true);
-
-  return <video ref={video} muted loop playsInline preload="metadata" aria-hidden="true" />;
 }
 
 const heroMarqueePhrases = ["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"];
 
-const consultationPhrases = ["Automate Customer Replies", "Generate Reports Automatically", "Handle Follow-up Calls", "Capture & Qualify Leads", "Schedule Appointments", "Manage Customer Inquiries", "Send Order Notifications", "Sync Business Data"];
-
-function ConsultationPhrases() {
-  const [active, setActive] = useState(consultationPhrases.length);
-  const [animate, setAnimate] = useState(true);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let timer: ReturnType<typeof setInterval> | undefined;
-    const syncMotion = () => {
-      if (timer) clearInterval(timer);
-      if (!media.matches) timer = setInterval(() => setActive((value) => value + 1), 2700);
-    };
-    syncMotion();
-    media.addEventListener("change", syncMotion);
-    return () => { if (timer) clearInterval(timer); media.removeEventListener("change", syncMotion); };
-  }, []);
-
-  const handleTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget || event.propertyName !== "transform" || active < consultationPhrases.length * 2) return;
-    setAnimate(false);
-    setActive(consultationPhrases.length);
-    requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
-  };
-
-  return <div className="consultation-phrases" aria-label={consultationPhrases.join(", ")}>
-    <div className="consultation-phrases-track" aria-hidden="true" onTransitionEnd={handleTransitionEnd} style={{ transform: `translateY(${(2 - active) / (consultationPhrases.length * 3) * 100}%)`, transition: animate ? undefined : "none" }}>
-      {[0, 1, 2].flatMap((copy) => consultationPhrases.map((phrase, index) => <div key={`${copy}-${phrase}`} className={`consultation-phrase${copy * consultationPhrases.length + index === active ? " is-active" : ""}`}>{phrase}</div>))}
-    </div>
-  </div>;
-}
-
-const subscribeToHydration = () => () => {};
-const clientSnapshot = () => true;
-const serverSnapshot = () => false;
-
 export default function Home() {
-  const root = useRef<HTMLElement>(null);
-  const motionReady = useSyncExternalStore(subscribeToHydration, clientSnapshot, serverSnapshot);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const element = root.current;
-    if (!element) return;
-    const cleanups: Array<() => void> = [];
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Keep teardown owned by one GSAP context; self-reverting matchMedia cleanups caused the prior recursion.
-    const ctx = gsap.context(() => {
-      if (!reduceMotion) {
-        const showcase = element.querySelector<HTMLElement>(".experiences");
-        const stack = showcase?.querySelector<HTMLElement>(".capability-stack");
-        const cards = stack ? gsap.utils.toArray<HTMLElement>(".capability-card", stack) : [];
-        if (showcase && stack && cards.length) {
-          const depth = () => parseFloat(getComputedStyle(stack).getPropertyValue("--stack-step")) || 10;
-          // Scroll distance includes a resting interval for every card, including the first and last.
-          const cardTimeline = gsap.timeline({ scrollTrigger: { trigger: showcase, start: "top top", end: () => `+=${showcase.clientHeight * (window.innerWidth <= 900 ? 3.6 : 4.8)}`, pin: true, scrub: .4, invalidateOnRefresh: true, anticipatePin: 1 } });
-          cardTimeline.to({}, { duration: .5 });
-          cards.slice(1).forEach((card, index) => {
-            const start = cardTimeline.duration();
-            // Bring each card in from below the viewport. The last card rests at
-            // the same compact size before its surface fills the viewport.
-            const finalCard = index === cards.length - 2;
-            const duration = 1;
-            cardTimeline.fromTo(card, { y: () => showcase.clientHeight - stack.offsetTop }, { y: () => depth() * (index + 1), duration, ease: "sine.inOut", immediateRender: true }, start);
-            if (finalCard) {
-              const surface = card.querySelector<HTMLElement>(".capability-surface");
-              const expandAt = start + duration + .3;
-              const expandDuration = 1.35;
-              cardTimeline.to(card, { y: () => -stack.offsetTop, duration: expandDuration, ease: "sine.inOut" }, expandAt);
-              if (surface) cardTimeline.fromTo(surface,
-                { width: () => stack.clientWidth, height: () => stack.clientHeight, left: 0, borderRadius: () => window.innerWidth <= 640 ? 22 : 26 },
-                { width: () => showcase.clientWidth, height: () => showcase.clientHeight, left: () => -stack.offsetLeft, borderRadius: 0, duration: expandDuration, ease: "sine.inOut", immediateRender: true }, expandAt);
-              cardTimeline.to(showcase, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--showcase-charcoal").trim(), duration: expandDuration, ease: "sine.inOut" }, expandAt);
-            }
-            cardTimeline.to({}, { duration: .45 });
-          });
-          const statement = showcase.querySelector<HTMLElement>(".project-statement-track");
-          const phrase = statement?.querySelector<HTMLElement>(".project-statement-phrase");
-          if (statement && phrase) {
-            cardTimeline.fromTo(statement, { x: 0 }, {
-              x: () => -phrase.offsetWidth,
-              duration: cardTimeline.duration(),
-              ease: "none",
-            }, 0);
-          }
-          // Refresh the function-based positions when the stack's dimensions change,
-          // including after fonts load or a tablet changes orientation.
-          let refreshFrame = 0;
-          let stackWidth = stack.clientWidth;
-          let stackHeight = stack.clientHeight;
-          const scheduleRefresh = () => {
-            cancelAnimationFrame(refreshFrame);
-            refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
-          };
-          const observer = new ResizeObserver(() => {
-            if (stack.clientWidth === stackWidth && stack.clientHeight === stackHeight) return;
-            stackWidth = stack.clientWidth;
-            stackHeight = stack.clientHeight;
-            scheduleRefresh();
-          });
-          observer.observe(stack);
-          document.fonts.addEventListener("loadingdone", scheduleRefresh);
-          cleanups.push(() => {
-            observer.disconnect();
-            document.fonts.removeEventListener("loadingdone", scheduleRefresh);
-            cancelAnimationFrame(refreshFrame);
-          });
-        }
-        const overview = element.querySelector<HTMLElement>(".service-overview");
-        if (overview) {
-          gsap.from(overview.querySelector(".service-overview-heading"), { y: 20, opacity: 0, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview, start: "top 82%", once: true } });
-          gsap.from(overview.querySelectorAll(".service-overview-card"), { y: 22, opacity: 0, stagger: .12, duration: .7, ease: "power2.out", scrollTrigger: { trigger: overview.querySelector(".service-overview-grid"), start: "top 86%", once: true } });
-        }
-        for (const button of element.querySelectorAll<HTMLElement>(".magnetic")) {
-          const onMove = (event: PointerEvent) => {
-            const rect = button.getBoundingClientRect();
-            gsap.to(button, { x: (event.clientX - rect.left - rect.width / 2) * .08, y: (event.clientY - rect.top - rect.height / 2) * .12, duration: .3, overwrite: true });
-          };
-          const onLeave = () => gsap.to(button, { x: 0, y: 0, duration: .5, ease: "power2.out" });
-          button.addEventListener("pointermove", onMove);
-          button.addEventListener("pointerleave", onLeave);
-          cleanups.push(() => {
-            button.removeEventListener("pointermove", onMove);
-            button.removeEventListener("pointerleave", onLeave);
-          });
-        }
-      }
-    }, root);
-    return () => {
-      for (const cleanup of cleanups) cleanup();
-      ctx.revert();
-    };
-  }, []);
-
   return (
     <>
-    <main ref={root}>
+    <main>
       <section className="hero" id="discover" aria-label="Spark Lab digital studio">
         <SiteNav />
         <div className="hero-content">
@@ -293,7 +69,7 @@ export default function Home() {
       <section className="service-overview section-pad" aria-labelledby="service-overview-heading">
         <header className="service-overview-heading">
           <h2 id="service-overview-heading">We build AI-powered automation, websites, web applications, mobile apps, and custom software that help businesses grow.</h2>
-          {motionReady ? <FlipWords before="Built for" words={["Websites", "Automation", "Applications", "Digital Products"]} after="" interval={4000} wordClassName="text-[#b9562d]" className="service-flip" /> : <p className="service-flip">Built for <span className="text-[#b9562d]">Websites</span></p>}
+          <FlipWords before="Built for" words={["Websites", "Automation", "Applications", "Digital Products"]} after="" interval={4000} wordClassName="text-[#b9562d]" className="service-flip" />
         </header>
         <div className="service-overview-grid">
           <article className="service-overview-card service-overview-dark">
@@ -317,13 +93,13 @@ export default function Home() {
         <div className="consultation-copy">
           <h2 id="consultation-heading">Ready to automate and scale your business?</h2>
           <p>Our team is ready to architect, build, and deploy your idea. Book a free consultation to get started.</p>
-          {motionReady ? <BackspaceText before="" words={["Building digital experiences", "Automating business workflows", "Creating intelligent solutions", "Turning ideas into reality"]} pause={2200} wordClassName="text-[#b9562d]" className="consultation-backspace" /> : <p className="consultation-backspace">Building digital experiences</p>}
+          <BackspaceText before="" words={["Building digital experiences", "Automating business workflows", "Creating intelligent solutions", "Turning ideas into reality"]} pause={2200} wordClassName="text-[#b9562d]" className="consultation-backspace" />
           <a className="consultation-cta" href="#contact">Book a free consultation <span aria-hidden="true">→</span></a>
         </div>
         <ConsultationPhrases />
         </div>
       </section>
-      <section className="experiences section-pad" id="experiences" aria-label="SparkLab workflow and showreel">
+      <WorkflowMotion>
         <h2 className="project-statement">
           <span className="project-statement-track">
             <span className="project-statement-phrase">BE VISIBLE. BE DISCOVERED. <em>BE UNSTOPPABLE.</em></span>
@@ -340,14 +116,14 @@ export default function Home() {
                   {step.points.map((point) => <li key={point}>{point}</li>)}
                 </ul>
               </div>
-              <WorkflowVisual stage={step.id} />
+              <DeferredWorkflowVisual stage={step.id} />
             </div>
           </article>)}
-          <article className="capability-card capability-card-charcoal">
-            <div className="capability-surface"><ProjectShowreel /></div>
-          </article>
         </div>
-      </section>
+        <article className="workflow-showreel capability-card-charcoal" aria-label="SparkLab creative showreel">
+          <div className="capability-surface"><ProjectShowreel /></div>
+        </article>
+      </WorkflowMotion>
 
       <SeoGeoShowcase />
 

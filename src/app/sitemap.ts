@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
-import { siteOrigin } from "./site-metadata";
+import { canonicalUrl, indexableRoutes, isVercelPreview } from "./site-metadata";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  if (!siteOrigin) return [];
+  if (isVercelPreview) return [];
 
-  return ["/", "/services", "/about", "/contact"].map(path => ({
-    url: new URL(path, siteOrigin).href,
+  return indexableRoutes.map(path => ({
+    url: canonicalUrl(path),
   }));
 }

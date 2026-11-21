@@ -1,41 +1,43 @@
 import type { Metadata } from "next";
 
-function productionOrigin() {
-  try {
-    const url = new URL(process.env.NEXT_PUBLIC_SITE_URL?.trim() ?? "");
-    if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
-    if (/^(?:localhost|0\.0\.0\.0|\[::1\])$|^127\.|\.localhost$/i.test(url.hostname)) return undefined;
-    if (url.username || url.password || url.pathname !== "/" || url.search || url.hash) return undefined;
-    return url.origin;
-  } catch {
-    return undefined;
-  }
+export const siteOrigin = "https://sparklabltd.com";
+export const isVercelPreview = process.env.VERCEL_ENV === "preview";
+export const indexableRoutes = ["/", "/about", "/services", "/approach", "/contact"] as const;
+type IndexableRoute = (typeof indexableRoutes)[number];
+
+const siteName = "Spark Lab";
+const socialImage = {
+  url: new URL("/sparklab-icon-clear.png", siteOrigin).href,
+  width: 1044,
+  height: 1068,
+  alt: "SparkLab emblem",
+};
+
+export function canonicalUrl(path: IndexableRoute) {
+  return path === "/" ? siteOrigin : new URL(path, siteOrigin).href;
 }
 
-export const siteOrigin = productionOrigin();
-export const siteSocialImage = siteOrigin ? new URL("/sparklab-icon-clear.png", siteOrigin).href : undefined;
-
-export function pageMetadata(path: string, title: string, description: string): Metadata {
-  const url = siteOrigin ? new URL(path, siteOrigin).href : undefined;
-  const socialTitle = `${title} | Spark Lab`;
+export function pageMetadata(path: IndexableRoute, title: string, description: string): Metadata {
+  const url = canonicalUrl(path);
+  const socialTitle = path === "/" ? title : `${title} | ${siteName}`;
 
   return {
     title,
     description,
-    alternates: url ? { canonical: url } : undefined,
+    alternates: { canonical: url },
     openGraph: {
       title: socialTitle,
       description,
-      siteName: "Spark Lab",
+      siteName,
       type: "website",
       url,
-      images: siteSocialImage ? [{ url: siteSocialImage, alt: "SparkLab emblem" }] : undefined,
+      images: [socialImage],
     },
     twitter: {
       card: "summary",
       title: socialTitle,
       description,
-      images: siteSocialImage ? [siteSocialImage] : undefined,
+      images: [socialImage],
     },
   };
 }

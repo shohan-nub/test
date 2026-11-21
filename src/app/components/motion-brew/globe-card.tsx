@@ -342,7 +342,7 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         antialias: true,
         alpha: true,
       });
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      const compact = window.matchMedia("(max-width: 767px), (pointer: coarse)");
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       host.appendChild(renderer.domElement);
       renderer.domElement.style.display = "block";
@@ -559,6 +559,7 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
 
       const size = { w: 0, h: 0 };
       const resize = () => {
+        renderer.setPixelRatio(Math.min(compact.matches ? 1 : 2, window.devicePixelRatio || 1));
         size.w = host.clientWidth;
         size.h = host.clientHeight;
         renderer.setSize(size.w, size.h, false);
@@ -566,30 +567,26 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         renderer.domElement.style.height = "100%";
         camera.aspect = size.w / Math.max(1, size.h);
         camera.updateProjectionMatrix();
+        if (settings.current.still) renderer.render(scene, camera);
       };
       resize();
       const ro = new ResizeObserver(resize);
       ro.observe(host);
 
-      let visible = true;
-      const io = new IntersectionObserver(
-        ([e]) => void (visible = !!e?.isIntersecting),
-      );
-      io.observe(host);
-
       if (settings.current.still)
         for (let i = 0; i < settings.current.arcs; i++) launch(0, true);
 
-      let last = performance.now();
+      let last = 0;
       let elapsed = 0;
       let nextLaunch = 0.3;
       let raf = 0;
+      let visible = false;
       const easeOut = (t: number) => 1 - (1 - t) ** 3;
 
-      const frame = () => {
-        raf = requestAnimationFrame(frame);
-        const t = performance.now();
-        const dt = Math.min(0.05, (t - last) / 1000);
+      const frame = (t: number) => {
+        raf = settings.current.still ? 0 : requestAnimationFrame(frame);
+        if (last && compact.matches && t - last < 32) return;
+        const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
         last = t;
         if (!visible || !size.w) return;
         elapsed += dt;
@@ -672,7 +669,22 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         }
         renderer.render(scene, camera);
       };
-      frame();
+      const schedule = () => {
+        if (visible && !document.hidden) {
+          if (!raf) raf = requestAnimationFrame(frame);
+        } else {
+          cancelAnimationFrame(raf);
+          raf = 0;
+          last = 0;
+        }
+      };
+      const io = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        schedule();
+      });
+      io.observe(host);
+      document.addEventListener("visibilitychange", schedule);
+      compact.addEventListener("change", resize);
 
       // Drag spins the globe (sideways) and tips it (up and down), leaving momentum behind.
       const local = (e: PointerEvent) => {
@@ -726,6 +738,8 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         cancelAnimationFrame(raf);
         ro.disconnect();
         io.disconnect();
+        document.removeEventListener("visibilitychange", schedule);
+        compact.removeEventListener("change", resize);
         host.removeEventListener("pointerenter", onEnter);
         host.removeEventListener("pointerleave", onLeave);
         host.removeEventListener("pointerdown", onDown);
@@ -746,7 +760,7 @@ export const GlobeCard = React.forwardRef<HTMLDivElement, GlobeCardProps>(
         renderer.dispose();
         renderer.domElement.remove();
       };
-    }, [standalone]);
+    }, [standalone, still]);
 
     return (
       <div

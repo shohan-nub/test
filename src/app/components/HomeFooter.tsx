@@ -1,32 +1,10 @@
-"use client";
-
-import { Component, useSyncExternalStore, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { brandLogo } from "./brand";
-import { GlobeCard } from "./motion-brew/globe-card";
-import { ParticleCard } from "./motion-brew/particle-card";
+import { CopyrightYear, FooterEffects } from "./FooterEffects";
 import styles from "./HomeFooter.module.css";
 
-const places = [
-  { name: "Dhaka", city: "Dhaka", lat: 23.81, lon: 90.41, color: "#b9562d" },
-  { name: "Mymensingh", city: "Mymensingh", lat: 24.75, lon: 90.41, color: "#de9d73" },
-];
-const subscribe = () => () => {};
-const clientSnapshot = () => true;
-const serverSnapshot = () => false;
-const currentYear = () => new Date().getFullYear();
-const noYear = () => null;
-
-class GlobeFallback extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? null : this.props.children; }
-}
-
 export default function HomeFooter() {
-  const mounted = useSyncExternalStore(subscribe, clientSnapshot, serverSnapshot);
-  const year = useSyncExternalStore(subscribe, currentYear, noYear);
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
@@ -56,30 +34,9 @@ export default function HomeFooter() {
             <span className={styles.emailArrow} aria-hidden="true">↗</span>
           </a>
         </div>
-        <div className={styles.visual}>
-          <div className={styles.globeStage}>
-            {mounted && <GlobeFallback>
-              <GlobeCard standalone members={places} arcs={3} turn={90} />
-            </GlobeFallback>}
-          </div>
-          <ParticleCard
-            title="Ideas without borders"
-            description="Connected by curiosity and creativity."
-            cta="Explore the studio"
-            href="/about"
-            look="scan"
-            background="#fcf6ee"
-            color="#b9562d"
-            textColor="#28221e"
-            cell={5}
-            spin={0.45}
-            force={0.65}
-            reach={65}
-            className={styles.particle}
-          />
-        </div>
+        <FooterEffects />
       </div>
-      <div className={styles.bottom}>© {year} SparkLab</div>
+      <div className={styles.bottom}>© <CopyrightYear /> SparkLab</div>
     </footer>
   );
 }

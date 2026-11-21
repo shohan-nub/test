@@ -40,7 +40,7 @@ function createQueue(): CalQueue {
 
 let loading: Promise<boolean> | undefined;
 let popupTrigger: HTMLElement | null = null;
-const observedModals = new WeakSet<HTMLElement>();
+let bookingModal: HTMLElement | null = null;
 
 function loadCalEmbed() {
   if (loading) return loading;
@@ -81,8 +81,19 @@ function loadCalEmbed() {
     const script = document.createElement("script");
     script.src = embedOrigin + "/embed/embed.js";
     script.async = true;
-    script.onload = () => resolve(Boolean(cal.ns[namespace].instance));
-    script.onerror = () => resolve(false);
+    const finish = (ready: boolean) => {
+      window.clearTimeout(timeout);
+      script.onload = null;
+      script.onerror = null;
+      if (!ready) {
+        script.remove();
+        loading = undefined;
+      }
+      resolve(ready);
+    };
+    const timeout = window.setTimeout(() => finish(false), 5000);
+    script.onload = () => finish(Boolean(cal.ns[namespace].instance));
+    script.onerror = () => finish(false);
     document.head.append(script);
   });
 
@@ -96,16 +107,13 @@ export default function CalBookingButton({ label = "Let's Talk — Book a Call",
   slide?: boolean;
   magnetic?: boolean;
 } = {}) {
-  const [ready, setReady] = useState(false);
   const [bookingError, setBookingError] = useState(false);
+  const pending = useRef<Promise<boolean> | null>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const trigger = triggerRef.current;
-    let mounted = true;
-    void loadCalEmbed().then(loaded => { if (mounted) setReady(loaded); });
     return () => {
-      mounted = false;
       // The embed lives under document.body, outside the route that opened it.
       if (trigger && popupTrigger === trigger) {
         popupTrigger = null;
@@ -115,31 +123,47 @@ export default function CalBookingButton({ label = "Let's Talk — Book a Call",
   }, []);
 
   const openBooking = () => {
-    const cal = (window as CalWindow).Cal?.ns[namespace];
-    if (!ready || !cal || !triggerRef.current) {
-      setBookingError(true);
-      return false;
-    }
+    if (pending.current) return pending.current;
+    const trigger = triggerRef.current;
     setBookingError(false);
-    const activeModal = document.querySelector<HTMLElement>('cal-modal-box[name], cal-modal-box');
-    if (activeModal?.style.visibility === "visible") return true;
-    popupTrigger = triggerRef.current;
-    cal("modal", { calLink, config: popupConfig, calOrigin: bookingUrl.origin });
-    const modal = document.querySelector<HTMLElement>("cal-modal-box");
-    if (modal && !observedModals.has(modal)) {
-      observedModals.add(modal);
-      modal.addEventListener("close", () => {
-        popupTrigger = null;
-        const frame = modal.querySelector("iframe");
-        if (frame) frame.inert = true;
-      });
-      modal.addEventListener("open", () => {
-        const frame = modal.querySelector("iframe");
-        if (frame) frame.inert = false;
-      });
-    }
-    return true;
+    const request = loadCalEmbed().then(ready => {
+      if (!trigger || triggerRef.current !== trigger) return false;
+      const cal = (window as CalWindow).Cal?.ns[namespace];
+      if (!ready || !cal?.instance) {
+        setBookingError(true);
+        return false;
+      }
+      if (bookingModal?.isConnected && popupTrigger) return true;
+      // The embed can leave a closed box in the document and build another on
+      // the next call. Remove the closed instance before requesting a new one.
+      bookingModal?.remove();
+      popupTrigger = trigger;
+      cal("modal", { calLink, config: popupConfig, calOrigin: bookingUrl.origin });
+      const modal = document.querySelector<HTMLElement>("cal-modal-box");
+      bookingModal = modal;
+      if (modal) {
+        modal.addEventListener("close", () => {
+          if (bookingModal === modal) popupTrigger = null;
+          const frame = modal.querySelector("iframe");
+          if (frame) frame.inert = true;
+        });
+        modal.addEventListener("open", () => {
+          const frame = modal.querySelector("iframe");
+          if (frame) frame.inert = false;
+        });
+      }
+      return true;
+    }).catch(() => {
+      if (triggerRef.current === trigger) setBookingError(true);
+      return false;
+    }).finally(() => { pending.current = null; });
+    pending.current = request;
+    return request;
   };
+
+  const fallback = bookingError && <p className={styles.bookingError} role="status">
+    The booking popup is unavailable. <a href={bookingUrl.href} target="_blank" rel="noopener noreferrer" className="underline">Open booking directly</a>.
+  </p>;
 
   if (slide) {
     return (
@@ -149,19 +173,19 @@ export default function CalBookingButton({ label = "Let's Talk — Book a Call",
           pendingLabel="Opening booking"
           doneLabel="Booking opened"
           className={styles.slide}
-          onCommit={() => {
-            if (!openBooking()) throw new Error("Booking is unavailable");
+          onCommit={async () => {
+            if (!await openBooking()) throw new Error("Booking is unavailable");
           }}
         />
-        {bookingError && <p className={styles.bookingError} role="status">Booking is unavailable right now. Please try again shortly.</p>}
+        {fallback}
       </div>
     );
   }
 
   if (magnetic) {
     return <div ref={triggerRef} className={className}>
-      <MagneticButton type="button" size="sm" strength={0.18} labelStrength={0.08} className={actionClassName} onClick={() => { openBooking(); }}>{label}</MagneticButton>
-      {bookingError && <p className={styles.bookingError} role="status">Booking is unavailable right now. Please try again shortly.</p>}
+      <MagneticButton type="button" size="sm" strength={0.18} labelStrength={0.08} className={actionClassName} onClick={() => { void openBooking(); }}>{label}</MagneticButton>
+      {fallback}
     </div>;
   }
 
@@ -172,15 +196,16 @@ export default function CalBookingButton({ label = "Let's Talk — Book a Call",
         href={bookingUrl.href}
         target="_blank"
         rel="noopener noreferrer"
-        aria-haspopup={ready ? "dialog" : undefined}
+        aria-haspopup="dialog"
         onClick={event => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
           event.preventDefault();
-          openBooking();
+          void openBooking();
         }}
       >
         {label} <span aria-hidden="true">→</span>
       </a>
-      {bookingError && <p className={styles.bookingError} role="status">Booking is unavailable right now. Please try again shortly.</p>}
+      {fallback}
     </div>
   );
 }

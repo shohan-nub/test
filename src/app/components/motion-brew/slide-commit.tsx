@@ -14,6 +14,7 @@
  * permission notice are included in all copies or substantial portions.
  */
 
+import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import * as React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { type ClassValue, clsx } from "clsx";
@@ -215,7 +216,7 @@ export const SlideCommit = React.forwardRef<HTMLDivElement, SlideCommitProps>(
     },
     ref,
   ) {
-    const still = !!useReducedMotion();
+    const still = useReducedMotionPreference();
     const track = React.useRef<HTMLDivElement>(null);
     React.useImperativeHandle(ref, () => track.current as HTMLDivElement);
     const [phase, setPhase] = React.useState<Phase>("idle");

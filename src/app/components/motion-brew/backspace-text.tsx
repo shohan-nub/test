@@ -7,9 +7,10 @@
  * helper. Needs React 18 or 19 and Tailwind CSS v4.
  */
 
+import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import * as React from "react";
 import { type ClassValue, clsx } from "clsx";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -59,7 +60,7 @@ export const BackspaceText = React.forwardRef<HTMLParagraphElement, BackspaceTex
   },
   ref,
 ) {
-  const still = useReducedMotion();
+  const still = useReducedMotionPreference();
   const [index, setIndex] = React.useState(0);
   const [count, setCount] = React.useState(0);
   const [deleting, setDeleting] = React.useState(false);

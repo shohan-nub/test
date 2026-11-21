@@ -8,6 +8,7 @@
 
 @media (max-width: 640px) {
   .placement { margin-top: -20px; }
+  .card button { backdrop-filter: none; }
 }
 
 .card { width: 100%; }

@@ -19,6 +19,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import { useGSAP } from "@gsap/react";
 import { type ClassValue, clsx } from "clsx";
 import gsap from "gsap";
+import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import { AnimatePresence, motion, type Transition, useAnimation, useReducedMotion, type Variants } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
@@ -962,11 +963,12 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
     },
     ref,
   ) {
-    const still = !!useReducedMotion();
+    const still = useReducedMotionPreference();
     const dark = theme === "dark";
     const uid = React.useId();
     const root = React.useRef<HTMLDivElement>(null);
     const canvas = React.useRef<HTMLCanvasElement>(null);
+    const wakeGlow = React.useRef<() => void>(() => {});
     const ring = React.useRef<HTMLSpanElement>(null);
     const words = React.useRef<HTMLParagraphElement>(null);
     const [scrolled, setScrolled] = React.useState(false);
@@ -1053,6 +1055,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
       live.current.heard = 0;
       live.current.listening = true;
       setListening(true);
+      wakeGlow.current();
       gsap.to(live.current.energy, {
         v: 1,
         duration: still ? 0 : 0.9,
@@ -1113,10 +1116,11 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
       () => {
         const p = words.current;
         if (!heard || !p) return;
-        const over = p.offsetHeight > LINES * LINE;
+        const wordHeight = p.offsetHeight;
+        const over = wordHeight > LINES * LINE;
         setScrolled(over);
         gsap.to(p, {
-          y: Math.min(0, LINES * LINE - p.offsetHeight),
+          y: Math.min(0, LINES * LINE - wordHeight),
           duration: still ? 0 : 0.7,
           ease: "power3.out",
           overwrite: true,
@@ -1146,11 +1150,22 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
     useGSAP(
       () => {
         const el = canvas.current!;
-        const gl = el.getContext("webgl", {
-          antialias: false,
-          premultipliedAlpha: true,
-          alpha: true,
+        const host = root.current!;
+        const compact = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+        const tones = colors.map(rgb);
+        const css = (i: number) =>
+          `rgb(${tones[Math.min(tones.length - 1, i)]!.join(",")})`;
+        const background = `radial-gradient(120% 90% at 50% 110%, ${css(0)}, ${css(1)} 35%, ${css(3)} 60%, transparent 80%)`;
+        el.style.background = background;
+        let width = 0;
+        let height = 0;
+        let dpr = Math.min(compact.matches ? 1 : 2, window.devicePixelRatio || 1);
+        const resize = new ResizeObserver(([{ contentRect }]) => {
+          width = contentRect.width;
+          height = contentRect.height;
+          dpr = Math.min(compact.matches ? 1 : 2, window.devicePixelRatio || 1);
         });
+        resize.observe(el);
         // One setter per axis: quickSetter's "scale" shorthand writes a stray
         // "scaleX,scaleY" attribute instead of a transform (Safari throws on it).
         const setScaleX = ring.current
@@ -1162,15 +1177,24 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
         const setRing = ring.current
           ? gsap.quickSetter(ring.current, "opacity")
           : null;
-        const tones = colors.map(rgb);
         const toneAt = (i: number) =>
           tones[Math.min(tones.length - 1, i)]!.map((c) => c / 255) as [
             number,
             number,
             number,
           ];
-        let draw = () => {};
-        if (gl) {
+        let draw: (() => void) | undefined;
+        let disposeGlow: (() => void) | undefined;
+        let attempted = false;
+        const initialize = () => {
+          if (attempted || !width || !height) return;
+          attempted = true;
+          const gl = el.getContext("webgl", {
+            antialias: false,
+            premultipliedAlpha: true,
+            alpha: true,
+          });
+          if (!gl) return;
           const shader = (type: number, src: string) => {
             const s = gl.createShader(type)!;
             gl.shaderSource(s, src);
@@ -1178,11 +1202,24 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
             return s;
           };
           const prog = gl.createProgram()!;
-          gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERTEX));
-          gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAGMENT));
+          const vertex = shader(gl.VERTEX_SHADER, VERTEX);
+          const fragment = shader(gl.FRAGMENT_SHADER, FRAGMENT);
+          gl.attachShader(prog, vertex);
+          gl.attachShader(prog, fragment);
           gl.linkProgram(prog);
+          gl.deleteShader(vertex);
+          gl.deleteShader(fragment);
+          if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+            gl.deleteProgram(prog);
+            return;
+          }
           gl.useProgram(prog);
-          gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+          const buffer = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          disposeGlow = () => {
+            gl.deleteBuffer(buffer);
+            gl.deleteProgram(prog);
+          };
           gl.bufferData(
             gl.ARRAY_BUFFER,
             new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
@@ -1206,28 +1243,26 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           gl.uniform3fv(u("c2"), toneAt(2));
           gl.uniform3fv(u("c3"), toneAt(3));
           gl.uniform1f(U.ink, dark ? 1 : 0);
+          let oldWidth = 0;
+          let oldHeight = 0;
           draw = () => {
-            const dpr = Math.min(2, window.devicePixelRatio || 1);
-            const w = Math.max(1, Math.round(el.clientWidth * dpr));
-            const h = Math.max(1, Math.round(el.clientHeight * dpr));
-            if (el.width !== w || el.height !== h) {
-              el.width = w;
-              el.height = h;
+            const w = Math.max(1, Math.round(width * dpr));
+            const h = Math.max(1, Math.round(height * dpr));
+            if (oldWidth !== w || oldHeight !== h) {
+              if (el.width !== w) el.width = w;
+              if (el.height !== h) el.height = h;
+              gl.viewport(0, 0, w, h);
+              gl.uniform2f(U.r, w, h);
+              oldWidth = w;
+              oldHeight = h;
             }
-            gl.viewport(0, 0, w, h);
-            gl.uniform2f(U.r, w, h);
             gl.uniform1f(U.t, t);
             gl.uniform1f(U.lvl, level);
             gl.uniform1f(U.e, live.current.energy.v);
             gl.uniform3f(U.bd, bands[0]!, bands[1]!, bands[2]!);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
           };
-        } else {
-          // No WebGL: a still gradient in the same colours.
-          const css = (i: number) =>
-            `rgb(${tones[Math.min(tones.length - 1, i)]!.join(",")})`;
-          el.style.background = `radial-gradient(120% 90% at 50% 110%, ${css(0)}, ${css(1)} 35%, ${css(3)} 60%, transparent 80%)`;
-        }
+        };
 
         const bands = new Float32Array(3);
         const targets = new Float32Array(3);
@@ -1309,46 +1344,68 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           }
         };
 
-        // Suspend the shader outside the viewport, and release an active mic
-        // without refocusing the composer when the visitor scrolls away.
         let visible = false;
+        let frame = 0;
+        let last = 0;
+        const running = () => visible && !document.hidden;
+        function schedule() {
+          const animate = running() && ((!still && !compact.matches) || live.current.listening);
+          if (animate && !frame) frame = requestAnimationFrame(tick);
+          if (!animate) {
+            cancelAnimationFrame(frame);
+            frame = 0;
+            last = 0;
+            el.style.background = background;
+          }
+          host.toggleAttribute("data-glow-moving", running() && !still && !compact.matches);
+        }
+        function tick(now: number) {
+          frame = 0;
+          const active = live.current.listening;
+          const interval = still ? 100 : compact.matches ? 1000 / 24 : active ? 1000 / 60 : 1000 / 20;
+          if (!last || now - last >= interval - 1) {
+            const dt = last ? Math.min(.12, (now - last) / 1000) : interval / 1000;
+            last = now;
+            t += dt;
+            listen(dt);
+            if (!still) {
+              initialize();
+              if (draw) {
+                draw();
+                el.style.background = "";
+              }
+              const energy = live.current.energy.v;
+              setScaleX?.(1 + level * 0.9 * energy);
+              setScaleY?.(1 + level * 0.9 * energy);
+              setRing?.(0.6 * energy);
+            }
+          }
+          schedule();
+        }
+        function syncVisibility() {
+          if (!running() && live.current.listening) stop(false, false);
+          schedule();
+        }
         const observer = new IntersectionObserver(([entry]) => {
           visible = entry.isIntersecting;
-          if (!visible && live.current.listening) stop(false, false);
+          syncVisibility();
         });
-        if (root.current) observer.observe(root.current);
-
-        const tick = (_time: number, ms: number) => {
-          if (!visible) return;
-          const dt = Math.min(0.05, Math.max(0, ms / 1000));
-          t += dt;
-          listen(dt);
-          draw();
-          const E = live.current.energy.v;
-          setScaleX?.(1 + level * 0.9 * E);
-          setScaleY?.(1 + level * 0.9 * E);
-          setRing?.(0.6 * E);
-        };
-        if (still) {
-          // Reduced motion: words still arrive, the glow is redrawn without moving.
-          const timer = window.setInterval(() => {
-            if (!visible) return;
-            listen(0.1);
-            draw();
-          }, 100);
-          draw();
-          return () => {
-            observer.disconnect();
-            window.clearInterval(timer);
-          };
-        }
-        gsap.ticker.add(tick);
+        observer.observe(host);
+        compact.addEventListener("change", schedule);
+        document.addEventListener("visibilitychange", syncVisibility);
+        wakeGlow.current = schedule;
         return () => {
           observer.disconnect();
-          gsap.ticker.remove(tick);
+          resize.disconnect();
+          compact.removeEventListener("change", schedule);
+          document.removeEventListener("visibilitychange", syncVisibility);
+          cancelAnimationFrame(frame);
+          disposeGlow?.();
+          host.removeAttribute("data-glow-moving");
+          wakeGlow.current = () => {};
         };
       },
-      { dependencies: [colors.join(), dark, still, said] },
+      { dependencies: [colors.join(), dark, still, said], revertOnUpdate: true },
     );
 
     const ink = dark ? "text-white" : "text-[#242423]";
@@ -1393,13 +1450,13 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
               WebkitMaskComposite: "xor",
             }}
           >
-            <motion.div
+            <div
+              data-voice-shimmer
+              data-listening={listening || undefined}
               className="absolute left-1/2 top-1/2 aspect-square w-[160%] -translate-x-1/2 -translate-y-1/2"
               style={{
                 background: `conic-gradient(from 0deg, transparent 0deg, ${colors[1] ?? colors[0]} 50deg, ${colors[2] ?? colors[0]} 90deg, transparent 140deg, transparent 180deg, ${colors[3] ?? colors[0]} 230deg, transparent 280deg)`,
               }}
-              animate={still ? undefined : { rotate: 360 }}
-              transition={{ duration: listening ? 4 : 8, ease: "linear", repeat: Infinity }}
             />
           </div>
 
@@ -1449,7 +1506,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
             <AnimatePresence>
               {listening && (
                 <motion.div
-                  className="absolute inset-0 flex items-start justify-center px-4 pt-5"
+                  className="pointer-events-none absolute inset-0 flex items-start justify-center px-4 pt-5"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{

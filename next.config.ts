@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
+import { siteOrigin } from "./src/app/site-metadata";
+
+const wwwHost = `www.${new URL(siteOrigin).hostname}`;
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: wwwHost.replaceAll(".", "\\.") }],
+        destination: `${siteOrigin}/:path*`,
+        permanent: true,
+      },
+    ];
+  },
   /* config options here */
   images: {
     localPatterns: [

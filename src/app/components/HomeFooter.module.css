@@ -59,7 +59,9 @@
 .visual { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); align-items: center; gap: clamp(14px, 2vw, 28px); }
 .globeStage { position: relative; width: 100%; aspect-ratio: 1; }
 .particle { width: 100%; padding: clamp(12px, 1.5vw, 18px); border: 1px solid #b9562d26; border-radius: 16px; box-shadow: 0 12px 32px -24px #6b432955; }
-.particle > div:has(> canvas) { height: clamp(118px, 13vw, 170px); touch-action: pan-y; }
+.particle > div:has(> canvas), .particleField { height: clamp(118px, 13vw, 170px); touch-action: pan-y; }
+.particlePlaceholder { background: #fcf6ee; color: #28221e; }
+.particleField { margin-top: -4px; }
 .particle h3 { margin-top: 6px; font-size: 16px; }
 .particle a { margin-top: 14px; }
 .bottom { max-width: 1120px; margin: 24px auto 0; padding-top: 18px; border-top: 1px solid #b9562d24; color: #655b53; font-size: 12px; }
@@ -71,5 +73,5 @@
 
 @media (max-width: 600px) {
   .visual { grid-template-columns: 1fr; width: min(100%, 330px); gap: 22px; }
-  .particle > div:has(> canvas) { height: 145px; }
+  .particle > div:has(> canvas), .particleField { height: 145px; }
 }

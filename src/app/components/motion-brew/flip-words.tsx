@@ -7,9 +7,10 @@
  * helper. Needs React 18 or 19 and Tailwind CSS v4.
  */
 
+import { useReducedMotionPreference } from "./useReducedMotionPreference";
 import * as React from "react";
 import { type ClassValue, clsx } from "clsx";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
 // cn(): merges Tailwind classes, later ones win.
@@ -59,7 +60,7 @@ export const FlipWords = React.forwardRef<HTMLParagraphElement, FlipWordsProps>(
   },
   ref,
 ) {
-  const still = useReducedMotion();
+  const still = useReducedMotionPreference();
   const [index, setIndex] = React.useState(0);
   React.useEffect(() => {
     if (words.length < 2) return;
