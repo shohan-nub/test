@@ -1184,6 +1184,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           ];
         let draw: (() => void) | undefined;
         let disposeGlow: (() => void) | undefined;
+        let finishLink: (() => void) | undefined;
         let attempted = false;
         const initialize = () => {
           if (attempted || !width || !height) return;
@@ -1208,59 +1209,70 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
           gl.linkProgram(prog);
           gl.deleteShader(vertex);
           gl.deleteShader(fragment);
-          if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-            gl.deleteProgram(prog);
-            return;
-          }
-          gl.useProgram(prog);
-          const buffer = gl.createBuffer();
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          disposeGlow = () => {
+          const parallel = gl.getExtension("KHR_parallel_shader_compile");
+          let buffer: WebGLBuffer | null = null;
+          const dispose = () => {
             gl.deleteBuffer(buffer);
             gl.deleteProgram(prog);
           };
-          gl.bufferData(
-            gl.ARRAY_BUFFER,
-            new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-            gl.STATIC_DRAW,
-          );
-          const at = gl.getAttribLocation(prog, "p");
-          gl.enableVertexAttribArray(at);
-          gl.vertexAttribPointer(at, 2, gl.FLOAT, false, 0, 0);
-          const u = (name: string) => gl.getUniformLocation(prog, name);
-          const U = {
-            r: u("r"),
-            t: u("t"),
-            lvl: u("lvl"),
-            e: u("e"),
-            bd: u("bd"),
-            ink: u("ink"),
-          };
-          // Ramp: core, body, crest light, and the soft outer bloom.
-          gl.uniform3fv(u("c0"), toneAt(0));
-          gl.uniform3fv(u("c1"), toneAt(1));
-          gl.uniform3fv(u("c2"), toneAt(2));
-          gl.uniform3fv(u("c3"), toneAt(3));
-          gl.uniform1f(U.ink, dark ? 1 : 0);
-          let oldWidth = 0;
-          let oldHeight = 0;
-          draw = () => {
-            const w = Math.max(1, Math.round(width * dpr));
-            const h = Math.max(1, Math.round(height * dpr));
-            if (oldWidth !== w || oldHeight !== h) {
-              if (el.width !== w) el.width = w;
-              if (el.height !== h) el.height = h;
-              gl.viewport(0, 0, w, h);
-              gl.uniform2f(U.r, w, h);
-              oldWidth = w;
-              oldHeight = h;
+          disposeGlow = dispose;
+          finishLink = () => {
+            // LINK_STATUS can block until the driver has finished compiling.
+            // Poll completion on the existing render loop where supported.
+            if (parallel && !gl.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)) return;
+            finishLink = undefined;
+            if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+              dispose();
+              disposeGlow = undefined;
+              return;
             }
-            gl.uniform1f(U.t, t);
-            gl.uniform1f(U.lvl, level);
-            gl.uniform1f(U.e, live.current.energy.v);
-            gl.uniform3f(U.bd, bands[0]!, bands[1]!, bands[2]!);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            gl.useProgram(prog);
+            buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(
+              gl.ARRAY_BUFFER,
+              new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+              gl.STATIC_DRAW,
+            );
+            const at = gl.getAttribLocation(prog, "p");
+            gl.enableVertexAttribArray(at);
+            gl.vertexAttribPointer(at, 2, gl.FLOAT, false, 0, 0);
+            const u = (name: string) => gl.getUniformLocation(prog, name);
+            const U = {
+              r: u("r"),
+              t: u("t"),
+              lvl: u("lvl"),
+              e: u("e"),
+              bd: u("bd"),
+              ink: u("ink"),
+            };
+            // Ramp: core, body, crest light, and the soft outer bloom.
+            gl.uniform3fv(u("c0"), toneAt(0));
+            gl.uniform3fv(u("c1"), toneAt(1));
+            gl.uniform3fv(u("c2"), toneAt(2));
+            gl.uniform3fv(u("c3"), toneAt(3));
+            gl.uniform1f(U.ink, dark ? 1 : 0);
+            let oldWidth = 0;
+            let oldHeight = 0;
+            draw = () => {
+              const w = Math.max(1, Math.round(width * dpr));
+              const h = Math.max(1, Math.round(height * dpr));
+              if (oldWidth !== w || oldHeight !== h) {
+                if (el.width !== w) el.width = w;
+                if (el.height !== h) el.height = h;
+                gl.viewport(0, 0, w, h);
+                gl.uniform2f(U.r, w, h);
+                oldWidth = w;
+                oldHeight = h;
+              }
+              gl.uniform1f(U.t, t);
+              gl.uniform1f(U.lvl, level);
+              gl.uniform1f(U.e, live.current.energy.v);
+              gl.uniform3f(U.bd, bands[0]!, bands[1]!, bands[2]!);
+              gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            };
           };
+          if (!parallel) finishLink();
         };
 
         const bands = new Float32Array(3);
@@ -1383,6 +1395,7 @@ export const VoicePrompt = React.forwardRef<HTMLDivElement, VoicePromptProps>(
                   if (running() && !compact.matches) initialize();
                 }, { timeout: 650 });
               }
+              finishLink?.();
               if (draw) {
                 draw();
                 if (!showingShader) {
