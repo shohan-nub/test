@@ -1,9 +1,11 @@
-import type { NextConfig } from "next";
-import { siteOrigin } from "./src/app/site-metadata";
+// @ts-check
+
+import { siteOrigin } from "./src/app/site-origin.mjs";
 
 const wwwHost = `www.${new URL(siteOrigin).hostname}`;
 
-const nextConfig: NextConfig = {
+/** @type {import("next").NextConfig} */
+const nextConfig = {
   async redirects() {
     return [
       {
@@ -14,7 +16,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  /* config options here */
   images: {
     localPatterns: [
       { pathname: "/**", search: "" },

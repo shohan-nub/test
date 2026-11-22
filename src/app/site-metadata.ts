@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { siteOrigin } from "./site-origin.mjs";
 
-export const siteOrigin = "https://sparklabltd.com";
+export { siteOrigin };
 export const isVercelPreview = process.env.VERCEL_ENV === "preview";
 export const indexableRoutes = ["/", "/about", "/services", "/approach", "/contact"] as const;
 type IndexableRoute = (typeof indexableRoutes)[number];
