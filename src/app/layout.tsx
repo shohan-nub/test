@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import OpeningLoader from "./components/OpeningLoader";
-import { isVercelPreview, pageMetadata, siteOrigin } from "./site-metadata";
+import { isVercelPreview, pageMetadata, siteName, siteOrigin } from "./site-metadata";
 import "./globals.css";
 
-const homeTitle = "Spark Lab | Digital Experiences & AI Solutions";
-const homeDescription = "Spark Lab designs and builds modern websites, web applications, e-commerce experiences, and intelligent AI automation solutions for ambitious businesses.";
+const homeTitle = `${siteName} | Digital Experiences & AI Solutions`;
+const homeDescription = `${siteName} designs and builds modern websites, web applications, e-commerce experiences, and intelligent AI automation solutions for ambitious businesses.`;
 
 export const metadata: Metadata = {
   ...pageMetadata("/", homeTitle, homeDescription),
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   title: {
     default: homeTitle,
-    template: "%s | Spark Lab",
+    template: `%s | ${siteName}`,
   },
 };
 

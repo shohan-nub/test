@@ -13,7 +13,7 @@ export const metadata = pageMetadata("/contact", "Contact & Project Proposals", 
 export default function ContactPage() {
   return (
     <>
-      <PageIntro label="Contact SparkLab" heading="Tell Us About Your Project." description="We work with businesses worldwide on AI automation, websites, web and mobile apps, and custom software. Share your requirements and estimated budget to request a proposal, or book a discovery call." />
+      <PageIntro label="Contact SparkLab" heading="Tell Us About Your Project." description="We work with businesses worldwide on AI automation, websites, web and mobile apps, and custom software. Share your requirements to request a proposal, or book a 30-minute discovery call." />
 
       <div className={styles.contactGrid}>
         <section className={styles.callCard} aria-labelledby="discovery-heading">
@@ -25,7 +25,7 @@ export default function ContactPage() {
             </g>
           </svg>
           <h2 id="discovery-heading">Book a Discovery Call</h2>
-          <p>Pick a time to talk about your project and ask us questions.</p>
+          <p>Pick a time to discuss your goals and ask us project questions.</p>
           <dl className={styles.callDetails}>
             <div><dt>Duration</dt><dd>30 minutes</dd></div>
             <div><dt>Meeting</dt><dd>Google Meet</dd></div>

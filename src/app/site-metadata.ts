@@ -5,7 +5,7 @@ export const isVercelPreview = process.env.VERCEL_ENV === "preview";
 export const indexableRoutes = ["/", "/about", "/services", "/approach", "/contact"] as const;
 type IndexableRoute = (typeof indexableRoutes)[number];
 
-const siteName = "Spark Lab";
+export const siteName = "SparkLab";
 const socialImage = {
   url: new URL("/sparklab-mark-512.png", siteOrigin).href,
   width: 512,

@@ -1,11 +1,12 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
+import { JsonLd, organizationId } from "../../entity-structured-data";
 import { inquiryLink, services } from "../../services-data";
-import { pageMetadata } from "../../site-metadata";
+import { canonicalUrl, pageMetadata } from "../../site-metadata";
 import PageIntro from "../PageIntro";
 import shared from "../AgencyPages.module.css";
 import DiscoveryGraphic from "./DiscoveryGraphic";
-import PlatformStatistics from "./PlatformStatistics";
+import ServiceHighlights from "./ServiceHighlights";
 import TechnologyStack from "./TechnologyStack";
 import styles from "./Services.module.css";
 
@@ -18,19 +19,38 @@ const serviceCatalog = services.map(service => service.id === automationService
   ? {
       ...service,
       title: "AI Workflow Automation Services",
-      description: "Connect your existing business tools through APIs to route inquiries, sync records, and automate recurring reports. Assistants and chatbots can collect information and answer common questions. AI agents can use that information to carry out defined steps in a workflow.",
+      description: "SparkLab connects your tools to route inquiries, sync records, and run recurring reports. A workflow follows predefined steps. An AI agent can use context to choose among allowed actions within that workflow. Assistants and chatbots can collect details and answer common questions.",
       capabilities: [...service.capabilities, "AI Agent Development", "Business Intelligence"],
     }
   : service);
+
+const servicesUrl = canonicalUrl("/services");
+const serviceEntities = {
+  "@context": "https://schema.org",
+  "@graph": serviceCatalog.map(({ id, title, description }) => {
+    const url = `${servicesUrl}#${id}`;
+
+    return {
+      "@type": "Service",
+      "@id": url,
+      url,
+      name: title,
+      description,
+      provider: { "@id": organizationId },
+      areaServed: "Worldwide",
+    };
+  }),
+};
 
 export const metadata = pageMetadata("/services", "AI Workflow Automation Services", description);
 
 export default function ServicesPage() {
   return (
     <>
+      <JsonLd data={serviceEntities} />
       <PageIntro label="Services" heading="AI Workflow Automation and Digital Services" description={intro} />
 
-      <PlatformStatistics />
+      <ServiceHighlights />
 
       <nav className={styles.index} aria-label="Jump to a service">
         {serviceCatalog.map(service => (

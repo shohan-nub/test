@@ -1,0 +1,37 @@
+# SparkLab AEO completion report
+
+Reviewed 23 November 2026. This pass reviewed the five public routes for questions a buyer could answer from the page itself, including from the initial HTML. The previous evidence audits distinguish published service scope from verified client work. That distinction also applies here. [GEO audit](GEO_AUDIT.md) · [Team credibility audit](GEO_TEAM_CREDIBILITY_AUDIT.md) · [GEO completion report](GEO_COMPLETION_REPORT.md) · [Keyword map](SEO_KEYWORD_MAPPING.md) · [Services facts](SEO_SERVICES_FACTS.md) · [Services brief](SEO_SERVICES_PAGE_BRIEF.md)
+
+## Initial audit and buyer questions
+
+| Page | Questions a prospective client might ask | Initial audit findings |
+| --- | --- | --- |
+| Homepage | What does SparkLab do? Does it offer custom web apps? Can it help reduce manual work? | The Hero already identified the studio category and audience. The slogan and animated text communicated brand tone, while the visible service cards contained the business scope. Generic phrases such as “high-performance” and “scalable software” said less about what a buyer could commission. The main automation link went to the top of the Services page. |
+| Services | What tasks can SparkLab automate? How are workflows and agents different? What does an automation project typically cost? | The offer and pricing were visible. The automation description mentioned agents, assistants, and workflows without defining the distinction together. Several other card descriptions were broad, with specific use cases available only as capability labels. The published range is $2,000–$40,000 USD for typical automation engagements, with smaller scopes welcome and complex projects able to exceed the range. |
+| About | Where is SparkLab based? Does it work internationally? Who is Abid Nion? | The opening sentence already answered location and worldwide availability. The public link correctly identified Abid’s individual profile. The capability paragraph used broader wording than the Services catalog. |
+| Approach | What happens first? How does a project go from discovery to launch? | An ordered list already described four stages. The first stage gave useful context and could state more directly what SparkLab reviews before defining requirements. |
+| Contact | How do I start a project? Can I book a call instead? What information should I prepare? | The booking time, format and timezone were separate from the opening answer. The form already described its required fields and optional budget. Its input handling depends on hydration, while the page-level contact choices are server-rendered. |
+
+The homepage FAQ was already present as five real, user-expandable entries. Its initial HTML contains the answer text. The existing controls expose answers to assistive technology when expanded. The old FAQ included a superlative, mentioned software rental without a documented offer, and stated a Singapore hosting location that the reviewed materials could not establish as a client hosting policy.
+
+## Implemented content changes
+
+- **Homepage** · Named concrete automation tasks and linked straight to the automation offer. Clarified the web and mobile development card. Reworked existing FAQ answers around services, worldwide availability, project scope, and smaller budgets. References to design inspiration explain that SparkLab creates original work. The same FAQ entries and controls are used. [Homepage](src/app/page.tsx) · [FAQ](src/app/components/HomeFaq.tsx)
+- **Services** · Put an existing workflow example and a short workflow-versus-agent distinction in the automation introduction. Clarified the use cases for the catalog’s other offers in their existing descriptions. The Service JSON-LD descriptions come from the same source as the visible paragraphs. Published estimates, caveats and quote destinations keep their existing role. [Services page](src/app/%28agency%29/services/page.tsx) · [Service catalog](src/app/services-data.ts)
+- **About** · Clarified that SparkLab builds AI tools to automate business tasks. The existing introduction and personal Fiverr reference continue to establish location, reach, and the owner’s identity. [About content](src/app/%28agency%29/about/about-data.ts)
+- **Approach** · Made the first discovery step a direct description of what SparkLab reviews and how it uses that information. [Approach](src/app/%28agency%29/approach/page.tsx)
+- **Contact** · Put the two ways to start a project and the 30-minute duration in the intro. The existing booking details and proposal form support that answer. [Contact](src/app/%28agency%29/contact/page.tsx)
+
+## Technical AEO and structured data
+
+- Each route has one H1 and a main landmark, with service articles, an ordered delivery process, and FAQ question headings and buttons below it. The branded Hero H1 and promotional headings can provide limited context by themselves. Nearby service H2/H3 text supplies the subject without adding new headings or visual sections.
+- Existing contextual links distinguish the studio profile, service catalog, delivery process, and proposal route. The Homepage automation link now targets a specific section. Service and portfolio images use descriptive alt text, and decorative image variants use empty alt text.
+- The primary answers remain in the initial HTML. The existing Home, Services and About JSON-LD emit one Organization, one WebSite, one Person and six Services. Entity IDs and relationships are retained. The buyer-facing accordion serves its current purpose without a FAQPage graph. Google discontinued FAQ rich results in May 2026 and says its AI search features require no special schema. [Google Search changelog](https://developers.google.com/search/updates#may-2026) · [Google AI features guidance](https://developers.google.com/search/docs/appearance/ai-features)
+- The canonical origin remains `https://sparklabltd.com`. The production sitemap lists only the five public routes. The wildcard robots policy allows public paths and disallows `/api/`. Preview-specific sitemap suppression and noindex behavior remain in source. These checks describe the application output. Actual crawler traffic, indexing, rankings and citations require separate external evidence.
+- **Decision on `llms.txt`** · The proposal would offer agents a curated Markdown index. SparkLab has five interlinked routes with a sitemap and readable HTML. Another index would duplicate those sources and need upkeep. Google Search says it does not use `llms.txt`, and there is no verified benefit for SparkLab on other engines. This pass leaves the file out. [llms.txt proposal](https://llmstxt.org/) · [Google guidance on generative AI search](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)
+
+## Evidence gaps and deferred work
+
+- Obtain publishable records for completed projects, client permissions and quantified outcomes before adding case-study answers. Confirm which integrations and hosting arrangements are offered, along with support, handoff and data-handling terms.
+- Verify the legal identity and any company-owned social or marketplace accounts before publishing additional company credentials. The owner’s Fiverr profile remains an individual reference.
+- After publication, verify the live canonical domain, actual crawler access and indexing from the relevant platform tools or logs before assessing answer-engine visibility.

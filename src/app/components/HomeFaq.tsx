@@ -5,11 +5,11 @@ import { RotatingText } from "./motion-brew/rotating-text";
 import styles from "./HomeFaq.module.css";
 
 const questions = [
-  { id: "why-sparklab", question: "Why SparkLab Best Agency?", answer: "SparkLab brings websites, web applications, mobile apps, custom software, and AI-powered automation together under one roof. You can work with one team across your complete digital project." },
-  { id: "entire-project", question: "Can SparkLab Manage My Entire Software Project?", answer: "Yes. We support projects from planning and strategy through UI/UX design, development, deployment, and ongoing improvements. Each stage builds on decisions made with you earlier in the project." },
-  { id: "limited-budget", question: "What If I Have a Limited Budget?", answer: "We can help you prioritize essential features, explore alternative approaches, and consider suitable software rental options where available. That gives you a way to start with what your business needs most." },
-  { id: "design-inspiration", question: "Can You Build Software Inspired by Existing Designs or Products?", answer: "Yes. We can discuss what you find useful in existing designs, interfaces, or products and use those references to inform an original solution tailored to your brand, business requirements, and functionality needs." },
-  { id: "hosting-location", question: "Where Is Your Hosting Infrastructure Located?", answer: "Our hosting infrastructure includes servers in Singapore that support our digital solutions." },
+  { id: "why-sparklab", question: "What does SparkLab do?", answer: "SparkLab is a creative technology studio that builds websites, web and mobile apps, custom software, and AI workflow automation for businesses." },
+  { id: "entire-project", question: "Can SparkLab Manage My Entire Software Project?", answer: "Yes. SparkLab can handle planning, design, development, testing, and launch. We agree on the scope with you before development." },
+  { id: "limited-budget", question: "What If I Have a Limited Budget?", answer: "Smaller projects are welcome. SparkLab can prioritize essential features, reduce the number of integrations, or split delivery into phases while keeping its engineering and testing standards." },
+  { id: "design-inspiration", question: "Can You Build Software Inspired by Existing Designs or Products?", answer: "Yes. Tell us what works for you in a reference design or product. We can use those ideas to inform an original design for your business." },
+  { id: "hosting-location", question: "Does SparkLab Work With Businesses Worldwide?", answer: "Yes. SparkLab is based in Bangladesh and serves businesses worldwide. You can request a proposal online or book a 30-minute discovery call." },
 ];
 
 function FaqQuestion({ id, question, answer }: (typeof questions)[number]) {

@@ -4,7 +4,7 @@
   principles: [
     {
       title: "What We Build",
-      copy: "We develop websites, web and mobile apps, custom software, and AI-powered tools for business automation.",
+      copy: "We build websites, web and mobile apps, custom software, and AI tools that automate business tasks.",
       link: { href: "/services", label: "Explore our services" },
     },
     { title: "What We Value", copy: "Software should be useful, reliable, and easy to use.", link: null },

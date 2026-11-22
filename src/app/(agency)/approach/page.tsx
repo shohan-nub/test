@@ -10,7 +10,7 @@ const description = "See how SparkLab delivers software and AI automation, from 
 export const metadata = pageMetadata("/approach", "Software & AI Automation Delivery Process", description);
 
 const process = [
-  { title: "Research & Discovery", copy: "Understand your goals, users, and existing workflows so we can define what the project needs to do." },
+  { title: "Research & Discovery", copy: "We review your business goals, user needs, and existing workflows to define what the project needs to do." },
   { title: "Strategy & Technology", copy: "Agree on scope and plan the software architecture, automation workflows, and integrations the project needs." },
   { title: "Design & Prototype", copy: "Design the experience and use prototypes to review key interactions and gather feedback before development." },
   { title: "Development & Launch", copy: "Build the software or automation, connect the required tools, and test the workflows before delivery and launch." },

@@ -1,6 +1,7 @@
 import { cacheLife } from "next/cache";
 import Link from "next/link";
-import { pageMetadata } from "./site-metadata";
+import { pageMetadata, siteName } from "./site-metadata";
+import { JsonLd, siteEntities } from "./entity-structured-data";
 import worldLand from "./world-land.json";
 import SeoGeoShowcase from "./components/SeoGeoShowcase";
 import ProjectShowcase from "./components/ProjectShowcase";
@@ -66,8 +67,9 @@ export default async function Home() {
 
   return (
     <>
+    <JsonLd data={siteEntities} />
     <main>
-      <section className="hero" id="discover" aria-label="Spark Lab digital studio">
+      <section className="hero" id="discover" aria-label={`${siteName} digital studio`}>
         <SiteNav />
         <div className="hero-content">
           <h1><span className="hero-line">Ideas Without <span className="hero-accent">Borders.</span></span></h1>
@@ -88,11 +90,11 @@ export default async function Home() {
         <div className="service-overview-grid">
           <article className="service-overview-card service-overview-dark">
             <span className="service-overview-number">01</span>
-            <div><h3>AI &amp; Intelligent Automation</h3><p>We build <Link href="/services" prefetch={false} style={{ textDecoration: "underline" }}>AI agents and automated workflows</Link>, conversational systems, and integrations that help teams reduce manual work.</p></div>
+            <div><h3>AI &amp; Intelligent Automation</h3><p>We build <Link href="/services#ai-automation" prefetch={false} style={{ textDecoration: "underline" }}>AI agents and automated workflows</Link>, assistants, and integrations that route inquiries and sync records across tools.</p></div>
           </article>
           <article className="service-overview-card service-overview-orange">
             <span className="service-overview-number">02</span>
-            <div><h3>Web, Software &amp; Mobile Development</h3><p>We design and develop high-performance websites, custom web applications, mobile experiences, and scalable software tailored to your business.</p></div>
+            <div><h3>Web, Software &amp; Mobile Development</h3><p>We design and develop websites, custom web applications for business operations, iOS and Android apps, and software tailored to your business.</p></div>
           </article>
           <div className="service-overview-card service-overview-visual" aria-hidden="true">
             <OverviewVideo />

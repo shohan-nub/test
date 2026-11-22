@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { pageMetadata } from "../../site-metadata";
+import { JsonLd, ownerEntity, ownerProfile } from "../../entity-structured-data";
 import PageIntro from "../PageIntro";
 import shared from "../AgencyPages.module.css";
 import { about } from "./about-data";
@@ -19,6 +20,7 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <>
+      <JsonLd data={ownerEntity} />
       <div className={styles.overview}>
         <PageIntro label="About SparkLab" heading={about.heading} description={about.description} />
         <div className={`${styles.principles} ${shared.stagger}`}>
@@ -29,6 +31,12 @@ export default function AboutPage() {
                 {copy}
                 {link && <>{" "}<Link href={link.href} prefetch={false} style={{ textDecoration: "underline" }}>{link.label}</Link>.</>}
               </p>
+              {title === "What We Value" && (
+                <p id="abid-nion">
+                  SparkLab owner {ownerProfile.name} specializes in logo design and brand identity.{" "}
+                  <a href={ownerProfile.url} style={{ textDecoration: "underline" }}>View his individual Fiverr profile</a>.
+                </p>
+              )}
             </section>
           ))}
         </div>
