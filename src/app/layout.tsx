@@ -11,10 +11,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
   robots: isVercelPreview ? { index: false, follow: false } : undefined,
   icons: {
-    icon: "/sparklab-icon-clear.svg",
-    shortcut: "/sparklab-icon-clear.svg",
-    apple: "/sparklab-icon-clear.png",
+    icon: { url: "/favicon.ico", type: "image/x-icon", sizes: "16x16 32x32 48x48" },
+    apple: { url: "/sparklab-mark-180.png", sizes: "180x180", type: "image/png" },
   },
+  manifest: "/site.webmanifest",
   title: {
     default: homeTitle,
     template: "%s | Spark Lab",

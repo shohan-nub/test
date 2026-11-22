@@ -6,14 +6,14 @@ import PageIntro from "../PageIntro";
 import shared from "../AgencyPages.module.css";
 import styles from "./Approach.module.css";
 
-const description = "From the first conversation to the final launch, we combine thoughtful strategy, creative design, and reliable technology to turn ambitious ideas into meaningful digital experiences.";
-export const metadata = pageMetadata("/approach", "Our Approach", description);
+const description = "See how SparkLab delivers software and AI automation, from understanding business requirements and planning integrations to development, testing, and launch.";
+export const metadata = pageMetadata("/approach", "Software & AI Automation Delivery Process", description);
 
 const process = [
-  { title: "Research & Discovery", copy: "Understand the business, audience, goals, and challenges." },
-  { title: "Strategy & Technology", copy: "Define the right direction, architecture, and technology." },
-  { title: "Design & Prototype", copy: "Create intuitive experiences and validate the design direction." },
-  { title: "Development & Launch", copy: "Build, test, optimize, and launch the final product." },
+  { title: "Research & Discovery", copy: "Understand your goals, users, and existing workflows so we can define what the project needs to do." },
+  { title: "Strategy & Technology", copy: "Agree on scope and plan the software architecture, automation workflows, and integrations the project needs." },
+  { title: "Design & Prototype", copy: "Design the experience and use prototypes to review key interactions and gather feedback before development." },
+  { title: "Development & Launch", copy: "Build the software or automation, connect the required tools, and test the workflows before delivery and launch." },
 ];
 const principles = [
   { title: "Purpose-driven strategy", copy: "Align each decision with the needs and goals of the business.", Icon: Compass },
@@ -25,14 +25,14 @@ const principles = [
 export default function ApproachPage() {
   return <>
     <div className={styles.hero}>
-      <PageIntro label="Our Approach" heading={<>Great Work Starts With a <em>Clear Approach.</em></>} description={description}>
+      <PageIntro label="Our Approach" heading={<>How We Deliver <em>Software and AI.</em></>} description={description}>
         <Link className={`${shared.button} ${styles.heroCta}`} href="/contact">Start a conversation <ArrowUpRight size={16} aria-hidden /></Link>
       </PageIntro>
       <div className={styles.heroAside} aria-hidden="true"><span>Strategy</span><ArrowDownRight size={30} /><span>Design</span><ArrowDownRight size={30} /><span>Technology</span></div>
     </div>
 
     <section className={styles.section} aria-labelledby="process-title">
-      <div className={styles.sectionHeading}><p className={shared.eyebrow}>Our process</p><h2 id="process-title">From understanding<br /><em>to launch.</em></h2></div>
+      <div className={styles.sectionHeading}><p className={shared.eyebrow}>Our process</p><h2 id="process-title">From discovery<br /><em>to launch.</em></h2></div>
       <ol className={`${styles.process} ${shared.stagger}`}>
         {process.map((stage, index) => <li key={stage.title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{stage.title}</h3><p>{stage.copy}</p></li>)}
       </ol>
@@ -45,7 +45,7 @@ export default function ApproachPage() {
 
     <section className={`${styles.section} ${styles.collaboration}`} aria-labelledby="collaboration-title">
       <div className={styles.sectionHeading}><p className={shared.eyebrow}>How we collaborate</p><h2 id="collaboration-title">Built together,<br /><em>with clarity.</em></h2></div>
-      <div className={styles.collaborationCopy}><p>We start with a conversation about your goals and the challenges you want to solve. Together, we shape a direction and agree on the work ahead.</p><p>As the project develops, we share progress, gather feedback, and refine the details through to delivery.</p><Link href="/contact" className={shared.textLink}>Tell us about your project <ArrowUpRight size={16} aria-hidden /></Link></div>
+      <div className={styles.collaborationCopy}><p>We start with your goals and the challenges you want to solve. Explore our <Link href="/services" prefetch={false} style={{ textDecoration: "underline" }}>software and automation services</Link> to see where we can help.</p><p>As the project develops, we share progress, gather feedback, and refine the details through to delivery.</p><Link href="/contact" className={shared.textLink}>Tell us about your project <ArrowUpRight size={16} aria-hidden /></Link></div>
     </section>
 
     <section className={styles.closing} aria-labelledby="closing-title"><div><p className={shared.eyebrow}>Let&apos;s make it happen</p><h2 id="closing-title">Have an Idea<br /><em>Worth Building?</em></h2><p>Let&apos;s discuss your next project and find the right way to bring it to life.</p></div><div className={styles.actions}><Link href="/contact" className={shared.button}>Contact us <ArrowUpRight size={16} aria-hidden /></Link><CalBookingButton label="Book a Discovery Call" className={styles.booking} actionClassName={styles.bookingLink} /></div></section>

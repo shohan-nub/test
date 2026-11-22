@@ -27,7 +27,7 @@ export function TechnologyBridge({
       brands={brands}
       defaultConnected={["nextjs", "tailwindcss"]}
       autoplay={false}
-      hub={<Image className={styles.hub} src="/sparklab-icon-clear.svg" alt="SparkLab" width={44} height={44} unoptimized />}
+      hub={<Image className={styles.hub} src="/sparklab-mark-192.png" alt="SparkLab" width={44} height={44} unoptimized />}
       title={null}
       description="Tap or select a technology to connect or disconnect it."
       particles={18}

@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { brandLogo } from "./brand";
 import { CopyrightYear, FooterEffects } from "./FooterEffects";
+import FooterRouteLink from "./FooterRouteLink";
 import styles from "./HomeFooter.module.css";
 
 export default function HomeFooter() {
@@ -9,18 +9,18 @@ export default function HomeFooter() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div>
-          <Link className={styles.logo} href="/" aria-label="SparkLab home">
+          <FooterRouteLink className={styles.logo} href="/" aria-label="SparkLab home">
             <Image {...brandLogo} alt="SparkLab" sizes="150px" />
-          </Link>
+          </FooterRouteLink>
           <p className={styles.description}>Building digital experiences and intelligent solutions for businesses without boundaries.</p>
           <div className={styles.details}>
             <nav aria-label="Footer navigation">
               <h2>Explore</h2>
               <ul>
-                <li><Link href="/">Studio</Link></li>
-                <li><Link href="/services">Services</Link></li>
-                <li><Link href="/about">About Us</Link></li>
-                <li><Link href="/contact">Contact Us</Link></li>
+                <li><FooterRouteLink href="/">Studio</FooterRouteLink></li>
+                <li><FooterRouteLink href="/services">Services</FooterRouteLink></li>
+                <li><FooterRouteLink href="/about">About Us</FooterRouteLink></li>
+                <li><FooterRouteLink href="/contact">Contact Us</FooterRouteLink></li>
               </ul>
             </nav>
             <div>

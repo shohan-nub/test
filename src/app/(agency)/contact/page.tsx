@@ -6,14 +6,14 @@ import PageIntro from "../PageIntro";
 import styles from "../AgencyPages.module.css";
 import InquiryForm from "./InquiryForm";
 
-const description = "Tell us a little about your project. We'll review your requirements and get back to you as soon as possible.";
+const description = "Contact SparkLab to request a proposal for AI automation, software, websites, or apps. Share your goals and budget or book a discovery call from anywhere.";
 
-export const metadata = pageMetadata("/contact", "Contact & Booking", description);
+export const metadata = pageMetadata("/contact", "Contact & Project Proposals", description);
 
 export default function ContactPage() {
   return (
     <>
-      <PageIntro label="Contact SparkLab" heading="Let's Build Something Meaningful." description={description} />
+      <PageIntro label="Contact SparkLab" heading="Tell Us About Your Project." description="We work with businesses worldwide on AI automation, websites, web and mobile apps, and custom software. Share your requirements and estimated budget to request a proposal, or book a discovery call." />
 
       <div className={styles.contactGrid}>
         <section className={styles.callCard} aria-labelledby="discovery-heading">
@@ -44,7 +44,7 @@ export default function ContactPage() {
 
       <div className={styles.returnLinks}>
         <Link className={styles.textLink} href="/"><span aria-hidden="true">←</span> Back to Studio</Link>
-        <Link className={styles.textLink} href="/services">Explore services <span aria-hidden="true">↗</span></Link>
+        <Link className={styles.textLink} href="/services">Explore software and AI services <span aria-hidden="true">↗</span></Link>
       </div>
     </>
   );

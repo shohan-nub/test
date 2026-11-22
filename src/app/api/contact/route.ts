@@ -8,6 +8,12 @@ const MAX_BODY_BYTES = 32_768;
 const requests = new Map<string, { count: number; expiresAt: number }>();
 let pruneAfter = 0;
 
+const legacyContactBudgets = [
+  { id: "under-500", label: "Under $500" },
+  { id: "5000-plus", label: "$5,000+" },
+];
+const acceptedBudgets = [...contactBudgets, ...inquiryBudgets, ...legacyContactBudgets];
+
 function isRateLimited(request: Request) {
   const key = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const now = Date.now();
@@ -65,7 +71,7 @@ export async function POST(request: Request) {
   const timeline = field(body, "timeline");
   const websiteUrl = field(body, "websiteUrl");
   const selectedService = findService(body.service);
-  const selectedBudget = [...contactBudgets, ...inquiryBudgets].find(option => option.id === body.budget);
+  const selectedBudget = acceptedBudgets.find(option => option.id === body.budget);
   const isProjectInquiry = body.kind === "project-inquiry";
   const service = isProjectInquiry ? (body.service === "other" ? "Other" : selectedService?.title) : subject;
 

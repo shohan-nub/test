@@ -7,9 +7,9 @@ type IndexableRoute = (typeof indexableRoutes)[number];
 
 const siteName = "Spark Lab";
 const socialImage = {
-  url: new URL("/sparklab-icon-clear.png", siteOrigin).href,
-  width: 1044,
-  height: 1068,
+  url: new URL("/sparklab-mark-512.png", siteOrigin).href,
+  width: 512,
+  height: 512,
   alt: "SparkLab emblem",
 };
 

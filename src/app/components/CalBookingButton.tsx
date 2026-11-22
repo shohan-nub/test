@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SlideCommit } from "./motion-brew/slide-commit";
+import DeferredBookingSlider from "./DeferredBookingSlider";
 import { MagneticButton } from "./motion-brew/magnetic-button";
 import styles from "./FinalContact.module.css";
 
@@ -168,14 +168,9 @@ export default function CalBookingButton({ label = "Let's Talk — Book a Call",
   if (slide) {
     return (
       <div ref={triggerRef} className={className ?? styles.booking}>
-        <SlideCommit
+        <DeferredBookingSlider
           label={label}
-          pendingLabel="Opening booking"
-          doneLabel="Booking opened"
-          className={styles.slide}
-          onCommit={async () => {
-            if (!await openBooking()) throw new Error("Booking is unavailable");
-          }}
+          openBooking={openBooking}
         />
         {fallback}
       </div>

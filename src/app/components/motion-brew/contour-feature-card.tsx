@@ -259,6 +259,8 @@ function ContourField({
     let last = performance.now();
     let time = 0;
     let idle = 0;
+    let needsDraw = true;
+    let wasDynamic = false;
     const glow = { x: 0, y: 0, a: 0 };
 
     const size = () => {
@@ -272,6 +274,7 @@ function ContourField({
       cols = Math.ceil(w / CELL) + 1;
       rows = Math.ceil(h / CELL) + 1;
       field = new Float32Array(cols * rows);
+      needsDraw = true;
     };
 
     // Height of the terrain at a point: drifting noise, the pointer's hill and any waves.
@@ -315,6 +318,7 @@ function ContourField({
         : start === -1 || start === -2
           ? 0
           : Math.min(1, (time - start) / REVEAL);
+      needsDraw = pr < 1;
       if (pr === 0) return;
       sample();
 
@@ -437,7 +441,10 @@ function ContourField({
       last = now;
       if (!visible) return;
       time += dt;
-      if (reveal.current === -2) reveal.current = time;
+      if (reveal.current === -2) {
+        reveal.current = time;
+        needsDraw = true;
+      }
       const p = pointer.current;
       const k = 1 - Math.pow(0.002, dt);
       glow.x += (p.x - glow.x) * k;
@@ -455,7 +462,10 @@ function ContourField({
       waves.current = waves.current
         .map((wv) => (wv.t < 0 ? { ...wv, t: time } : wv))
         .filter((wv) => time - wv.t < 1.8);
-      draw();
+      const dynamic = speed !== 0 || glow.a > 0.01 || waves.current.length > 0;
+      // Paint the final settled frame, then keep its pixels until an input changes them.
+      if (needsDraw || dynamic || wasDynamic) draw();
+      wasDynamic = dynamic;
     };
 
     size();

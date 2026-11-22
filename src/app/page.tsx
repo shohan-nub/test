@@ -1,3 +1,6 @@
+import { cacheLife } from "next/cache";
+import Link from "next/link";
+import { pageMetadata } from "./site-metadata";
 import worldLand from "./world-land.json";
 import SeoGeoShowcase from "./components/SeoGeoShowcase";
 import ProjectShowcase from "./components/ProjectShowcase";
@@ -49,7 +52,18 @@ function GlobalMap() {
 
 const heroMarqueePhrases = ["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"];
 
-export default function Home() {
+const title = "SparkLab | Creative Technology Studio";
+const description = "SparkLab is a creative technology studio in Bangladesh. We design and build websites, web and mobile apps, custom software, and AI automation for businesses worldwide.";
+
+export const metadata = {
+  ...pageMetadata("/", title, description),
+  title: { absolute: title },
+};
+
+export default async function Home() {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
+
   return (
     <>
     <main>
@@ -57,7 +71,7 @@ export default function Home() {
         <SiteNav />
         <div className="hero-content">
           <h1><span className="hero-line">Ideas Without <span className="hero-accent">Borders.</span></span></h1>
-          <p className="hero-description">Building digital experiences and intelligent solutions for businesses without boundaries.</p>
+          <p className="hero-description">A <Link href="/about" prefetch={false} style={{ textDecoration: "underline" }}>creative technology studio</Link> for businesses of all sizes and industries worldwide.</p>
           <div className="hero-actions">
             <CalBookingButton magnetic label="Book a Discovery Call" className="hero-booking" actionClassName="hero-action hero-action-primary" />
             <MagneticButton href="/approach" variant="outline" size="sm" strength={0.18} labelStrength={0.08} className="hero-action hero-action-secondary">Explore Our Approach</MagneticButton>
@@ -74,7 +88,7 @@ export default function Home() {
         <div className="service-overview-grid">
           <article className="service-overview-card service-overview-dark">
             <span className="service-overview-number">01</span>
-            <div><h3>AI &amp; Intelligent Automation</h3><p>We build intelligent AI agents, automated workflows, conversational systems, and integrations that reduce manual work and improve business operations.</p></div>
+            <div><h3>AI &amp; Intelligent Automation</h3><p>We build <Link href="/services" prefetch={false} style={{ textDecoration: "underline" }}>AI agents and automated workflows</Link>, conversational systems, and integrations that help teams reduce manual work.</p></div>
           </article>
           <article className="service-overview-card service-overview-orange">
             <span className="service-overview-number">02</span>
@@ -93,7 +107,7 @@ export default function Home() {
         <div className="consultation-panel">
         <div className="consultation-copy">
           <h2 id="consultation-heading">Ready to automate and scale your business?</h2>
-          <p>Our team is ready to architect, build, and deploy your idea. Book a free consultation to get started.</p>
+          <p>Our team can design, build, and launch your digital product. <Link href="/contact" prefetch={false} style={{ textDecoration: "underline" }}>Tell us about your project</Link> or book a free consultation.</p>
           <BackspaceText before="" words={["Building digital experiences", "Automating business workflows", "Creating intelligent solutions", "Turning ideas into reality"]} pause={2200} wordClassName="text-[#b9562d]" className="consultation-backspace" />
           <a className="consultation-cta" href="#contact">Book a free consultation <span aria-hidden="true">→</span></a>
         </div>

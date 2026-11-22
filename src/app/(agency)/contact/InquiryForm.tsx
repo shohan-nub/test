@@ -42,7 +42,7 @@ export default function InquiryForm() {
 
   return (
     <form className={styles.form} method="post" onSubmit={submit} aria-describedby="inquiry-required">
-      <p id="inquiry-required" className={styles.formNote}>Name, work email, project subject, service and project details are required.</p>
+      <p id="inquiry-required" className={styles.formNote}>Name, work email, project subject, service and project details are required. Budget is optional, and smaller projects are welcome.</p>
       <div className={styles.formFields}>
         <label>Full Name <input name="name" autoComplete="name" required maxLength={100} /></label>
         <label>Work Email <input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
