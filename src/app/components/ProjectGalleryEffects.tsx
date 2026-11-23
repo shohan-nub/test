@@ -154,7 +154,7 @@ function ProjectPreview({ project }: { project: Project }) {
     return (
       <ContourFeatureCard
         className={styles.contour}
-        interactiveLabel="Ripple the contours around Rivora"
+        interactiveLabel={`Ripple the contours around ${project.title}. ${project.alt}`}
         color="#a56849"
         lines={10}
         speed={0}

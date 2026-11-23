@@ -100,7 +100,7 @@ export default function SeoGeoShowcase() {
   return <section ref={root} className={styles.section} id="destinations" data-visible={visible} aria-labelledby="visibility-title">
     <div className={styles.heading}>
       <h2 id="visibility-title">Be Seen. Be Found.<br /><em>Be Chosen.</em></h2>
-      <p className={styles.intro}>Helping businesses grow through search visibility, intelligent discovery, and connected digital systems.</p>
+      <p className={styles.intro}>Explore technical SEO, content strategy, and ways to make your website easier to find in search results and AI-generated answers.</p>
     </div>
     <div className={styles.carousel} role="region" aria-roledescription="carousel" aria-label="Digital visibility capabilities">
       <div className={styles.stage} role="group" tabIndex={0} aria-label="Use left and right arrow keys, or swipe, to explore services"
@@ -135,7 +135,7 @@ export default function SeoGeoShowcase() {
       </div>
     </div>
     <div className={styles.footer}>
-      <a href="#experiences">Explore Our Capabilities <span aria-hidden="true">↗</span></a>
+      <a href="/services#seo-geo">Explore SEO &amp; GEO Services <span aria-hidden="true">↗</span></a>
     </div>
   </section>;
 }

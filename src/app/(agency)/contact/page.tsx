@@ -36,6 +36,7 @@ export default function ContactPage() {
 
         <section id="project-inquiry" className={styles.inquiryCard} aria-labelledby="inquiry-heading" tabIndex={-1}>
           <h2 id="inquiry-heading">Send a Project Inquiry</h2>
+          <p className={styles.formNote}>Tell us what you want to build or improve and which tools you already use. Include a timeline or budget if you have one.</p>
           <Suspense fallback={<p className={styles.formNote} role="status">Loading inquiry form…</p>}>
             <InquiryForm />
           </Suspense>

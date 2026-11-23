@@ -19,7 +19,7 @@ const principles = [
   { title: "Purpose-driven strategy", copy: "Align each decision with the needs and goals of the business.", Icon: Compass },
   { title: "User-focused design", copy: "Shape clear, intuitive experiences around the people who use them.", Icon: Layers3 },
   { title: "Scalable development", copy: "Build with a considered foundation that supports future growth.", Icon: Code2 },
-  { title: "Practical automation", copy: "Use intelligent solutions where they can simplify real work.", Icon: Sparkles },
+  { title: "Practical automation", copy: "Map the manual steps first, then decide which steps to automate and which decisions should stay with your team.", Icon: Sparkles },
 ];
 
 export default function ApproachPage() {

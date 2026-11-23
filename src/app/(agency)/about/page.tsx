@@ -8,14 +8,7 @@ import styles from "./About.module.css";
 
 const title = "About SparkLab | Studio & Values";
 const description = "Meet SparkLab, a creative technology studio based in Bangladesh. Learn how we design and build software and AI-powered automation for businesses worldwide.";
-const aboutMetadata = pageMetadata("/about", title, description);
-
-export const metadata = {
-  ...aboutMetadata,
-  title: { absolute: title },
-  openGraph: { ...aboutMetadata.openGraph, title },
-  twitter: { ...aboutMetadata.twitter, title },
-};
+export const metadata = pageMetadata("/about", title, description, { absoluteTitle: true });
 
 export default function AboutPage() {
   return (

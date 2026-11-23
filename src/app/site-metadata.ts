@@ -18,16 +18,21 @@ export function canonicalUrl(path: IndexableRoute) {
   return path === "/" ? siteOrigin : new URL(path, siteOrigin).href;
 }
 
-export function pageMetadata(path: IndexableRoute, title: string, description: string): Metadata {
+export function pageMetadata(
+  path: IndexableRoute,
+  title: string,
+  description: string,
+  { absoluteTitle = false } = {},
+): Metadata {
   const url = canonicalUrl(path);
-  const socialTitle = path === "/" ? title : `${title} | ${siteName}`;
+  const fullTitle = absoluteTitle ? title : `${title} | ${siteName}`;
 
   return {
-    title,
+    title: fullTitle,
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: socialTitle,
+      title: fullTitle,
       description,
       siteName,
       type: "website",
@@ -36,7 +41,7 @@ export function pageMetadata(path: IndexableRoute, title: string, description: s
     },
     twitter: {
       card: "summary",
-      title: socialTitle,
+      title: fullTitle,
       description,
       images: [socialImage],
     },

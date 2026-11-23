@@ -11,7 +11,7 @@ import TechnologyStack from "./TechnologyStack";
 import styles from "./Services.module.css";
 
 const intro = "SparkLab builds AI solutions, custom software, websites and applications for startups, small and midsize businesses, and enterprises across industries worldwide.";
-const description = "Connect your tools and automate repetitive work with SparkLab’s AI workflow automation services. Explore typical project investment and request a tailored proposal.";
+const description = "Connect your tools and automate repetitive work with SparkLab’s AI workflow automation services. See typical project costs and request a tailored proposal.";
 const dollars = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const automationService = "ai-automation";
 
@@ -74,8 +74,8 @@ export default function ServicesPage() {
             <p className={styles.description}>{service.description}</p>
             {service.id === automationService && (
               <p className={styles.description}>
-                Share the tasks your team repeats and the tools involved. We’ll map the workflow, scope a proposal, then build, test, and deliver the agreed solution.
-                {" "}<Link href="/approach#process-title" style={{ textDecoration: "underline" }}>See how we work</Link>.
+                For example, a customer inquiry workflow can collect a message, send it to the right team, and record it for follow-up. Share the task and the tools you use so we can define the workflow and scope the build.
+                {" "}<Link href="/approach#process-title" style={{ textDecoration: "underline" }}>See how we plan and test a project</Link>.
               </p>
             )}
             <ul className={styles.capabilities} aria-label="Capabilities" role="list">
@@ -106,7 +106,7 @@ export default function ServicesPage() {
           </div>
           <div className={`${styles.visual} ${shared.reveal} ${shared.revealLater}`}>
             <div className={styles.photo}>
-              <Image src={service.image.src} alt={service.image.alt} fill sizes="(max-width: 740px) 90vw, (max-width: 1200px) 48vw, 640px" />
+              <Image src={service.image.src} alt={service.image.alt} fill sizes="auto, (max-width: 740px) 90vw, (max-width: 1200px) 48vw, 640px" />
             </div>
             {service.id === "seo-geo" && <DiscoveryGraphic />}
           </div>

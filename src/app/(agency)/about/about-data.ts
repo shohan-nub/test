@@ -7,7 +7,7 @@
       copy: "We build websites, web and mobile apps, custom software, and AI tools that automate business tasks.",
       link: { href: "/services", label: "Explore our services" },
     },
-    { title: "What We Value", copy: "Software should be useful, reliable, and easy to use.", link: null },
+    { title: "What We Value", copy: "We design around the tasks people need to complete, whether they are customers using a website or a team working with an internal tool.", link: null },
   ],
   process: [
     { title: "Discover", copy: "Understand what your team and customers need.", link: null },

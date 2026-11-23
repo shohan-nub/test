@@ -14,9 +14,8 @@ import HomeFooter from "./components/HomeFooter";
 import { MagneticButton } from "./components/motion-brew/magnetic-button";
 import { FlipWords } from "./components/motion-brew/flip-words";
 import { BackspaceText } from "./components/motion-brew/backspace-text";
-import CalBookingButton from "./components/CalBookingButton";
 import HeroVoicePrompt from "./components/HeroVoicePrompt";
-import SiteNav from "./components/SiteNav";
+import { HeroBookingButton, HomeSiteNav } from "./components/HomeHeroControls";
 import { ConsultationPhrases, OverviewVideo, ProjectShowreel } from "./components/HomeMedia";
 import MapMotion from "./components/MapMotion";
 
@@ -53,13 +52,10 @@ function GlobalMap() {
 
 const heroMarqueePhrases = ["DIGITAL INNOVATION", "CREATIVE TECHNOLOGY", "INTELLIGENT AUTOMATION", "BUILT FOR WHAT'S NEXT", "IDEAS INTO REALITY", "DESIGN MEETS TECHNOLOGY"];
 
-const title = "SparkLab | Creative Technology Studio";
-const description = "SparkLab is a creative technology studio in Bangladesh. We design and build websites, web and mobile apps, custom software, and AI automation for businesses worldwide.";
+const title = `${siteName} | Creative Technology & AI Automation Studio`;
+const description = "SparkLab builds websites, web and mobile apps, custom software, and AI automation for businesses worldwide. Explore our services and discuss your project.";
 
-export const metadata = {
-  ...pageMetadata("/", title, description),
-  title: { absolute: title },
-};
+export const metadata = pageMetadata("/", title, description, { absoluteTitle: true });
 
 export default async function Home() {
   "use cache";
@@ -70,12 +66,12 @@ export default async function Home() {
     <JsonLd data={siteEntities} />
     <main>
       <section className="hero" id="discover" aria-label={`${siteName} digital studio`}>
-        <SiteNav />
+        <HomeSiteNav />
         <div className="hero-content">
           <h1><span className="hero-line">Ideas Without <span className="hero-accent">Borders.</span></span></h1>
-          <p className="hero-description">A <Link href="/about" prefetch={false} style={{ textDecoration: "underline" }}>creative technology studio</Link> for businesses of all sizes and industries worldwide.</p>
+          <p className="hero-description">A <Link href="/about" prefetch={false} style={{ textDecoration: "underline" }}>creative technology studio</Link> building software and AI automation for businesses worldwide.</p>
           <div className="hero-actions">
-            <CalBookingButton magnetic label="Book a Discovery Call" className="hero-booking" actionClassName="hero-action hero-action-primary" />
+            <HeroBookingButton />
             <MagneticButton href="/approach" variant="outline" size="sm" strength={0.18} labelStrength={0.08} className="hero-action hero-action-secondary">Explore Our Approach</MagneticButton>
           </div>
         </div>
@@ -84,17 +80,17 @@ export default async function Home() {
       </section>
       <section className="service-overview section-pad" aria-labelledby="service-overview-heading">
         <header className="service-overview-heading">
-          <h2 id="service-overview-heading">We build AI-powered automation, websites, web applications, mobile apps, and custom software that help businesses grow.</h2>
+          <h2 id="service-overview-heading">Websites, Apps, Custom Software &amp; AI Automation</h2>
           <FlipWords before="Built for" words={["Websites", "Automation", "Applications", "Digital Products"]} after="" interval={4000} wordClassName="text-[#b9562d]" className="service-flip" />
         </header>
         <div className="service-overview-grid">
           <article className="service-overview-card service-overview-dark">
             <span className="service-overview-number">01</span>
-            <div><h3>AI &amp; Intelligent Automation</h3><p>We build <Link href="/services#ai-automation" prefetch={false} style={{ textDecoration: "underline" }}>AI agents and automated workflows</Link>, assistants, and integrations that route inquiries and sync records across tools.</p></div>
+            <div><h3>AI &amp; Business Process Automation</h3><p>We build <Link href="/services#ai-automation" prefetch={false} style={{ textDecoration: "underline" }}>AI agents and automated workflows</Link> to route customer inquiries, sync business data, and generate recurring reports.</p></div>
           </article>
           <article className="service-overview-card service-overview-orange">
             <span className="service-overview-number">02</span>
-            <div><h3>Web, Software &amp; Mobile Development</h3><p>We design and develop websites, custom web applications for business operations, iOS and Android apps, and software tailored to your business.</p></div>
+            <div><h3>Web, Software &amp; Mobile Development</h3><p>Launch a website customers can use, build a custom web app for your team, or develop an iOS or Android app. <Link href="/services#website-design" prefetch={false} style={{ textDecoration: "underline" }}>Explore website development</Link>.</p></div>
           </article>
           <div className="service-overview-card service-overview-visual" aria-hidden="true">
             <OverviewVideo />
@@ -108,8 +104,8 @@ export default async function Home() {
       <section className="consultation-section section-pad" aria-labelledby="consultation-heading">
         <div className="consultation-panel">
         <div className="consultation-copy">
-          <h2 id="consultation-heading">Ready to automate and scale your business?</h2>
-          <p>Our team can design, build, and launch your digital product. <Link href="/contact" prefetch={false} style={{ textDecoration: "underline" }}>Tell us about your project</Link> or book a free consultation.</p>
+          <h2 id="consultation-heading">What Would You Like to Build or Automate?</h2>
+          <p>Bring a product idea or a task your team repeats. <Link href="/contact#project-inquiry" prefetch={false} style={{ textDecoration: "underline" }}>Send a project brief</Link> or book a free consultation to discuss what to build first.</p>
           <BackspaceText before="" words={["Building digital experiences", "Automating business workflows", "Creating intelligent solutions", "Turning ideas into reality"]} pause={2200} wordClassName="text-[#b9562d]" className="consultation-backspace" />
           <a className="consultation-cta" href="#contact">Book a free consultation <span aria-hidden="true">→</span></a>
         </div>
@@ -117,12 +113,13 @@ export default async function Home() {
         </div>
       </section>
       <WorkflowMotion>
-        <h2 className="project-statement">
+        <h2 className="sr-only">Our Digital Product Development Process</h2>
+        <div className="project-statement" aria-hidden="true">
           <span className="project-statement-track">
             <span className="project-statement-phrase">BE VISIBLE. BE DISCOVERED. <em>BE UNSTOPPABLE.</em></span>
             <span className="project-statement-phrase" aria-hidden="true">BE VISIBLE. BE DISCOVERED. <em>BE UNSTOPPABLE.</em></span>
           </span>
-        </h2>
+        </div>
         <div className="capability-stack">
           {workflowStages.map((step, index) => <article className={`capability-card capability-card-${step.tone}`} key={step.id} aria-labelledby={`workflow-${step.id}`}>
             <div className={`capability-surface ${workflowStyles.surface}`}>

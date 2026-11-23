@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import DeferredBookingSlider from "./DeferredBookingSlider";
-import { MagneticButton } from "./motion-brew/magnetic-button";
 import styles from "./FinalContact.module.css";
 
 const defaultBookingUrl = "https://cal.com/spark-lab-ufwtr2/30min";
@@ -100,12 +99,12 @@ function loadCalEmbed() {
   return loading;
 }
 
-export default function CalBookingButton({ label = "Let's Talk — Book a Call", className, actionClassName, slide = false, magnetic = false }: {
+export default function CalBookingButton({ label = "Let's Talk — Book a Call", className, actionClassName, slide = false, BookingAction }: {
   label?: string;
   className?: string;
   actionClassName?: string;
   slide?: boolean;
-  magnetic?: boolean;
+  BookingAction?: ComponentType<{ onClick: () => void }>;
 } = {}) {
   const [bookingError, setBookingError] = useState(false);
   const pending = useRef<Promise<boolean> | null>(null);
@@ -177,9 +176,9 @@ export default function CalBookingButton({ label = "Let's Talk — Book a Call",
     );
   }
 
-  if (magnetic) {
+  if (BookingAction) {
     return <div ref={triggerRef} className={className}>
-      <MagneticButton type="button" size="sm" strength={0.18} labelStrength={0.08} className={actionClassName} onClick={() => { void openBooking(); }}>{label}</MagneticButton>
+      <BookingAction onClick={() => { void openBooking(); }} />
       {fallback}
     </div>;
   }

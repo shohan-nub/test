@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import OpeningLoader from "./components/OpeningLoader";
-import { isVercelPreview, pageMetadata, siteName, siteOrigin } from "./site-metadata";
+import { isVercelPreview, siteOrigin } from "./site-metadata";
 import "./globals.css";
 
-const homeTitle = `${siteName} | Digital Experiences & AI Solutions`;
-const homeDescription = `${siteName} designs and builds modern websites, web applications, e-commerce experiences, and intelligent AI automation solutions for ambitious businesses.`;
-
 export const metadata: Metadata = {
-  ...pageMetadata("/", homeTitle, homeDescription),
   metadataBase: new URL(siteOrigin),
   robots: isVercelPreview ? { index: false, follow: false } : undefined,
   icons: {
@@ -15,10 +11,6 @@ export const metadata: Metadata = {
     apple: { url: "/sparklab-mark-180.png", sizes: "180x180", type: "image/png" },
   },
   manifest: "/site.webmanifest",
-  title: {
-    default: homeTitle,
-    template: `%s | ${siteName}`,
-  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

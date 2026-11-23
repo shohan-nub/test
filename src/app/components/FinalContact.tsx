@@ -30,7 +30,7 @@ export default function FinalContact() {
             width={1254}
             height={1254}
             sizes="(max-width: 580px) 86vw, (max-width: 719px) 480px, (max-width: 1200px) 37vw, 430px"
-            alt="SparkLab portrait in a black T-shirt with the orange SparkLab emblem"
+            alt="Studio portrait of a person wearing a black blazer and a shirt with the orange SparkLab emblem"
           />
         </div>
         <div className={styles.content}>
